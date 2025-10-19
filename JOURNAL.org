@@ -1,0 +1,5 @@
+#+title: Journal
+* 2025
+** 2025/Oct/19
+*** erlang.get_line does not work
+I used another package called input, but maybe it could work using external function erlang.get_line
