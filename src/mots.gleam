@@ -18,7 +18,7 @@ pub type GameState {
 }
 
 // Create a new game state for a word pair
-pub fn new_game(word_pair: WordPair, max_attempts: Int) -> GameState {
+pub fn new_game(word_pair: WordPair, max_attempts max_attempts: Int) -> GameState {
   GameState(
     word_pair: word_pair,
     guessed_letters: [],
