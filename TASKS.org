@@ -1,4 +1,6 @@
 #+title: Tasks
 * TODO how external works
 * TODO mobile first
+* TODO deploy with GH actions
+https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * TODO deploy to fly.io
