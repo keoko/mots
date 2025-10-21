@@ -1,2 +1,4 @@
 #+title: Tasks
-* how external works
+* TODO how external works
+* TODO mobile first
+* TODO deploy to fly.io
