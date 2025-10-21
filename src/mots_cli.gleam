@@ -3,7 +3,6 @@ import gleam/list
 import gleam/string
 import input.{input}
 
-
 // A word pair: Catalan word and its English translation
 pub type WordPair {
   WordPair(catalan: String, english: String)
@@ -27,7 +26,10 @@ pub type GameResult {
 }
 
 // Create a new game state for a word pair
-pub fn new_game(word_pair: WordPair, max_attempts max_attempts: Int) -> GameState {
+pub fn new_game(
+  word_pair: WordPair,
+  max_attempts max_attempts: Int,
+) -> GameState {
   GameState(
     word_pair: word_pair,
     guessed_letters: [],
@@ -88,11 +90,12 @@ pub fn make_guess(state: GameState, letter: String) -> GameState {
       // Check if the letter is in the word
       case is_letter_in_word(lowercase_letter, state.word_pair.english) {
         True -> GameState(..state, guessed_letters: new_guessed)
-        False -> GameState(
-          ..state,
-          guessed_letters: new_guessed,
-          attempts_left: state.attempts_left - 1,
-        )
+        False ->
+          GameState(
+            ..state,
+            guessed_letters: new_guessed,
+            attempts_left: state.attempts_left - 1,
+          )
       }
     }
   }
@@ -122,9 +125,14 @@ fn play_word_loop(state: GameState) -> GameResult {
     }
     InProgress -> {
       // Display current state
-      io.println("\nWord: " <> display_word(state.word_pair.english, state.guessed_letters))
+      io.println(
+        "\nWord: "
+        <> display_word(state.word_pair.english, state.guessed_letters),
+      )
       io.println("Attempts left: " <> string.inspect(state.attempts_left))
-      io.println("Guessed letters: " <> string.join(state.guessed_letters, ", "))
+      io.println(
+        "Guessed letters: " <> string.join(state.guessed_letters, ", "),
+      )
 
       // Get user input
       io.print("\nGuess a letter: ")
@@ -138,12 +146,21 @@ fn play_word_loop(state: GameState) -> GameResult {
               let new_state = make_guess(state, letter)
 
               // Give feedback
-              case letter == string.lowercase(letter) && is_letter_in_word(letter, state.word_pair.english) {
+              case
+                letter == string.lowercase(letter)
+                && is_letter_in_word(letter, state.word_pair.english)
+              {
                 True -> io.println("✓ Good guess!")
-                False -> case list.contains(state.guessed_letters, string.lowercase(letter)) {
-                  True -> io.println("⚠ You already guessed that!")
-                  False -> io.println("✗ Wrong letter!")
-                }
+                False ->
+                  case
+                    list.contains(
+                      state.guessed_letters,
+                      string.lowercase(letter),
+                    )
+                  {
+                    True -> io.println("⚠ You already guessed that!")
+                    False -> io.println("✗ Wrong letter!")
+                  }
               }
 
               play_word_loop(new_state)
