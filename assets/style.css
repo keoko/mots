@@ -250,14 +250,14 @@ body {
   font-weight: 500;
 }
 
-/* Keyboard - Mobile First with QWERTY layout */
+/* Keyboard - Mobile First with responsive QWERTY layout */
 .keyboard {
-  display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  gap: var(--spacing-xs);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
   padding: var(--spacing-md) 0;
-  /* Touch-friendly minimum target size: 44x44px */
-  min-height: 44px;
+  justify-content: center;
+  max-width: 100%;
 }
 
 @media (min-width: 640px) {
@@ -267,18 +267,23 @@ body {
 }
 
 .key {
+  /* Flexible sizing for mobile */
+  flex: 0 0 auto;
+  width: calc((100% - (6 * 0.375rem)) / 7); /* 7 keys per row on mobile */
   aspect-ratio: 1;
   background: var(--color-surface);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: var(--font-size-sm);
+  font-size: 0.813rem;
   font-weight: 600;
   color: var(--color-text);
   cursor: pointer;
   transition: all var(--transition-base);
   /* Ensure minimum touch target */
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 48px;
+  max-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -289,9 +294,20 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+@media (min-width: 375px) {
+  .key {
+    width: calc((100% - (6 * 0.375rem)) / 7);
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
 @media (min-width: 640px) {
   .key {
+    width: calc((100% - (9 * 0.5rem)) / 10); /* 10 keys per row on tablet+ */
     font-size: var(--font-size-base);
+    max-width: 56px;
+    max-height: 56px;
   }
 }
 

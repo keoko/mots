@@ -1,5 +1,13 @@
 #+title: Journal
 * 2025
+** 2025/Oct/21
+*** deploy with GH actions
+Looks like there are some mistakes on the documentation.
+https://hexdocs.pm/lustre/guide/04-spa-deployments.html
+
+
 ** 2025/Oct/19
+*** chatgpt/claude makes mistakes when writing Gleam code like using list.at
+list.at function does not exist in Erlang
 *** erlang.get_line does not work
 I used another package called input, but maybe it could work using external function erlang.get_line, not sure how it works
