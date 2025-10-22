@@ -60,10 +60,10 @@ pub fn parse_topics_index(
 
 // FFI to load JSON files (JavaScript side handles file reading)
 
-@external(javascript, "../topics_ffi.mjs", "loadJsonFile")
+@external(javascript, "./topics_ffi.mjs", "loadJsonFile")
 pub fn load_json_file(filepath: String) -> Result(String, String)
 
-@external(javascript, "../topics_ffi.mjs", "loadAllTopicFiles")
+@external(javascript, "./topics_ffi.mjs", "loadAllTopicFiles")
 pub fn load_all_topic_files() -> List(String)
 
 // High-level functions
