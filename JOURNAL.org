@@ -2,7 +2,7 @@
 * 2025
 ** 2025/Oct/22
 *** word collections
-
+*** word collections moved to JSON files
 ** 2025/Oct/21
 *** deploy with GH actions
 Looks like there are some mistakes on the documentation.

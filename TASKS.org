@@ -3,11 +3,13 @@
 * DONE mobile first
 * DONE deploy with GH actions
 https://hexdocs.pm/lustre/guide/04-spa-deployments.html
+* DONE keys overflow in mobile
+* DONE word collections
+* DONE word collections in JSON
+* TODO game logic generic. 2 UIs: terminal and web
+* TODO word collections stored on the backend
+* TODO timing?
+* TODO multiplayer?
 * TODO deploy to fly.io
 * TODO full stack deployment
 https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
-* TODO keys overflow in mobile
-* TODO timing?
-* TODO multiplayer?
-* TODO word collections
-* TODO word collections stored on the backend

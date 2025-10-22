@@ -6,6 +6,7 @@ import lustre/attribute.{attribute, class}
 import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
+import topics_loader
 
 // TYPES
 
