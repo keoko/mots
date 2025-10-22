@@ -9,3 +9,5 @@ https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
 * TODO keys overflow in mobile
 * TODO timing?
 * TODO multiplayer?
+* TODO word collections
+* TODO word collections stored on the backend

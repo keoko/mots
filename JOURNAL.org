@@ -1,10 +1,12 @@
 #+title: Journal
 * 2025
+** 2025/Oct/22
+*** word collections
+
 ** 2025/Oct/21
 *** deploy with GH actions
 Looks like there are some mistakes on the documentation.
 https://hexdocs.pm/lustre/guide/04-spa-deployments.html
-
 
 ** 2025/Oct/19
 *** chatgpt/claude makes mistakes when writing Gleam code like using list.at

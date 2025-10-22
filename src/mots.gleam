@@ -13,7 +13,12 @@ pub type WordPair {
   WordPair(catalan: String, english: String)
 }
 
+pub type Topic {
+  Topic(name: String, emoji: String, words: List(WordPair))
+}
+
 pub type GameState {
+  TopicSelection
   Playing
   Won
   Lost
@@ -22,7 +27,8 @@ pub type GameState {
 
 pub type Model {
   Model(
-    words: List(WordPair),
+    topics: List(Topic),
+    selected_topic: Result(Topic, Nil),
     current_index: Int,
     guessed_letters: List(String),
     attempts_left: Int,
@@ -33,9 +39,11 @@ pub type Model {
 }
 
 pub type Msg {
+  SelectTopic(String)
   GuessLetter(String)
   NextWord
   RestartGame
+  BackToTopics
 }
 
 // CONSTANTS
@@ -45,20 +53,97 @@ const alphabet = [
   "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m",
 ]
 
+// WORD COLLECTIONS BY TOPIC
+
+fn get_topics() -> List(Topic) {
+  [
+    Topic(
+      name: "Animals",
+      emoji: "🐾",
+      words: [
+        WordPair(catalan: "gat", english: "cat"),
+        WordPair(catalan: "gos", english: "dog"),
+        WordPair(catalan: "cavall", english: "horse"),
+        WordPair(catalan: "ocell", english: "bird"),
+        WordPair(catalan: "peix", english: "fish"),
+        WordPair(catalan: "conill", english: "rabbit"),
+        WordPair(catalan: "elefant", english: "elephant"),
+      ],
+    ),
+    Topic(
+      name: "Weather",
+      emoji: "🌤️",
+      words: [
+        WordPair(catalan: "sol", english: "sunny"),
+        WordPair(catalan: "núvol", english: "cloudy"),
+        WordPair(catalan: "pluja", english: "rainy"),
+        WordPair(catalan: "vent", english: "windy"),
+        WordPair(catalan: "neu", english: "snowy"),
+        WordPair(catalan: "tempesta", english: "stormy"),
+        WordPair(catalan: "boira", english: "foggy"),
+      ],
+    ),
+    Topic(
+      name: "Food",
+      emoji: "🍽️",
+      words: [
+        WordPair(catalan: "pa", english: "bread"),
+        WordPair(catalan: "aigua", english: "water"),
+        WordPair(catalan: "fruita", english: "fruit"),
+        WordPair(catalan: "carn", english: "meat"),
+        WordPair(catalan: "peix", english: "fish"),
+        WordPair(catalan: "verdura", english: "vegetable"),
+        WordPair(catalan: "formatge", english: "cheese"),
+      ],
+    ),
+    Topic(
+      name: "Home",
+      emoji: "🏠",
+      words: [
+        WordPair(catalan: "casa", english: "house"),
+        WordPair(catalan: "porta", english: "door"),
+        WordPair(catalan: "finestra", english: "window"),
+        WordPair(catalan: "taula", english: "table"),
+        WordPair(catalan: "cadira", english: "chair"),
+        WordPair(catalan: "llit", english: "bed"),
+        WordPair(catalan: "cuina", english: "kitchen"),
+      ],
+    ),
+    Topic(
+      name: "Nature",
+      emoji: "🌳",
+      words: [
+        WordPair(catalan: "arbre", english: "tree"),
+        WordPair(catalan: "flor", english: "flower"),
+        WordPair(catalan: "muntanya", english: "mountain"),
+        WordPair(catalan: "riu", english: "river"),
+        WordPair(catalan: "mar", english: "sea"),
+        WordPair(catalan: "bosc", english: "forest"),
+        WordPair(catalan: "pedra", english: "stone"),
+      ],
+    ),
+    Topic(
+      name: "School",
+      emoji: "📚",
+      words: [
+        WordPair(catalan: "escola", english: "school"),
+        WordPair(catalan: "llibre", english: "book"),
+        WordPair(catalan: "llapis", english: "pencil"),
+        WordPair(catalan: "paper", english: "paper"),
+        WordPair(catalan: "taula", english: "desk"),
+        WordPair(catalan: "mestre", english: "teacher"),
+        WordPair(catalan: "alumne", english: "student"),
+      ],
+    ),
+  ]
+}
+
 // INITIALIZATION
 
 pub fn init(_flags) -> Model {
   Model(
-    words: [
-      WordPair(catalan: "gat", english: "cat"),
-      WordPair(catalan: "gos", english: "dog"),
-      WordPair(catalan: "casa", english: "house"),
-      WordPair(catalan: "aigua", english: "water"),
-      WordPair(catalan: "menjar", english: "food"),
-      WordPair(catalan: "llibre", english: "book"),
-      WordPair(catalan: "escola", english: "school"),
-      WordPair(catalan: "arbre", english: "tree"),
-    ],
+    topics: get_topics(),
+    selected_topic: Error(Nil),
     current_index: 0,
     guessed_letters: [],
     attempts_left: 6,
@@ -81,8 +166,22 @@ fn get_at(items: List(a), index: Int) -> Result(a, Nil) {
   }
 }
 
+fn find_topic(topics: List(Topic), name: String) -> Result(Topic, Nil) {
+  case topics {
+    [] -> Error(Nil)
+    [topic, ..rest] ->
+      case topic.name == name {
+        True -> Ok(topic)
+        False -> find_topic(rest, name)
+      }
+  }
+}
+
 fn current_word(model: Model) -> Result(WordPair, Nil) {
-  get_at(model.words, model.current_index)
+  case model.selected_topic {
+    Error(_) -> Error(Nil)
+    Ok(topic) -> get_at(topic.words, model.current_index)
+  }
 }
 
 fn display_word(word: String, guessed: List(String)) -> String {
@@ -113,15 +212,19 @@ fn is_word_complete(word: String, guessed: List(String)) -> Bool {
 }
 
 fn game_state(model: Model) -> GameState {
-  case current_word(model) {
-    Error(_) -> Complete
-    Ok(word_pair) ->
-      case is_word_complete(word_pair.english, model.guessed_letters) {
-        True -> Won
-        False ->
-          case model.attempts_left <= 0 {
-            True -> Lost
-            False -> Playing
+  case model.selected_topic {
+    Error(_) -> TopicSelection
+    Ok(topic) ->
+      case current_word(model) {
+        Error(_) -> Complete
+        Ok(word_pair) ->
+          case is_word_complete(word_pair.english, model.guessed_letters) {
+            True -> Won
+            False ->
+              case model.attempts_left <= 0 {
+                True -> Lost
+                False -> Playing
+              }
           }
       }
   }
@@ -131,9 +234,34 @@ fn game_state(model: Model) -> GameState {
 
 pub fn update(model: Model, msg: Msg) -> Model {
   case msg {
+    SelectTopic(name) -> handle_topic_selection(model, name)
     GuessLetter(letter) -> handle_guess(model, letter)
     NextWord -> handle_next_word(model)
     RestartGame -> init(Nil)
+    BackToTopics ->
+      Model(
+        ..model,
+        selected_topic: Error(Nil),
+        current_index: 0,
+        guessed_letters: [],
+        attempts_left: model.max_attempts,
+      )
+  }
+}
+
+fn handle_topic_selection(model: Model, name: String) -> Model {
+  case find_topic(model.topics, name) {
+    Ok(topic) ->
+      Model(
+        ..model,
+        selected_topic: Ok(topic),
+        current_index: 0,
+        guessed_letters: [],
+        attempts_left: model.max_attempts,
+        total_won: 0,
+        total_lost: 0,
+      )
+    Error(_) -> model
   }
 }
 
@@ -147,6 +275,7 @@ fn handle_guess(model: Model, letter: String) -> Model {
     _, Won -> model
     _, Lost -> model
     _, Complete -> model
+    _, TopicSelection -> model
     False, Playing ->
       case current_word(model) {
         Error(_) -> model
@@ -199,8 +328,10 @@ pub fn view(model: Model) -> Element(Msg) {
     ],
     [
       view_header(),
-      view_score(model),
-      view_game(model),
+      case game_state(model) {
+        TopicSelection -> view_topic_selection(model)
+        _ -> view_game_with_score(model)
+      },
     ],
   )
 }
@@ -212,6 +343,68 @@ fn view_header() -> Element(Msg) {
       element.text("Learn English words from Catalan"),
     ]),
   ])
+}
+
+fn view_topic_selection(model: Model) -> Element(Msg) {
+  html.div([class("topic-selection")], [
+    html.h2([class("section-title")], [element.text("Choose a Topic")]),
+    html.div(
+      [class("topic-grid"), attribute("role", "list")],
+      list.map(model.topics, fn(topic) {
+        html.button(
+          [
+            class("topic-card"),
+            attribute("role", "listitem"),
+            attribute(
+              "aria-label",
+              "Select topic: " <> topic.name <> ", " <> int.to_string(
+                list.length(topic.words),
+              ) <> " words",
+            ),
+            event.on_click(SelectTopic(topic.name)),
+          ],
+          [
+            html.div([class("topic-emoji")], [element.text(topic.emoji)]),
+            html.div([class("topic-name")], [element.text(topic.name)]),
+            html.div([class("topic-count")], [
+              element.text(
+                int.to_string(list.length(topic.words)) <> " words",
+              ),
+            ]),
+          ],
+        )
+      }),
+    ),
+  ])
+}
+
+fn view_game_with_score(model: Model) -> Element(Msg) {
+  html.div([], [
+    view_topic_header(model),
+    view_score(model),
+    view_game(model),
+  ])
+}
+
+fn view_topic_header(model: Model) -> Element(Msg) {
+  case model.selected_topic {
+    Error(_) -> html.div([], [])
+    Ok(topic) ->
+      html.div([class("topic-header")], [
+        html.button(
+          [
+            class("back-button"),
+            attribute("aria-label", "Back to topic selection"),
+            event.on_click(BackToTopics),
+          ],
+          [element.text("← Topics")],
+        ),
+        html.div([class("current-topic")], [
+          html.span([class("topic-emoji-small")], [element.text(topic.emoji)]),
+          html.span([class("topic-name-small")], [element.text(topic.name)]),
+        ]),
+      ])
+  }
 }
 
 fn view_score(model: Model) -> Element(Msg) {
@@ -245,6 +438,7 @@ fn view_game(model: Model) -> Element(Msg) {
         Won -> view_won(model, word_pair)
         Lost -> view_lost(model, word_pair)
         Complete -> view_complete(model)
+        TopicSelection -> html.div([], [])
       }
   }
 }
@@ -406,20 +600,25 @@ fn view_lost(model: Model, word: WordPair) -> Element(Msg) {
 }
 
 fn view_next_button(model: Model) -> Element(Msg) {
-  let has_more = model.current_index + 1 < list.length(model.words)
-  let button_text = case has_more {
-    True -> "Next Word →"
-    False -> "See Results →"
-  }
+  case model.selected_topic {
+    Error(_) -> html.div([], [])
+    Ok(topic) -> {
+      let has_more = model.current_index + 1 < list.length(topic.words)
+      let button_text = case has_more {
+        True -> "Next Word →"
+        False -> "See Results →"
+      }
 
-  html.button(
-    [
-      class("btn btn-primary"),
-      attribute("aria-label", button_text),
-      event.on_click(NextWord),
-    ],
-    [element.text(button_text)],
-  )
+      html.button(
+        [
+          class("btn btn-primary"),
+          attribute("aria-label", button_text),
+          event.on_click(NextWord),
+        ],
+        [element.text(button_text)],
+      )
+    }
+  }
 }
 
 fn view_complete(model: Model) -> Element(Msg) {
@@ -437,7 +636,7 @@ fn view_complete(model: Model) -> Element(Msg) {
     ],
     [
       html.div([class("result-icon")], [element.text("🏁")]),
-      html.h2([class("result-title")], [element.text("Game Complete!")]),
+      html.h2([class("result-title")], [element.text("Topic Complete!")]),
       html.div([class("final-score")], [
         html.div([class("stat")], [
           html.div([class("stat-value")], [
@@ -458,14 +657,24 @@ fn view_complete(model: Model) -> Element(Msg) {
           html.div([class("stat-label")], [element.text("Success Rate")]),
         ]),
       ]),
-      html.button(
-        [
-          class("btn btn-primary"),
-          attribute("aria-label", "Play again from the beginning"),
-          event.on_click(RestartGame),
-        ],
-        [element.text("🔄 Play Again")],
-      ),
+      html.div([class("complete-buttons")], [
+        html.button(
+          [
+            class("btn btn-secondary"),
+            attribute("aria-label", "Choose another topic"),
+            event.on_click(BackToTopics),
+          ],
+          [element.text("← Choose Topic")],
+        ),
+        html.button(
+          [
+            class("btn btn-primary"),
+            attribute("aria-label", "Play this topic again"),
+            event.on_click(RestartGame),
+          ],
+          [element.text("🔄 Play Again")],
+        ),
+      ]),
     ],
   )
 }
