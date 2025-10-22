@@ -3,6 +3,9 @@
 ** 2025/Oct/22
 *** word collections
 *** word collections moved to JSON files
+*** used FFI to fetch JSON files in JS
+had some issues to understand where to place the FFI file, and also the mapping of function names
+the FFI should be placed on src/ folder, and when building the app it is moved to the assets folder
 ** 2025/Oct/21
 *** deploy with GH actions
 Looks like there are some mistakes on the documentation.

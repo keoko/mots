@@ -6,6 +6,8 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE keys overflow in mobile
 * DONE word collections
 * DONE word collections in JSON
+* TODO study / play modes
+* TODO store progress
 * TODO game logic generic. 2 UIs: terminal and web
 * TODO word collections stored on the backend
 * TODO timing?
