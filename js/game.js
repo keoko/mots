@@ -28,7 +28,8 @@ const state = {
   maxAttempts: 6,
   totalWon: 0,
   totalLost: 0,
-  gameState: GAME_STATES.TOPIC_SELECTION
+  gameState: GAME_STATES.TOPIC_SELECTION,
+  isWordRevealed: false
 };
 
 // Alphabet for keyboard
@@ -68,6 +69,7 @@ export function selectMode(mode) {
   state.currentWordIndex = 0;
   state.guessedLetters = [];
   state.attemptsLeft = state.maxAttempts;
+  state.isWordRevealed = false;
 
   if (mode === GAME_MODES.STUDY) {
     state.gameState = GAME_STATES.STUDYING;
@@ -177,6 +179,7 @@ export function nextWord() {
     // Reset for next word
     state.guessedLetters = [];
     state.attemptsLeft = state.maxAttempts;
+    state.isWordRevealed = false;
 
     if (state.gameMode === GAME_MODES.STUDY) {
       state.gameState = GAME_STATES.STUDYING;
@@ -190,6 +193,7 @@ export function nextWord() {
 export function previousWord() {
   if (state.currentWordIndex > 0) {
     state.currentWordIndex--;
+    state.isWordRevealed = false;
   }
 }
 
@@ -230,4 +234,11 @@ export function startPlaying() {
 // Restart game
 export function restartGame() {
   backToTopics();
+}
+
+// Toggle word reveal in study mode
+export function toggleWordReveal() {
+  if (state.gameMode === GAME_MODES.STUDY) {
+    state.isWordRevealed = !state.isWordRevealed;
+  }
 }

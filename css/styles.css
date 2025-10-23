@@ -198,6 +198,22 @@
   }
 }
 
+.study-word-reveal {
+  cursor: pointer;
+  transition: all var(--transition-base);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.study-word-reveal:hover {
+  background: var(--color-surface);
+}
+
+.study-word-reveal:active {
+  transform: scale(0.98);
+}
+
 .study-language-label {
   font-size: 0.688rem;
   color: var(--color-text-secondary);
@@ -218,12 +234,48 @@
   color: var(--color-primary);
   text-align: center;
   padding: var(--spacing-xs);
+  transition: all var(--transition-base);
 }
 
 @media (min-width: 640px) {
   .study-word-text {
     font-size: var(--font-size-3xl);
     padding: var(--spacing-md);
+  }
+}
+
+.study-word-text.hidden {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-3xl);
+  user-select: none;
+}
+
+.study-word-text.revealed {
+  animation: revealWord var(--transition-base);
+}
+
+@keyframes revealWord {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.reveal-hint {
+  font-size: 0.688rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: var(--spacing-xs);
+  opacity: 0.7;
+}
+
+@media (min-width: 640px) {
+  .reveal-hint {
+    font-size: var(--font-size-sm);
   }
 }
 

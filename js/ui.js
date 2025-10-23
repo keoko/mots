@@ -16,7 +16,8 @@ import {
   backToTopics,
   backToModeSelection,
   startPlaying,
-  restartGame
+  restartGame,
+  toggleWordReveal
 } from './game.js';
 
 // Main render function
@@ -141,6 +142,7 @@ function renderStudyMode() {
   const totalWords = state.selectedTopic.words.length;
   const hasNext = state.currentWordIndex < totalWords - 1;
   const hasPrevious = state.currentWordIndex > 0;
+  const isRevealed = state.isWordRevealed;
 
   return `
     <div class="study-mode">
@@ -161,9 +163,12 @@ function renderStudyMode() {
             <div class="study-word-text" lang="ca">${word.catalan}</div>
           </div>
           <div class="study-divider">→</div>
-          <div class="study-word">
+          <div class="study-word study-word-reveal" data-action="toggle-reveal">
             <div class="study-language-label">English</div>
-            <div class="study-word-text" lang="en">${word.english}</div>
+            <div class="study-word-text ${isRevealed ? 'revealed' : 'hidden'}" lang="en">
+              ${isRevealed ? word.english : '???'}
+            </div>
+            <div class="reveal-hint">${isRevealed ? '👁️ Tap to hide' : '👁️ Tap to reveal'}</div>
           </div>
         </div>
         <div class="study-navigation">
@@ -210,6 +215,11 @@ function attachStudyModeListeners() {
 
   document.querySelector('[data-action="start-playing"]')?.addEventListener('click', () => {
     startPlaying();
+    render();
+  });
+
+  document.querySelector('[data-action="toggle-reveal"]')?.addEventListener('click', () => {
+    toggleWordReveal();
     render();
   });
 }
