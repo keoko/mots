@@ -1,5 +1,10 @@
 #+title: Journal
 * 2025
+** 2025/Oct/23
+*** changed my mind and we will implement this game with vanilla JS. Why?
+- no need of backend, I wanted to play with Erlang/Gleam but new there is no need.
+- LLMs make a lot of mistakes with Gleam and Lustre (e.g. list.at, FFIs in Lustre, etc)
+- prefer to explore more local first apps (e.g. web APIs, state sync, etc)
 ** 2025/Oct/22
 *** word collections
 *** word collections moved to JSON files
