@@ -1,17 +1,22 @@
 #+title: Tasks
-* TODO how external works
+* KILL how external works
 * DONE mobile first
 * DONE deploy with GH actions
 https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE keys overflow in mobile
 * DONE word collections
 * DONE word collections in JSON
-* TODO study / play modes
+* DONE study / play modes
+* TODO all content show be visible on the viewport
+* TODO hide/show word when studying a word
 * TODO store progress
-* TODO game logic generic. 2 UIs: terminal and web
-* TODO word collections stored on the backend
-* TODO timing?
-* TODO multiplayer?
-* TODO deploy to fly.io
-* TODO full stack deployment
+* IDEA sync progress in backend
+* IDEA vibration API
+* IDEA gestures API
+* KILL game logic generic. 2 UIs: terminal and web
+* KILL word collections stored on the backend
+* IDEA timing?
+* IDEA multiplayer?
+* IDEA deploy to fly.io
+* KILL full stack deployment
 https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
