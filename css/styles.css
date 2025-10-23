@@ -374,24 +374,38 @@ body {
 .header {
   text-align: center;
   padding: var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .header {
+    flex-direction: column;
+    gap: 0;
+  }
 }
 
 .header h1 {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: 700;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 0;
   line-height: 1.2;
 }
 
 @media (min-width: 640px) {
   .header h1 {
     font-size: var(--font-size-3xl);
+    margin-bottom: var(--spacing-xs);
   }
 }
 
 .subtitle {
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: 0.688rem;
+  line-height: 1.2;
 }
 
 @media (min-width: 640px) {
