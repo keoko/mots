@@ -446,3 +446,40 @@ function renderCompleteScreen() {
     <div class="game game-complete" role="alert" aria-live="assertive">
       <div class="result-icon">🏁</div>
       <h2 class="result-title">Topic Complete!</h2>
+      <div class="final-score">
+        <div class="stat">
+          <div class="stat-value">${state.totalWon}</div>
+          <div class="stat-label">Words Won</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${state.totalLost}</div>
+          <div class="stat-label">Words Lost</div>
+        </div>
+        <div class="stat stat-highlight">
+          <div class="stat-value">${percentage}%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
+      <div class="complete-buttons">
+        <button class="btn btn-secondary" data-action="back-to-topics" aria-label="Choose another topic">
+          ← Choose Topic
+        </button>
+        <button class="btn btn-primary" data-action="back-to-modes" aria-label="Play this topic again">
+          🔄 Play Again
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function attachCompleteListeners() {
+  document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
+    backToTopics();
+    render();
+  });
+
+  document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
+    backToModeSelection();
+    render();
+  });
+}

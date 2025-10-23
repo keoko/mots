@@ -1,4 +1,180 @@
-/* CSS Reset & Base Styles */
+/* Mode Selection */
+.mode-selection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.mode-back-header {
+  display: flex;
+  justify-content: flex-start;
+  padding: var(--spacing-md) 0;
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (min-width: 640px) {
+  .mode-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mode-card {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  min-height: 200px;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .mode-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary);
+  }
+}
+
+.mode-card:active {
+  transform: scale(0.98);
+}
+
+.mode-icon {
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.mode-name {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.mode-description {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Study Mode */
+.study-mode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.study-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.study-progress {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.study-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 640px) {
+  .study-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+  }
+}
+
+.study-word {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.study-language-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.study-word-text {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  padding: var(--spacing-md);
+}
+
+@media (min-width: 640px) {
+  .study-word-text {
+    font-size: var(--font-size-3xl);
+  }
+}
+
+.study-divider {
+  font-size: var(--font-size-3xl);
+  color: var(--color-text-secondary);
+  text-align: center;
+  align-self: center;
+}
+
+@media (min-width: 640px) {
+  .study-divider {
+    transform: rotate(0deg);
+  }
+}
+
+.study-navigation {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: space-between;
+}
+
+.study-navigation .btn {
+  flex: 1;
+}
+
+.study-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.study-actions .btn {
+  min-width: 200px;
+}/* CSS Reset & Base Styles */
 * {
   margin: 0;
   padding: 0;
