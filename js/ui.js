@@ -22,6 +22,8 @@ import {
   toggleWordReveal
 } from './game.js';
 
+import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
+
 // Main render function
 export function render() {
   const mainContent = document.getElementById('main-content');
@@ -357,6 +359,14 @@ function attachPlayModeListeners() {
   document.querySelectorAll('[data-letter]').forEach(button => {
     button.addEventListener('click', (e) => {
       const letter = e.currentTarget.dataset.letter;
+      const state = getState();
+      const word = getCurrentWord();
+
+      // Only vibrate if letter was actually added
+      if (state.currentGuess.length < word.english.length) {
+        vibrateLetterInput();
+      }
+
       addLetter(letter);
       render();
     });
@@ -364,12 +374,27 @@ function attachPlayModeListeners() {
 
   // Backspace button
   document.querySelector('[data-action="backspace"]')?.addEventListener('click', () => {
+    const state = getState();
+
+    // Only vibrate if there's something to delete
+    if (state.currentGuess.length > 0) {
+      vibrateTap();
+    }
+
     removeLetter();
     render();
   });
 
   // Enter button
   document.querySelector('[data-action="enter"]')?.addEventListener('click', () => {
+    const state = getState();
+    const word = getCurrentWord();
+
+    // Vibrate invalid if word is incomplete
+    if (state.currentGuess.length !== word.english.length) {
+      vibrateInvalid();
+    }
+
     submitGuess();
     render();
   });

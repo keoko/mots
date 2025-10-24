@@ -2,6 +2,7 @@
 
 import { topics } from './data.js';
 import { saveTopicProgress, getTopicProgress } from './storage.js';
+import { vibrateSuccess, vibrateError, vibrateComplete } from './haptics.js';
 
 export const GAME_STATES = {
   TOPIC_SELECTION: 'topic_selection',
@@ -174,11 +175,13 @@ export function submitGuess() {
   if (isCorrect) {
     state.gameState = GAME_STATES.WON;
     state.currentStreak++;
+    vibrateSuccess(); // Haptic feedback for success
   } else {
     state.attemptsLeft--;
     if (state.attemptsLeft <= 0) {
       state.gameState = GAME_STATES.LOST;
       state.currentStreak = 0;
+      vibrateError(); // Haptic feedback for failure
     }
   }
 
@@ -204,6 +207,7 @@ export function nextWord() {
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
     if (state.gameMode === GAME_MODES.PLAY) {
       state.gameState = GAME_STATES.COMPLETE;
+      vibrateComplete(); // Haptic feedback for completing all words
       // Save progress to localStorage
       saveProgress();
     } else {
