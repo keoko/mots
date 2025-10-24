@@ -633,39 +633,79 @@ body {
   }
 }
 
-/* Attempts */
-.attempts {
+
+/* Wordle-style Grid */
+.grid-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-background);
-  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) 0;
+  align-items: center;
 }
 
-@media (min-width: 640px) {
-  .attempts {
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md);
-  }
+.grid-row {
+  display: flex;
+  gap: var(--spacing-xs);
 }
 
-.hearts {
+.grid-cell {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: var(--font-size-xl);
-  line-height: 1;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all var(--transition-base);
 }
 
 @media (min-width: 640px) {
-  .hearts {
+  .grid-cell {
+    width: 3.5rem;
+    height: 3.5rem;
     font-size: var(--font-size-2xl);
   }
 }
 
-.attempts-text {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  font-weight: 500;
+.grid-cell-filled {
+  border-color: var(--color-text);
+  animation: pop var(--transition-fast);
+}
+
+.grid-cell-correct {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+  animation: flip var(--transition-base);
+}
+
+.grid-cell-present {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: white;
+  animation: flip var(--transition-base);
+}
+
+.grid-cell-absent {
+  background: #64748b;
+  border-color: #64748b;
+  color: white;
+  animation: flip var(--transition-base);
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes flip {
+  0% { transform: rotateX(0); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
 }
 
 /* Keyboard - Mobile First with responsive QWERTY layout */
@@ -753,6 +793,32 @@ body {
   opacity: 0.5;
 }
 
+.key-wide {
+  min-width: 60px;
+  max-width: 80px;
+  font-size: 0.688rem;
+}
+
+@media (min-width: 640px) {
+  .key-wide {
+    min-width: 80px;
+    max-width: 100px;
+    font-size: var(--font-size-sm);
+  }
+}
+
+.key-enter {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+@media (hover: hover) {
+  .key-enter:hover {
+    background: var(--color-primary-dark);
+  }
+}
+
 .key-correct {
   background: var(--color-success);
   border-color: var(--color-success);
@@ -765,22 +831,6 @@ body {
   color: white;
 }
 
-/* Guessed Letters */
-.guessed {
-  text-align: center;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  background: var(--color-background);
-  border-radius: var(--radius-md);
-  word-wrap: break-word;
-}
-
-@media (min-width: 640px) {
-  .guessed {
-    padding: var(--spacing-md);
-  }
-}
 
 /* Result States */
 .result {

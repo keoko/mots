@@ -1,6 +1,7 @@
 // app.js - Main application entry point
 
 import { render } from './ui.js';
+import { addLetter, removeLetter, submitGuess } from './game.js';
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,12 +19,19 @@ function handleKeyboardInput(e) {
   // Only handle letter keys (a-z)
   if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
     const letter = e.key.toLowerCase();
-
-    // Find the button and click it
-    const button = document.querySelector(`[data-letter="${letter}"]`);
-    if (button && !button.disabled) {
-      button.click();
-    }
+    addLetter(letter);
+    render();
+  }
+  // Handle backspace
+  else if (e.key === 'Backspace') {
+    e.preventDefault();
+    removeLetter();
+    render();
+  }
+  // Handle enter
+  else if (e.key === 'Enter') {
+    submitGuess();
+    render();
   }
 }
 

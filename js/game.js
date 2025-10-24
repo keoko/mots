@@ -24,9 +24,10 @@ const state = {
   selectedTopic: null,
   gameMode: null,
   currentWordIndex: 0,
-  guessedLetters: [],
-  attemptsLeft: 6,
-  maxAttempts: 6,
+  guesses: [], // Array of guess objects: [{word: 'house', feedback: ['correct', 'absent', ...]}]
+  currentGuess: '', // Current word being typed
+  attemptsLeft: 5,
+  maxAttempts: 5,
   totalWon: 0,
   totalLost: 0,
   gameState: GAME_STATES.TOPIC_SELECTION,
@@ -64,7 +65,8 @@ export function selectTopic(topicId) {
   if (topic) {
     state.selectedTopic = topic;
     state.currentWordIndex = 0;
-    state.guessedLetters = [];
+    state.guesses = [];
+    state.currentGuess = '';
     state.attemptsLeft = state.maxAttempts;
     state.totalWon = 0;
     state.totalLost = 0;
@@ -76,7 +78,8 @@ export function selectTopic(topicId) {
 export function selectMode(mode) {
   state.gameMode = mode;
   state.currentWordIndex = 0;
-  state.guessedLetters = [];
+  state.guesses = [];
+  state.currentGuess = '';
   state.attemptsLeft = state.maxAttempts;
   state.isWordRevealed = false;
 
@@ -93,73 +96,89 @@ export function getCurrentWord() {
   return state.selectedTopic.words[state.currentWordIndex];
 }
 
-// Display word with guessed letters
-export function getDisplayWord() {
+// Add letter to current guess
+export function addLetter(letter) {
   const word = getCurrentWord();
-  if (!word) return '';
+  if (!word) return;
 
-  return word.english
-    .split('')
-    .map(letter => {
-      const lower = letter.toLowerCase();
-      return state.guessedLetters.includes(lower) ? letter : '_';
-    })
-    .join(' ');
+  if (state.currentGuess.length < word.english.length) {
+    state.currentGuess += letter.toLowerCase();
+  }
 }
 
-// Check if letter is in word
-function isLetterInWord(letter, word) {
-  return word.toLowerCase().includes(letter.toLowerCase());
+// Remove last letter from current guess
+export function removeLetter() {
+  state.currentGuess = state.currentGuess.slice(0, -1);
 }
 
-// Check if word is complete
-function isWordComplete() {
+// Get feedback for a guess (Wordle-style)
+function getFeedback(guess, target) {
+  const targetLower = target.toLowerCase();
+  const guessLower = guess.toLowerCase();
+  const feedback = [];
+  const targetLetters = targetLower.split('');
+  const used = new Array(targetLetters.length).fill(false);
+
+  // First pass: mark correct positions
+  for (let i = 0; i < guessLower.length; i++) {
+    if (guessLower[i] === targetLower[i]) {
+      feedback[i] = 'correct';
+      used[i] = true;
+    }
+  }
+
+  // Second pass: mark present letters
+  for (let i = 0; i < guessLower.length; i++) {
+    if (feedback[i] === 'correct') continue;
+
+    const foundIndex = targetLetters.findIndex((letter, j) =>
+      letter === guessLower[i] && !used[j]
+    );
+
+    if (foundIndex !== -1) {
+      feedback[i] = 'present';
+      used[foundIndex] = true;
+    } else {
+      feedback[i] = 'absent';
+    }
+  }
+
+  return feedback;
+}
+
+// Submit current guess
+export function submitGuess() {
+  if (state.gameState !== GAME_STATES.PLAYING) return;
+
   const word = getCurrentWord();
-  if (!word) return false;
+  if (!word) return;
 
-  return word.english
-    .split('')
-    .every(letter => state.guessedLetters.includes(letter.toLowerCase()));
-}
+  // Check if guess is complete
+  if (state.currentGuess.length !== word.english.length) return;
 
-// Guess a letter
-export function guessLetter(letter) {
-  const lowerLetter = letter.toLowerCase();
+  // Get feedback
+  const feedback = getFeedback(state.currentGuess, word.english);
 
-  // Already guessed
-  if (state.guessedLetters.includes(lowerLetter)) {
-    return;
-  }
+  // Add to guesses
+  state.guesses.push({
+    word: state.currentGuess,
+    feedback: feedback
+  });
 
-  // Not in playing state
-  if (state.gameState !== GAME_STATES.PLAYING) {
-    return;
-  }
+  // Check if won
+  const isCorrect = state.currentGuess.toLowerCase() === word.english.toLowerCase();
 
-  const currentWord = getCurrentWord();
-  if (!currentWord) return;
-
-  // Add to guessed letters
-  state.guessedLetters.push(lowerLetter);
-
-  // Check if correct
-  const isCorrect = isLetterInWord(lowerLetter, currentWord.english);
-
-  if (!isCorrect) {
-    state.attemptsLeft--;
-  }
-
-  // Update game state
-  updateGameState();
-}
-
-// Update game state based on current conditions
-function updateGameState() {
-  if (isWordComplete()) {
+  if (isCorrect) {
     state.gameState = GAME_STATES.WON;
-  } else if (state.attemptsLeft <= 0) {
-    state.gameState = GAME_STATES.LOST;
+  } else {
+    state.attemptsLeft--;
+    if (state.attemptsLeft <= 0) {
+      state.gameState = GAME_STATES.LOST;
+    }
   }
+
+  // Reset current guess
+  state.currentGuess = '';
 }
 
 // Move to next word
@@ -188,7 +207,8 @@ export function nextWord() {
     }
   } else {
     // Reset for next word
-    state.guessedLetters = [];
+    state.guesses = [];
+    state.currentGuess = '';
     state.attemptsLeft = state.maxAttempts;
     state.isWordRevealed = false;
 
@@ -213,7 +233,8 @@ export function backToTopics() {
   state.selectedTopic = null;
   state.gameMode = null;
   state.currentWordIndex = 0;
-  state.guessedLetters = [];
+  state.guesses = [];
+  state.currentGuess = '';
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;
@@ -224,7 +245,8 @@ export function backToTopics() {
 export function backToModeSelection() {
   state.gameMode = null;
   state.currentWordIndex = 0;
-  state.guessedLetters = [];
+  state.guesses = [];
+  state.currentGuess = '';
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;
@@ -235,7 +257,8 @@ export function backToModeSelection() {
 export function startPlaying() {
   state.gameMode = GAME_MODES.PLAY;
   state.currentWordIndex = 0;
-  state.guessedLetters = [];
+  state.guesses = [];
+  state.currentGuess = '';
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;

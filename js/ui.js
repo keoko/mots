@@ -5,13 +5,14 @@ import {
   getTopics,
   getTopicsWithProgress,
   getCurrentWord,
-  getDisplayWord,
   GAME_STATES,
   GAME_MODES,
   ALPHABET,
   selectTopic,
   selectMode,
-  guessLetter,
+  addLetter,
+  removeLetter,
+  submitGuess,
   nextWord,
   previousWord,
   backToTopics,
@@ -243,7 +244,6 @@ function attachStudyModeListeners() {
 function renderPlayMode() {
   const state = getState();
   const word = getCurrentWord();
-  const displayWord = getDisplayWord();
 
   return `
     <div>
@@ -274,80 +274,74 @@ function renderPlayMode() {
             <span class="label">Catalan</span>
             <div class="word" lang="ca">${word.catalan}</div>
           </div>
-          <div class="english-word">
-            <span class="label">English</span>
-            <div class="word display-word" lang="en" aria-label="Word to guess: ${word.english.length} letters">
-              ${displayWord}
-            </div>
-          </div>
         </div>
 
-        ${renderAttempts()}
+        ${renderGrid()}
         ${renderKeyboard()}
-        ${renderGuessed()}
       </div>
     </div>
   `;
 }
 
-function renderAttempts() {
-  const state = getState();
-  const hearts = Array.from({ length: state.maxAttempts }, (_, i) =>
-    i < state.attemptsLeft ? '❤️' : '🖤'
-  ).join('');
-
-  return `
-    <div class="attempts" role="status" aria-live="polite" aria-label="Attempts remaining: ${state.attemptsLeft}">
-      <div class="hearts">${hearts}</div>
-      <div class="attempts-text">${state.attemptsLeft} attempts left</div>
-    </div>
-  `;
-}
-
-function renderKeyboard() {
+// Render the Wordle-style grid
+function renderGrid() {
   const state = getState();
   const word = getCurrentWord();
+  const wordLength = word.english.length;
 
   return `
-    <div class="keyboard" role="group" aria-label="Letter keyboard">
-      ${ALPHABET.map(letter => {
-        const isGuessed = state.guessedLetters.includes(letter);
-        const isCorrect = isGuessed && word.english.toLowerCase().includes(letter);
-        const isWrong = isGuessed && !word.english.toLowerCase().includes(letter);
-
-        let keyClass = 'key';
-        if (isCorrect) keyClass += ' key-correct';
-        if (isWrong) keyClass += ' key-wrong';
-
-        let ariaLabel = `Letter ${letter.toUpperCase()}`;
-        if (isCorrect) ariaLabel += ' - correct';
-        if (isWrong) ariaLabel += ' - incorrect';
+    <div class="grid-container">
+      ${Array.from({ length: state.maxAttempts }).map((_, rowIndex) => {
+        const guess = state.guesses[rowIndex];
+        const isCurrentRow = rowIndex === state.guesses.length && state.guesses.length < state.maxAttempts;
 
         return `
-          <button
-            class="${keyClass}"
-            data-letter="${letter}"
-            ${isGuessed ? 'disabled' : ''}
-            aria-label="${ariaLabel}"
-            aria-pressed="${isGuessed}">
-            ${letter.toUpperCase()}
-          </button>
+          <div class="grid-row">
+            ${Array.from({ length: wordLength }).map((_, colIndex) => {
+              let letter = '';
+              let cellClass = 'grid-cell';
+
+              if (guess) {
+                // Completed guess
+                letter = guess.word[colIndex].toUpperCase();
+                cellClass += ` grid-cell-${guess.feedback[colIndex]}`;
+              } else if (isCurrentRow && state.currentGuess[colIndex]) {
+                // Current guess being typed
+                letter = state.currentGuess[colIndex].toUpperCase();
+                cellClass += ' grid-cell-filled';
+              }
+
+              return `<div class="${cellClass}">${letter}</div>`;
+            }).join('')}
+          </div>
         `;
       }).join('')}
     </div>
   `;
 }
 
-function renderGuessed() {
+// Render keyboard
+function renderKeyboard() {
   const state = getState();
-  const guessedText = state.guessedLetters.length === 0
-    ? 'No letters guessed yet'
-    : state.guessedLetters.reverse().join(', ');
 
   return `
-    <div class="guessed" role="status" aria-live="polite">
-      <span class="label">Guessed: </span>
-      <span>${guessedText}</span>
+    <div class="keyboard" role="group" aria-label="Letter keyboard">
+      ${ALPHABET.map(letter => {
+        return `
+          <button
+            class="key"
+            data-letter="${letter}"
+            aria-label="Letter ${letter.toUpperCase()}">
+            ${letter.toUpperCase()}
+          </button>
+        `;
+      }).join('')}
+      <button class="key key-wide" data-action="backspace" aria-label="Backspace">
+        ⌫
+      </button>
+      <button class="key key-wide key-enter" data-action="enter" aria-label="Submit guess">
+        ENTER
+      </button>
     </div>
   `;
 }
@@ -358,12 +352,25 @@ function attachPlayModeListeners() {
     render();
   });
 
+  // Letter buttons
   document.querySelectorAll('[data-letter]').forEach(button => {
     button.addEventListener('click', (e) => {
       const letter = e.currentTarget.dataset.letter;
-      guessLetter(letter);
+      addLetter(letter);
       render();
     });
+  });
+
+  // Backspace button
+  document.querySelector('[data-action="backspace"]')?.addEventListener('click', () => {
+    removeLetter();
+    render();
+  });
+
+  // Enter button
+  document.querySelector('[data-action="enter"]')?.addEventListener('click', () => {
+    submitGuess();
+    render();
   });
 }
 
