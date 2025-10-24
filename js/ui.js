@@ -3,6 +3,7 @@
 import {
   getState,
   getTopics,
+  getTopicsWithProgress,
   getCurrentWord,
   getDisplayWord,
   GAME_STATES,
@@ -59,23 +60,37 @@ export function render() {
 
 // Render topic selection
 function renderTopicSelection() {
-  const topics = getTopics();
+  const topics = getTopicsWithProgress();
 
   return `
     <div class="topic-selection">
       <h2 class="section-title">Choose a Topic</h2>
       <div class="topic-grid" role="list">
-        ${topics.map(topic => `
+        ${topics.map(topic => {
+          const hasProgress = topic.progress.totalPlayed > 0;
+          const winRate = topic.progress.totalPlayed > 0
+            ? Math.round((topic.progress.totalWon / (topic.progress.totalWon + topic.progress.totalLost)) * 100)
+            : 0;
+
+          return `
           <button
-            class="topic-card"
+            class="topic-card ${hasProgress ? 'has-progress' : ''}"
             data-topic-id="${topic.id}"
             role="listitem"
-            aria-label="Select topic: ${topic.name}, ${topic.words.length} words">
+            aria-label="Select topic: ${topic.name}, ${topic.words.length} words${hasProgress ? `, ${winRate}% success rate` : ''}">
             <div class="topic-emoji">${topic.emoji}</div>
             <div class="topic-name">${topic.name}</div>
             <div class="topic-count">${topic.words.length} words</div>
+            ${hasProgress ? `
+              <div class="topic-progress">
+                <span class="progress-stat">✓ ${topic.progress.totalWon}</span>
+                <span class="progress-stat">✗ ${topic.progress.totalLost}</span>
+                <span class="progress-rate">${winRate}%</span>
+              </div>
+            ` : ''}
           </button>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     </div>
   `;

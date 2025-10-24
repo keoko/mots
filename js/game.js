@@ -1,6 +1,7 @@
 // game.js - Game state management
 
 import { topics } from './data.js';
+import { saveTopicProgress, getTopicProgress } from './storage.js';
 
 export const GAME_STATES = {
   TOPIC_SELECTION: 'topic_selection',
@@ -47,6 +48,14 @@ export function getState() {
 // Get all topics
 export function getTopics() {
   return state.topics;
+}
+
+// Get topics with progress
+export function getTopicsWithProgress() {
+  return state.topics.map(topic => ({
+    ...topic,
+    progress: getTopicProgress(topic.id)
+  }));
 }
 
 // Select a topic
@@ -171,6 +180,8 @@ export function nextWord() {
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
     if (state.gameMode === GAME_MODES.PLAY) {
       state.gameState = GAME_STATES.COMPLETE;
+      // Save progress to localStorage
+      saveProgress();
     } else {
       // In study mode, stay on last word
       state.currentWordIndex = state.selectedTopic.words.length - 1;
@@ -241,4 +252,17 @@ export function toggleWordReveal() {
   if (state.gameMode === GAME_MODES.STUDY) {
     state.isWordRevealed = !state.isWordRevealed;
   }
+}
+
+// Save current game progress to localStorage
+function saveProgress() {
+  if (!state.selectedTopic) return;
+
+  const currentProgress = getTopicProgress(state.selectedTopic.id);
+
+  saveTopicProgress(state.selectedTopic.id, {
+    totalWon: currentProgress.totalWon + state.totalWon,
+    totalLost: currentProgress.totalLost + state.totalLost,
+    totalPlayed: currentProgress.totalPlayed + 1
+  });
 }

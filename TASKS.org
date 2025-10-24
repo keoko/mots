@@ -7,10 +7,11 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE word collections
 * DONE word collections in JSON
 * DONE study / play modes
-* TODO all content show be visible on the viewport
-* TODO hide/show word when studying a word
+* DONE all content show be visible on the viewport
+* DONE hide/show word when studying a word
 * TODO store progress
 * IDEA sync progress in backend
+* IDEA explore UI similar to wordle
 * IDEA vibration API
 * IDEA gestures API
 * KILL game logic generic. 2 UIs: terminal and web

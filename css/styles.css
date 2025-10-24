@@ -1117,6 +1117,38 @@ body {
   }
 }
 
+/* Topic Progress */
+.topic-progress {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  font-size: 0.688rem;
+  margin-top: var(--spacing-xs);
+  padding-top: var(--spacing-xs);
+  border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+  .topic-progress {
+    font-size: var(--font-size-sm);
+  }
+}
+
+.progress-stat {
+  color: var(--color-text-secondary);
+}
+
+.progress-rate {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.topic-card.has-progress {
+  border-color: var(--color-primary);
+  opacity: 0.95;
+}
+
 /* Topic Header in Game */
 .topic-header {
   display: flex;
