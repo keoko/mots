@@ -251,6 +251,9 @@ function attachStudyModeListeners() {
 function renderPlayMode() {
   const state = getState();
   const word = getCurrentWord();
+  const wordNumber = state.currentWordIndex + 1;
+  const totalWords = state.selectedTopic.words.length;
+  const hasStreak = state.currentStreak > 0;
 
   return `
     <div>
@@ -261,17 +264,8 @@ function renderPlayMode() {
         <div class="current-topic">
           <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
           <span class="topic-name-small">${state.selectedTopic.name}</span>
-        </div>
-      </div>
-
-      <div class="score" role="status" aria-live="polite">
-        <div class="score-item">
-          <span class="score-label">Won</span>
-          <span class="score-value" aria-label="Words won">${state.totalWon}</span>
-        </div>
-        <div class="score-item">
-          <span class="score-label">Lost</span>
-          <span class="score-value" aria-label="Words lost">${state.totalLost}</span>
+          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
+          ${hasStreak ? `<span class="streak-indicator">🔥 ${state.currentStreak}</span>` : ''}
         </div>
       </div>
 
@@ -386,6 +380,9 @@ function renderWonScreen() {
   const word = getCurrentWord();
   const state = getState();
   const hasMore = state.currentWordIndex + 1 < state.selectedTopic.words.length;
+  const wordNumber = state.currentWordIndex + 1;
+  const totalWords = state.selectedTopic.words.length;
+  const hasStreak = state.currentStreak > 0;
 
   return `
     <div>
@@ -396,17 +393,8 @@ function renderWonScreen() {
         <div class="current-topic">
           <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
           <span class="topic-name-small">${state.selectedTopic.name}</span>
-        </div>
-      </div>
-
-      <div class="score" role="status" aria-live="polite">
-        <div class="score-item">
-          <span class="score-label">Won</span>
-          <span class="score-value">${state.totalWon}</span>
-        </div>
-        <div class="score-item">
-          <span class="score-label">Lost</span>
-          <span class="score-value">${state.totalLost}</span>
+          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
+          ${hasStreak ? `<span class="streak-indicator">🔥 ${state.currentStreak}</span>` : ''}
         </div>
       </div>
 
@@ -427,6 +415,8 @@ function renderLostScreen() {
   const word = getCurrentWord();
   const state = getState();
   const hasMore = state.currentWordIndex + 1 < state.selectedTopic.words.length;
+  const wordNumber = state.currentWordIndex + 1;
+  const totalWords = state.selectedTopic.words.length;
 
   return `
     <div>
@@ -437,17 +427,7 @@ function renderLostScreen() {
         <div class="current-topic">
           <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
           <span class="topic-name-small">${state.selectedTopic.name}</span>
-        </div>
-      </div>
-
-      <div class="score" role="status" aria-live="polite">
-        <div class="score-item">
-          <span class="score-label">Won</span>
-          <span class="score-value">${state.totalWon}</span>
-        </div>
-        <div class="score-item">
-          <span class="score-label">Lost</span>
-          <span class="score-value">${state.totalLost}</span>
+          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
         </div>
       </div>
 

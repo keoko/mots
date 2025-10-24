@@ -30,6 +30,7 @@ const state = {
   maxAttempts: 5,
   totalWon: 0,
   totalLost: 0,
+  currentStreak: 0,
   gameState: GAME_STATES.TOPIC_SELECTION,
   isWordRevealed: false
 };
@@ -70,6 +71,7 @@ export function selectTopic(topicId) {
     state.attemptsLeft = state.maxAttempts;
     state.totalWon = 0;
     state.totalLost = 0;
+    state.currentStreak = 0;
     state.gameState = GAME_STATES.MODE_SELECTION;
   }
 }
@@ -81,6 +83,7 @@ export function selectMode(mode) {
   state.guesses = [];
   state.currentGuess = '';
   state.attemptsLeft = state.maxAttempts;
+  state.currentStreak = 0;
   state.isWordRevealed = false;
 
   if (mode === GAME_MODES.STUDY) {
@@ -170,10 +173,12 @@ export function submitGuess() {
 
   if (isCorrect) {
     state.gameState = GAME_STATES.WON;
+    state.currentStreak++;
   } else {
     state.attemptsLeft--;
     if (state.attemptsLeft <= 0) {
       state.gameState = GAME_STATES.LOST;
+      state.currentStreak = 0;
     }
   }
 
@@ -238,6 +243,7 @@ export function backToTopics() {
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;
+  state.currentStreak = 0;
   state.gameState = GAME_STATES.TOPIC_SELECTION;
 }
 
@@ -250,6 +256,7 @@ export function backToModeSelection() {
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;
+  state.currentStreak = 0;
   state.gameState = GAME_STATES.MODE_SELECTION;
 }
 
@@ -262,6 +269,7 @@ export function startPlaying() {
   state.attemptsLeft = state.maxAttempts;
   state.totalWon = 0;
   state.totalLost = 0;
+  state.currentStreak = 0;
   state.gameState = GAME_STATES.PLAYING;
 }
 

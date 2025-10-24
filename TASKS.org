@@ -11,6 +11,8 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE hide/show word when studying a word
 * DONE explore UI similar to wordle
 * TODO store progress
+* TODO display metrics
+* TODO display failed words
 * DONE create favicon
 * DONE study word with same wordle design
 * TODO won/lost move it to the nav bar
