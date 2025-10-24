@@ -161,7 +161,7 @@ function renderStudyMode() {
   const isRevealed = state.isWordRevealed;
 
   return `
-    <div class="study-mode">
+    <div>
       <div class="topic-header">
         <button class="back-button" data-action="back-to-modes" aria-label="Back to mode selection">
           ← Modes
@@ -171,22 +171,30 @@ function renderStudyMode() {
           <span class="topic-name-small">${state.selectedTopic.name} - Study</span>
         </div>
       </div>
-      <div class="study-content">
-        <div class="study-progress">Word ${wordNumber} of ${totalWords}</div>
-        <div class="study-card">
-          <div class="study-word">
-            <div class="study-language-label">Catalan</div>
-            <div class="study-word-text" lang="ca">${word.catalan}</div>
-          </div>
-          <div class="study-divider">→</div>
-          <div class="study-word study-word-reveal" data-action="toggle-reveal">
-            <div class="study-language-label">English</div>
-            <div class="study-word-text ${isRevealed ? 'revealed' : 'hidden'}" lang="en">
-              ${isRevealed ? word.english : '???'}
-            </div>
-            <div class="reveal-hint">${isRevealed ? '👁️ Tap to hide' : '👁️ Tap to reveal'}</div>
+
+      <div class="study-progress">Word ${wordNumber} of ${totalWords}</div>
+
+      <div class="game">
+        <div class="word-section">
+          <div class="catalan-word">
+            <span class="label">Catalan</span>
+            <div class="word" lang="ca">${word.catalan}</div>
           </div>
         </div>
+
+        <div class="study-grid-wrapper" data-action="toggle-reveal">
+          <div class="grid-container">
+            <div class="grid-row">
+              ${Array.from({ length: word.english.length }).map((_, i) => {
+                const letter = isRevealed ? word.english[i].toUpperCase() : '';
+                const cellClass = isRevealed ? 'grid-cell grid-cell-correct' : 'grid-cell';
+                return `<div class="${cellClass}">${letter}</div>`;
+              }).join('')}
+            </div>
+          </div>
+          <div class="reveal-hint">${isRevealed ? '👁️ Tap to hide' : '👁️ Tap to reveal'}</div>
+        </div>
+
         <div class="study-navigation">
           <button
             class="btn btn-secondary"
@@ -203,11 +211,10 @@ function renderStudyMode() {
             Next →
           </button>
         </div>
-        <div class="study-actions">
-          <button class="btn btn-primary" data-action="start-playing" aria-label="Start playing">
-            🎮 Start Playing
-          </button>
-        </div>
+
+        <button class="btn btn-primary btn-start-playing" data-action="start-playing" aria-label="Start playing">
+          🎮 Start Playing
+        </button>
       </div>
     </div>
   `;

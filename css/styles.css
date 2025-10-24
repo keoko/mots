@@ -118,45 +118,17 @@
 .study-mode {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-@media (min-width: 640px) {
-  .study-mode {
-    gap: var(--spacing-lg);
-    flex: 1;
-    min-height: 0;
-  }
-}
-
-.study-content {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-sm) var(--spacing-md);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  flex-direction: column;
   gap: var(--spacing-sm);
-}
-
-@media (min-width: 640px) {
-  .study-content {
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-xl);
-    gap: var(--spacing-xl);
-    flex: 1;
-    min-height: 0;
-    justify-content: center;
-  }
 }
 
 .study-progress {
   text-align: center;
-  font-size: 0.688rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
+  padding: var(--spacing-xs) 0;
 }
 
 @media (min-width: 640px) {
@@ -165,112 +137,29 @@
   }
 }
 
-.study-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm);
-  background: var(--color-background);
-  border-radius: var(--radius-md);
-}
-
-@media (min-width: 640px) {
-  .study-card {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-    gap: var(--spacing-xl);
-    padding: var(--spacing-xl);
-    border-radius: var(--radius-lg);
-  }
-}
-
-.study-word {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-@media (min-width: 640px) {
-  .study-word {
-    gap: var(--spacing-md);
-  }
-}
-
-.study-word-reveal {
+.study-grid-wrapper {
   cursor: pointer;
-  transition: all var(--transition-base);
-  padding: var(--spacing-xs);
+  padding: var(--spacing-sm);
   border-radius: var(--radius-md);
+  transition: all var(--transition-base);
   -webkit-tap-highlight-color: transparent;
 }
 
-.study-word-reveal:hover {
-  background: var(--color-surface);
+@media (hover: hover) {
+  .study-grid-wrapper:hover {
+    background: var(--color-background);
+  }
 }
 
-.study-word-reveal:active {
+.study-grid-wrapper:active {
   transform: scale(0.98);
-}
-
-.study-language-label {
-  font-size: 0.688rem;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
-@media (min-width: 640px) {
-  .study-language-label {
-    font-size: var(--font-size-sm);
-  }
-}
-
-.study-word-text {
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--color-primary);
-  text-align: center;
-  padding: var(--spacing-xs);
-  transition: all var(--transition-base);
-}
-
-@media (min-width: 640px) {
-  .study-word-text {
-    font-size: var(--font-size-3xl);
-    padding: var(--spacing-md);
-  }
-}
-
-.study-word-text.hidden {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-3xl);
-  user-select: none;
-}
-
-.study-word-text.revealed {
-  animation: revealWord var(--transition-base);
-}
-
-@keyframes revealWord {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 .reveal-hint {
   font-size: 0.688rem;
   color: var(--color-text-secondary);
   text-align: center;
-  margin-top: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
   opacity: 0.7;
 }
 
@@ -280,24 +169,11 @@
   }
 }
 
-.study-divider {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-secondary);
-  text-align: center;
-  align-self: center;
-}
-
-@media (min-width: 640px) {
-  .study-divider {
-    font-size: var(--font-size-3xl);
-    transform: rotate(0deg);
-  }
-}
-
 .study-navigation {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   justify-content: space-between;
+  margin-top: var(--spacing-sm);
 }
 
 @media (min-width: 640px) {
@@ -310,26 +186,16 @@
   flex: 1;
 }
 
-.study-actions {
-  display: flex;
-  justify-content: center;
-  padding-top: var(--spacing-xs);
-  border-top: 1px solid var(--color-border);
+.btn-start-playing {
+  width: 100%;
+  margin-top: var(--spacing-md);
 }
 
 @media (min-width: 640px) {
-  .study-actions {
-    padding-top: var(--spacing-md);
-  }
-}
-
-.study-actions .btn {
-  min-width: 140px;
-}
-
-@media (min-width: 640px) {
-  .study-actions .btn {
-    min-width: 200px;
+  .btn-start-playing {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }/* CSS Reset & Base Styles */
 * {
