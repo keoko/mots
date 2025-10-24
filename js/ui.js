@@ -179,7 +179,6 @@ function renderStudyMode() {
       <div class="game">
         <div class="word-section">
           <div class="catalan-word">
-            <span class="label">Catalan</span>
             <div class="word" lang="ca">${word.catalan}</div>
           </div>
         </div>
@@ -274,7 +273,6 @@ function renderPlayMode() {
       <div class="game" aria-labelledby="game-title">
         <div class="word-section">
           <div class="catalan-word">
-            <span class="label">Catalan</span>
             <div class="word" lang="ca">${word.catalan}</div>
           </div>
         </div>
