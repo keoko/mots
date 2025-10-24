@@ -1,7 +1,7 @@
 // app.js - Main application entry point
 
 import { render } from './ui.js';
-import { addLetter, removeLetter, submitGuess, getState, getCurrentWord } from './game.js';
+import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics } from './game.js';
 import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
 
 // Initialize app when DOM is ready
@@ -13,6 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add keyboard support for play mode
   document.addEventListener('keydown', handleKeyboardInput);
+
+  // Make title clickable to go home
+  const gameTitle = document.getElementById('game-title');
+  if (gameTitle) {
+    gameTitle.addEventListener('click', handleTitleClick);
+    gameTitle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleTitleClick();
+      }
+    });
+  }
 });
 
 // Handle keyboard input
@@ -54,6 +66,12 @@ function handleKeyboardInput(e) {
     submitGuess();
     render();
   }
+}
+
+// Handle title click to go home
+function handleTitleClick() {
+  backToTopics();
+  render();
 }
 
 console.log('✅ Mots loaded successfully!');

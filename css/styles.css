@@ -357,6 +357,31 @@ body {
   }
 }
 
+.clickable-title {
+  cursor: pointer;
+  transition: all var(--transition-base);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (hover: hover) {
+  .clickable-title:hover {
+    transform: scale(1.05);
+    color: var(--color-primary);
+  }
+}
+
+.clickable-title:active {
+  transform: scale(0.95);
+}
+
+.clickable-title:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
 .subtitle {
   color: var(--color-text-secondary);
   font-size: 0.688rem;
