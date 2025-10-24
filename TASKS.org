@@ -9,9 +9,13 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE study / play modes
 * DONE all content show be visible on the viewport
 * DONE hide/show word when studying a word
+* DONE explore UI similar to wordle
 * TODO store progress
+* TODO create favicon
+* TODO study word with same wordle design
+* TODO won/lost move it to the nav bar
+* TODO check long words like tooth bruise
 * IDEA sync progress in backend
-* IDEA explore UI similar to wordle
 * IDEA vibration API
 * IDEA gestures API
 * KILL game logic generic. 2 UIs: terminal and web
