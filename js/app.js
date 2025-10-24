@@ -17,16 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Make title clickable to go home
   const gameTitle = document.getElementById('game-title');
   if (gameTitle) {
-<<<<<<< HEAD
     // Use both click and touchend for better mobile support
     gameTitle.addEventListener('click', handleTitleClick);
     gameTitle.addEventListener('touchend', (e) => {
       e.preventDefault();
       handleTitleClick();
     });
-=======
-    gameTitle.addEventListener('click', handleTitleClick);
->>>>>>> 19c8f61d2ed803cc4cde89bee7a19a6c15cda51c
     gameTitle.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
