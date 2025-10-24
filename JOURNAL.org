@@ -1,10 +1,17 @@
 #+title: Journal
 * 2025
+** 2025/Oct/24
+*** changed game UI like wordle
+*** started looking into local first apps: local persistence
+*** minor improvements
+- favicon
 ** 2025/Oct/23
 *** changed my mind and we will implement this game with vanilla JS. Why?
 - no need of backend, I wanted to play with Erlang/Gleam but new there is no need.
 - LLMs make a lot of mistakes with Gleam and Lustre (e.g. list.at, FFIs in Lustre, etc)
 - prefer to explore more local first apps (e.g. web APIs, state sync, etc)
+*** difficulties to improve UI with Claude Code
+- wanted to fix some gaps, but it required several iterations and it didn't quite work
 ** 2025/Oct/22
 *** word collections
 *** word collections moved to JSON files
