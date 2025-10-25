@@ -289,6 +289,7 @@ function renderGrid() {
   const state = getState();
   const word = getCurrentWord();
   const wordLength = word.english.length;
+  const targetWord = word.english;
 
   return `
     <div class="grid-container" data-word-length="${wordLength}" style="--word-length: ${wordLength};">
@@ -299,6 +300,13 @@ function renderGrid() {
         return `
           <div class="grid-row">
             ${Array.from({ length: wordLength }).map((_, colIndex) => {
+              const targetChar = targetWord[colIndex];
+
+              // Check if this position is a space in the target word
+              if (targetChar === ' ') {
+                return `<div class="grid-space"></div>`;
+              }
+
               let letter = '';
               let cellClass = 'grid-cell';
 

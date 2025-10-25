@@ -109,12 +109,24 @@ export function addLetter(letter) {
 
   if (state.currentGuess.length < word.english.length) {
     state.currentGuess += letter.toLowerCase();
+
+    // Auto-insert spaces if the next character in the target word is a space
+    while (state.currentGuess.length < word.english.length &&
+           word.english[state.currentGuess.length] === ' ') {
+      state.currentGuess += ' ';
+    }
   }
 }
 
 // Remove last letter from current guess
 export function removeLetter() {
   state.currentGuess = state.currentGuess.slice(0, -1);
+
+  // Remove any trailing spaces that were auto-inserted
+  while (state.currentGuess.length > 0 &&
+         state.currentGuess[state.currentGuess.length - 1] === ' ') {
+    state.currentGuess = state.currentGuess.slice(0, -1);
+  }
 }
 
 // Update letter states for keyboard coloring
@@ -125,6 +137,10 @@ function updateLetterStates(guess, feedback) {
 
   for (let i = 0; i < guessLower.length; i++) {
     const letter = guessLower[i];
+
+    // Skip spaces
+    if (letter === ' ') continue;
+
     const currentState = state.letterStates[letter];
     const newState = feedback[i];
 

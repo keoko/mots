@@ -568,6 +568,18 @@ body {
   }
 }
 
+/* Grid space separator for multi-word phrases */
+.grid-space {
+  width: 0.5rem;
+  height: var(--cell-size, 2.5rem);
+}
+
+@media (min-width: 640px) {
+  .grid-space {
+    width: 0.75rem;
+  }
+}
+
 .grid-cell-filled {
   border-color: var(--color-text);
   animation: pop var(--transition-fast);
