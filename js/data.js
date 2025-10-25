@@ -157,5 +157,24 @@ export const topics = [
       { catalan: 'protector de mugrons', english: 'nipple shield' },
       { catalan: 'extractor de llet', english: 'breast pump' }
     ]
+  },
+  {
+    id: 'toiletries',
+    name: 'Toiletries',
+    emoji: '🧴',
+    words: [
+      { catalan: 'gel de dutxa', english: 'shower gel' },
+      { catalan: 'sabó', english: 'soap' },
+      { catalan: 'xampú anticaspa', english: 'anti-dandruff shampoo' },
+      { catalan: 'condicionador', english: 'conditioner' },
+      { catalan: 'pedra tosca', english: 'pumice stone' },
+      { catalan: 'escuma d\'afaitar', english: 'shaving foam' },
+      { catalan: 'loció per després d\'afaitar', english: 'aftershave' },
+      { catalan: 'raspall de dents', english: 'toothbrush' },
+      { catalan: 'pasta de dents', english: 'toothpaste' },
+      { catalan: 'fil dental', english: 'dental floss' },
+      { catalan: 'col·lutori', english: 'mouthwash' },
+      { catalan: 'dentadura postissa', english: 'denture' }
+    ]
   }
 ];
