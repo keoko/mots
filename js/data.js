@@ -137,5 +137,25 @@ export const topics = [
       { catalan: 'tetina', english: 'teat' },
       { catalan: 'poll', english: 'louse' }
     ]
+  },
+  {
+    id: 'pregnancy',
+    name: 'Pregnancy',
+    emoji: '🤰',
+    words: [
+      { catalan: 'tampons', english: 'tampons' },
+      { catalan: 'compresas', english: 'sanitary towels' },
+      { catalan: 'salvaslips', english: 'panty liners' },
+      { catalan: 'preservatiu', english: 'condom' },
+      { catalan: 'DIU', english: 'iud' },
+      { catalan: 'diafragma', english: 'diaphragm' },
+      { catalan: 'píndola anticonceptiva', english: 'oral contraceptive pill' },
+      { catalan: 'suplement vitamínic', english: 'vitamin supplement' },
+      { catalan: 'test d\'embaràs', english: 'pregnancy test' },
+      { catalan: 'crema antiestriès', english: 'stretch mark cream' },
+      { catalan: 'crema per mugrons', english: 'nipple cream' },
+      { catalan: 'protector de mugrons', english: 'nipple shield' },
+      { catalan: 'extractor de llet', english: 'breast pump' }
+    ]
   }
 ];
