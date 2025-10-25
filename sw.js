@@ -1,7 +1,7 @@
 // Service Worker for Mots - Offline-first PWA
-// Version 1.0.2
+// Version 1.0.3
 
-const CACHE_NAME = 'mots-v1.0.2';
+const CACHE_NAME = 'mots-v1.0.3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   './js/data.js',
   './js/storage.js',
   './js/haptics.js',
+  './js/version.js',
   './favicon.svg',
   './manifest.json',
   './icon-192.png',
@@ -20,7 +21,7 @@ const ASSETS_TO_CACHE = [
 
 // Install event - cache all static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker v1.0.2...');
+  console.log('[SW] Installing service worker v1.0.3...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)

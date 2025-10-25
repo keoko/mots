@@ -3,10 +3,16 @@
 import { render } from './ui.js';
 import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics } from './game.js';
 import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
+import { VERSION, getDiagnosticInfo, formatDiagnosticInfo } from './version.js';
 
 // Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎮 Mots - Starting game...');
+  console.log(`📦 Version: ${VERSION.app} (${VERSION.gitCommit})`);
+
+  // Log diagnostic info
+  const diagnosticInfo = await getDiagnosticInfo();
+  console.log('🔍 Diagnostic Info:', diagnosticInfo);
 
   // Initial render
   render();
@@ -48,6 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Setup help modal
   setupHelpModal();
+
+  // Setup copy debug info button
+  setupDebugInfoButton();
 
   // Show welcome modal on first visit
   showWelcomeIfFirstVisit();
@@ -127,6 +136,34 @@ function showWelcomeIfFirstVisit() {
       localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
     });
   }
+}
+
+// Setup copy debug info button
+function setupDebugInfoButton() {
+  const copyButton = document.getElementById('copy-debug-info');
+  if (!copyButton) return;
+
+  copyButton.addEventListener('click', async () => {
+    try {
+      const diagnosticInfo = await getDiagnosticInfo();
+      const formattedInfo = formatDiagnosticInfo(diagnosticInfo);
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(formattedInfo);
+
+      // Visual feedback
+      const originalText = copyButton.textContent;
+      copyButton.textContent = '✅ Copied!';
+      setTimeout(() => {
+        copyButton.textContent = originalText;
+      }, 2000);
+
+      console.log('📋 Diagnostic info copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy diagnostic info:', error);
+      alert('Failed to copy. Check console for diagnostic info.');
+    }
+  });
 }
 
 // Setup help modal
