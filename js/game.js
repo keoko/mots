@@ -33,7 +33,8 @@ const state = {
   totalLost: 0,
   currentStreak: 0,
   gameState: GAME_STATES.TOPIC_SELECTION,
-  isWordRevealed: false
+  isWordRevealed: false,
+  letterStates: {} // Track letter states: {a: 'correct', b: 'present', c: 'absent'}
 };
 
 // Alphabet for keyboard
@@ -86,6 +87,7 @@ export function selectMode(mode) {
   state.attemptsLeft = state.maxAttempts;
   state.currentStreak = 0;
   state.isWordRevealed = false;
+  state.letterStates = {};
 
   if (mode === GAME_MODES.STUDY) {
     state.gameState = GAME_STATES.STUDYING;
@@ -113,6 +115,31 @@ export function addLetter(letter) {
 // Remove last letter from current guess
 export function removeLetter() {
   state.currentGuess = state.currentGuess.slice(0, -1);
+}
+
+// Update letter states for keyboard coloring
+function updateLetterStates(guess, feedback) {
+  const guessLower = guess.toLowerCase();
+
+  console.log('[Game] Updating letter states for:', guessLower, 'feedback:', feedback);
+
+  for (let i = 0; i < guessLower.length; i++) {
+    const letter = guessLower[i];
+    const currentState = state.letterStates[letter];
+    const newState = feedback[i];
+
+    // Priority: correct > present > absent
+    // Don't downgrade a letter's state
+    if (newState === 'correct') {
+      state.letterStates[letter] = 'correct';
+    } else if (newState === 'present' && currentState !== 'correct') {
+      state.letterStates[letter] = 'present';
+    } else if (newState === 'absent' && !currentState) {
+      state.letterStates[letter] = 'absent';
+    }
+  }
+
+  console.log('[Game] Letter states now:', state.letterStates);
 }
 
 // Get feedback for a guess (Wordle-style)
@@ -162,6 +189,9 @@ export function submitGuess() {
 
   // Get feedback
   const feedback = getFeedback(state.currentGuess, word.english);
+
+  // Update letter states based on feedback
+  updateLetterStates(state.currentGuess, feedback);
 
   // Add to guesses
   state.guesses.push({
@@ -220,6 +250,7 @@ export function nextWord() {
     state.currentGuess = '';
     state.attemptsLeft = state.maxAttempts;
     state.isWordRevealed = false;
+    state.letterStates = {}; // Reset letter states
 
     if (state.gameMode === GAME_MODES.STUDY) {
       state.gameState = GAME_STATES.STUDYING;

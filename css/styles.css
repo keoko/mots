@@ -667,16 +667,6 @@ body {
   }
 }
 
-/* Hover effects (only on devices that support hover) */
-@media (hover: hover) {
-  .key:hover:not(:disabled) {
-    background: var(--color-primary);
-    color: white;
-    border-color: var(--color-primary);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-  }
-}
 
 /* Active/pressed state */
 .key:active:not(:disabled) {
@@ -714,16 +704,35 @@ body {
   }
 }
 
+/* Keyboard Letter States */
 .key-correct {
   background: var(--color-success);
   border-color: var(--color-success);
   color: white;
 }
 
-.key-wrong {
-  background: var(--color-error);
-  border-color: var(--color-error);
+.key-present {
+  background: #f59e0b;
+  border-color: #f59e0b;
   color: white;
+}
+
+.key-absent {
+  background: #64748b;
+  border-color: #64748b;
+  color: white;
+  opacity: 0.5;
+}
+
+/* Hover states for letter keys - don't override state colors */
+@media (hover: hover) {
+  .key:not(.key-correct):not(.key-present):not(.key-absent):not(.key-enter):hover {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 

@@ -1,5 +1,21 @@
 #+title: Tasks
-* KILL how external works
+* TODO check long words like tooth bruise
+* TODO mobile keyboard
+* TODO offline mode
+it works intermittently. It seems the service worker stops working.
+* TODO store progress
+* TODO display metrics
+* TODO display report
+* TODO display failed words
+* TODO vibration API - does it actually work?
+* IDEA gestures API
+* IDEA automatic functional testing
+https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
+* IDEA sync progress in backend
+* IDEA timing?
+* IDEA multiplayer?
+* IDEA deploy to fly.io
+* DONE improve UX to understand the game
 * DONE mobile first
 * DONE deploy with GH actions
 https://hexdocs.pm/lustre/guide/04-spa-deployments.html
@@ -10,27 +26,11 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE all content show be visible on the viewport
 * DONE hide/show word when studying a word
 * DONE explore UI similar to wordle
-* TODO store progress
-* TODO display metrics
-* TODO display report
-* TODO display failed words
 * DONE create favicon
 * DONE study word with same wordle design
 * DONE won/lost move it to the nav bar
 * DONE aligment header and subtitle
-* TODO check long words like tooth bruise
-* TODO mobile keyboard
-* TODO offline mode
-it works intermittently. It seems the service worker stops working.
-* DONE improve UX to understand the game
-* IDEA sync progress in backend
-* TODO vibration API - does it actually work?
-* IDEA gestures API
-* IDEA automatic functional testing
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
-* IDEA timing?
-* IDEA multiplayer?
-* IDEA deploy to fly.io
 * KILL full stack deployment
-https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
+* KILL how external works

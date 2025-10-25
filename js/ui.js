@@ -324,15 +324,21 @@ function renderGrid() {
 // Render keyboard
 function renderKeyboard() {
   const state = getState();
+  const letterStates = state.letterStates || {};
+
+  console.log('[UI] Rendering keyboard with letter states:', letterStates);
 
   return `
     <div class="keyboard" role="group" aria-label="Letter keyboard">
       ${ALPHABET.map(letter => {
+        const letterState = letterStates[letter];
+        const stateClass = letterState ? `key-${letterState}` : '';
+
         return `
           <button
-            class="key"
+            class="key ${stateClass}"
             data-letter="${letter}"
-            aria-label="Letter ${letter.toUpperCase()}">
+            aria-label="Letter ${letter.toUpperCase()}${letterState ? ` - ${letterState}` : ''}">
             ${letter.toUpperCase()}
           </button>
         `;
