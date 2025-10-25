@@ -113,5 +113,29 @@ export const topics = [
       { catalan: 'protecció solar', english: 'sun protection' },
       { catalan: 'crema per taló esquerdat', english: 'cracked heel cream' }
     ]
+  },
+  {
+    id: 'infancy',
+    name: 'Infancy',
+    emoji: '👶',
+    words: [
+      { catalan: 'bolquer', english: 'nappy' },
+      { catalan: 'crema de bolquers', english: 'nappy cream' },
+      { catalan: 'eritema del bolquer', english: 'nappy rash' },
+      { catalan: 'gatejar', english: 'crawling' },
+      { catalan: 'polls', english: 'lice' },
+      { catalan: 'llémena', english: 'nit' },
+      { catalan: 'oli de rosa mosqueta', english: 'wild rose oil' },
+      { catalan: 'conjuntivitis', english: 'conjunctivitis' },
+      { catalan: 'tovalloletes humides', english: 'baby wipes' },
+      { catalan: 'pols de talc', english: 'talcum powder' },
+      { catalan: 'xumet', english: 'pacifier/dummy' },
+      { catalan: 'menjar per a nadons', english: 'baby food' },
+      { catalan: 'biberó', english: 'baby\'s bottle/feeding bottle' },
+      { catalan: 'loció/xampú antipiolls', english: 'anti-lice lotion/shampoo' },
+      { catalan: 'pinta per llémenes', english: 'nit comb' },
+      { catalan: 'tetina', english: 'teat' },
+      { catalan: 'poll', english: 'louse' }
+    ]
   }
 ];
