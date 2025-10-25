@@ -1,5 +1,9 @@
 #+title: Journal
 * 2025
+** 2025/Oct/25
+*** improve UX to understand the game
+*** improve offline mode
+it seems it crashes the service worker after refreshing the mage on mobile (airplane mode)
 ** 2025/Oct/24
 *** changed game UI like wordle
 *** started looking into local first apps: local persistence
