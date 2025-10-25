@@ -1,7 +1,14 @@
-{
+#!/usr/bin/env node
+// generate-manifest.js - Generate manifest.json from version.js
+// Run this before deploying: node generate-manifest.js
+
+import { readFileSync, writeFileSync } from 'fs';
+import { VERSION } from './js/version.js';
+
+const manifest = {
   "name": "Mots - FAR Vocabulary Trainer",
   "short_name": "Mots",
-  "version": "1.0.4",
+  "version": VERSION.app,
   "description": "Learn English vocabulary for FAR students with an interactive word game",
   "start_url": "/",
   "display": "standalone",
@@ -28,9 +35,9 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": [
-    "education",
-    "games"
-  ],
+  "categories": ["education", "games"],
   "screenshots": []
-}
+};
+
+writeFileSync('manifest.json', JSON.stringify(manifest, null, 2));
+console.log(`✅ Generated manifest.json with version ${VERSION.app}`);

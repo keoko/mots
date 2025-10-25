@@ -1,7 +1,9 @@
 // Service Worker for Mots - Offline-first PWA
-// Version 1.0.3
+// Version controlled by js/version.js
 
-const CACHE_NAME = 'mots-v1.0.3';
+import { VERSION, getCacheName } from './js/version.js';
+
+const CACHE_NAME = getCacheName();
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -21,7 +23,7 @@ const ASSETS_TO_CACHE = [
 
 // Install event - cache all static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker v1.0.3...');
+  console.log(`[SW] Installing service worker v${VERSION.app}...`);
 
   event.waitUntil(
     caches.open(CACHE_NAME)

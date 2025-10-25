@@ -1,5 +1,4 @@
 #+title: Tasks
-* TODO check long words like tooth bruise
 * TODO mobile keyboard
 * TODO offline mode
 it works intermittently. It seems the service worker stops working.

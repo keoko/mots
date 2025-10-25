@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Setup copy debug info button
   setupDebugInfoButton();
 
+  // Update version display
+  updateVersionDisplay();
+
   // Show welcome modal on first visit
   showWelcomeIfFirstVisit();
 });
@@ -135,6 +138,14 @@ function showWelcomeIfFirstVisit() {
       document.body.style.overflow = '';
       localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
     });
+  }
+}
+
+// Update version display in help modal
+function updateVersionDisplay() {
+  const versionElement = document.getElementById('app-version');
+  if (versionElement) {
+    versionElement.textContent = `Version ${VERSION.app}`;
   }
 }
 

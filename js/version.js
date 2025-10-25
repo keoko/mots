@@ -1,10 +1,16 @@
 // version.js - App version and diagnostic information
+// This is the single source of truth for version information
 
 export const VERSION = {
-  app: '1.0.3',
+  app: '1.0.4',
   buildDate: '2025-10-25',
   gitCommit: 'b369e03'
 };
+
+// Generate cache name for service worker
+export function getCacheName() {
+  return `mots-v${VERSION.app}`;
+}
 
 // Get diagnostic information for troubleshooting
 export async function getDiagnosticInfo() {
