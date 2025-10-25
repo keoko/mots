@@ -618,6 +618,28 @@ body {
   100% { transform: rotateX(0); }
 }
 
+/* Hidden input for mobile keyboard */
+.mobile-keyboard-input {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Make grid cells look clickable on mobile */
+[data-grid-cell] {
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  [data-grid-cell]:hover {
+    transform: scale(1.05);
+    transition: transform var(--transition-fast);
+  }
+}
+
 /* Keyboard - Mobile First with responsive QWERTY layout */
 .keyboard {
   display: flex;

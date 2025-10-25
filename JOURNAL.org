@@ -8,6 +8,7 @@ it seems it crashes the service worker after refreshing the mage on mobile (airp
 *** feat: implement dynamic grid cell sizing
 *** feat: add support for multi-word phrases with auto-spacing and visual separators
 *** refactor: use ISO 639-1 language codes (ca/en) instead of full names (catalan/english)
+*** feat: add native mobile keyboard support with clickable grid cells
 ** 2025/Oct/24
 *** changed game UI like wordle
 *** started looking into local first apps: local persistence

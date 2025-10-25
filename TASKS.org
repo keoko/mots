@@ -36,6 +36,7 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE refactor: use ISO 639-1 language codes (ca/en) instead of full names (catalan/english)
 * DONE question mark icon does not render properly
 * DONE enter key to continue
+* DONE feat: add native mobile keyboard support with clickable grid cells
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

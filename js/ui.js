@@ -277,6 +277,19 @@ function renderPlayMode() {
           </div>
         </div>
 
+        <!-- Hidden input for mobile keyboard -->
+        <input
+          type="text"
+          id="mobile-keyboard-input"
+          class="mobile-keyboard-input"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-hidden="true"
+          tabindex="-1"
+        />
+
         ${renderGrid()}
         ${renderKeyboard()}
       </div>
@@ -320,7 +333,10 @@ function renderGrid() {
                 cellClass += ' grid-cell-filled';
               }
 
-              return `<div class="${cellClass}">${letter}</div>`;
+              // Make current row cells clickable to open mobile keyboard
+              const clickable = isCurrentRow ? 'data-grid-cell' : '';
+
+              return `<div class="${cellClass}" ${clickable}>${letter}</div>`;
             }).join('')}
           </div>
         `;
@@ -410,6 +426,77 @@ function attachPlayModeListeners() {
     submitGuess();
     render();
   });
+
+  // Mobile keyboard support
+  const mobileInput = document.getElementById('mobile-keyboard-input');
+  let lastInputValue = '';
+
+  if (mobileInput) {
+    // Click on grid cells to open mobile keyboard
+    document.querySelectorAll('[data-grid-cell]').forEach(cell => {
+      cell.addEventListener('click', () => {
+        mobileInput.focus();
+      });
+    });
+
+    // Handle input from mobile keyboard
+    mobileInput.addEventListener('input', (e) => {
+      const newValue = e.target.value.toLowerCase();
+      const state = getState();
+      const word = getCurrentWord();
+
+      // Check if user typed a new letter
+      if (newValue.length > lastInputValue.length) {
+        const newLetter = newValue[newValue.length - 1];
+
+        // Only accept a-z letters
+        if (/[a-z]/.test(newLetter)) {
+          if (state.currentGuess.length < word.en.length) {
+            vibrateLetterInput();
+            addLetter(newLetter);
+            render();
+          }
+        }
+      }
+      // Check if user deleted (backspace)
+      else if (newValue.length < lastInputValue.length) {
+        if (state.currentGuess.length > 0) {
+          vibrateTap();
+          removeLetter();
+          render();
+        }
+      }
+
+      lastInputValue = newValue;
+    });
+
+    // Handle Enter key from mobile keyboard
+    mobileInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const state = getState();
+        const word = getCurrentWord();
+
+        if (state.currentGuess.length !== word.en.length) {
+          vibrateInvalid();
+        }
+
+        submitGuess();
+        render();
+
+        // Refocus input after render
+        setTimeout(() => {
+          mobileInput.focus();
+        }, 100);
+      }
+    });
+
+    // Clear input value when focusing (to avoid autocomplete issues)
+    mobileInput.addEventListener('focus', () => {
+      mobileInput.value = '';
+      lastInputValue = '';
+    });
+  }
 }
 
 // Render won screen
