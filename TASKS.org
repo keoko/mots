@@ -32,6 +32,7 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE feat: add version tracking, enhanced keyboard, help modal, and offline-first PWA
 * DONE feat: implement dynamic grid cell sizing
 * DONE feat: add support for multi-word phrases with auto-spacing and visual separators
+* DONE refactor: use ISO 639-1 language codes (ca/en) instead of full names (catalan/english)
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

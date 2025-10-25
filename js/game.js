@@ -107,12 +107,12 @@ export function addLetter(letter) {
   const word = getCurrentWord();
   if (!word) return;
 
-  if (state.currentGuess.length < word.english.length) {
+  if (state.currentGuess.length < word.en.length) {
     state.currentGuess += letter.toLowerCase();
 
     // Auto-insert spaces if the next character in the target word is a space
-    while (state.currentGuess.length < word.english.length &&
-           word.english[state.currentGuess.length] === ' ') {
+    while (state.currentGuess.length < word.en.length &&
+           word.en[state.currentGuess.length] === ' ') {
       state.currentGuess += ' ';
     }
   }
@@ -201,10 +201,10 @@ export function submitGuess() {
   if (!word) return;
 
   // Check if guess is complete
-  if (state.currentGuess.length !== word.english.length) return;
+  if (state.currentGuess.length !== word.en.length) return;
 
   // Get feedback
-  const feedback = getFeedback(state.currentGuess, word.english);
+  const feedback = getFeedback(state.currentGuess, word.en);
 
   // Update letter states based on feedback
   updateLetterStates(state.currentGuess, feedback);
@@ -216,7 +216,7 @@ export function submitGuess() {
   });
 
   // Check if won
-  const isCorrect = state.currentGuess.toLowerCase() === word.english.toLowerCase();
+  const isCorrect = state.currentGuess.toLowerCase() === word.en.toLowerCase();
 
   if (isCorrect) {
     state.gameState = GAME_STATES.WON;

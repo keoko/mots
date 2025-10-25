@@ -75,7 +75,7 @@ function handleKeyboardInput(e) {
     const letter = e.key.toLowerCase();
 
     // Only vibrate if letter will be added
-    if (word && state.currentGuess.length < word.english.length) {
+    if (word && state.currentGuess.length < word.en.length) {
       vibrateLetterInput();
     }
 
@@ -97,7 +97,7 @@ function handleKeyboardInput(e) {
   // Handle enter
   else if (e.key === 'Enter') {
     // Vibrate invalid if word is incomplete
-    if (word && state.currentGuess.length !== word.english.length) {
+    if (word && state.currentGuess.length !== word.en.length) {
       vibrateInvalid();
     }
 

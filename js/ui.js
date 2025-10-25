@@ -179,15 +179,15 @@ function renderStudyMode() {
       <div class="game">
         <div class="word-section">
           <div class="catalan-word">
-            <div class="word" lang="ca">${word.catalan}</div>
+            <div class="word" lang="ca">${word.ca}</div>
           </div>
         </div>
 
         <div class="study-grid-wrapper" data-action="toggle-reveal">
-          <div class="grid-container" data-word-length="${word.english.length}" style="--word-length: ${word.english.length};">
+          <div class="grid-container" data-word-length="${word.en.length}" style="--word-length: ${word.en.length};">
             <div class="grid-row">
-              ${Array.from({ length: word.english.length }).map((_, i) => {
-                const letter = isRevealed ? word.english[i].toUpperCase() : '';
+              ${Array.from({ length: word.en.length }).map((_, i) => {
+                const letter = isRevealed ? word.en[i].toUpperCase() : '';
                 const cellClass = isRevealed ? 'grid-cell grid-cell-correct' : 'grid-cell';
                 return `<div class="${cellClass}">${letter}</div>`;
               }).join('')}
@@ -273,7 +273,7 @@ function renderPlayMode() {
       <div class="game" aria-labelledby="game-title">
         <div class="word-section">
           <div class="catalan-word">
-            <div class="word" lang="ca">${word.catalan}</div>
+            <div class="word" lang="ca">${word.ca}</div>
           </div>
         </div>
 
@@ -288,8 +288,8 @@ function renderPlayMode() {
 function renderGrid() {
   const state = getState();
   const word = getCurrentWord();
-  const wordLength = word.english.length;
-  const targetWord = word.english;
+  const wordLength = word.en.length;
+  const targetWord = word.en;
 
   return `
     <div class="grid-container" data-word-length="${wordLength}" style="--word-length: ${wordLength};">
@@ -375,7 +375,7 @@ function attachPlayModeListeners() {
       const word = getCurrentWord();
 
       // Only vibrate if letter was actually added
-      if (state.currentGuess.length < word.english.length) {
+      if (state.currentGuess.length < word.en.length) {
         vibrateLetterInput();
       }
 
@@ -403,7 +403,7 @@ function attachPlayModeListeners() {
     const word = getCurrentWord();
 
     // Vibrate invalid if word is incomplete
-    if (state.currentGuess.length !== word.english.length) {
+    if (state.currentGuess.length !== word.en.length) {
       vibrateInvalid();
     }
 
@@ -438,7 +438,7 @@ function renderWonScreen() {
       <div class="game result result-won" role="alert" aria-live="assertive">
         <div class="result-icon">🎉</div>
         <h2 class="result-title">Correct!</h2>
-        <p class="result-word">The word is: <strong>${word.english}</strong></p>
+        <p class="result-word">The word is: <strong>${word.en}</strong></p>
         <button class="btn btn-primary" data-action="next-word" aria-label="${hasMore ? 'Next Word' : 'See Results'}">
           ${hasMore ? 'Next Word →' : 'See Results →'}
         </button>
@@ -471,7 +471,7 @@ function renderLostScreen() {
       <div class="game result result-lost" role="alert" aria-live="assertive">
         <div class="result-icon">💔</div>
         <h2 class="result-title">Out of attempts!</h2>
-        <p class="result-word">The word was: <strong>${word.english}</strong></p>
+        <p class="result-word">The word was: <strong>${word.en}</strong></p>
         <button class="btn btn-primary" data-action="next-word" aria-label="${hasMore ? 'Next Word' : 'See Results'}">
           ${hasMore ? 'Next Word →' : 'See Results →'}
         </button>
