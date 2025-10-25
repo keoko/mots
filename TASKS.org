@@ -19,6 +19,7 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE won/lost move it to the nav bar
 * DONE aligment header and subtitle
 * TODO check long words like tooth bruise
+* TODO mobile keyboard
 * IDEA sync progress in backend
 * IDEA vibration API - does it actually work?
 * IDEA gestures API

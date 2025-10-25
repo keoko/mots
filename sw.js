@@ -1,7 +1,7 @@
 // Service Worker for Mots - Offline-first PWA
-// Version 1.0.1
+// Version 1.0.2
 
-const CACHE_NAME = 'mots-v1.0.1';
+const CACHE_NAME = 'mots-v1.0.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -20,17 +20,21 @@ const ASSETS_TO_CACHE = [
 
 // Install event - cache all static assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker v1.0.2...');
 
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Caching assets');
+        console.log('[SW] Opened cache, adding assets...');
         return cache.addAll(ASSETS_TO_CACHE);
       })
       .then(() => {
-        console.log('[SW] All assets cached');
+        console.log('[SW] ✅ All assets cached successfully');
         return self.skipWaiting(); // Activate immediately
+      })
+      .catch((error) => {
+        console.error('[SW] ❌ Failed to cache assets:', error);
+        throw error;
       })
   );
 });
@@ -66,7 +70,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request)
+    caches.match(event.request, { ignoreSearch: true })
       .then((cachedResponse) => {
         if (cachedResponse) {
           // Cache hit - return cached response
@@ -74,7 +78,7 @@ self.addEventListener('fetch', (event) => {
           return cachedResponse;
         }
 
-        // Cache miss - fetch from network
+        // Cache miss - try to fetch from network
         console.log('[SW] Fetching from network:', event.request.url);
         return fetch(event.request)
           .then((networkResponse) => {
@@ -95,9 +99,16 @@ self.addEventListener('fetch', (event) => {
             return networkResponse;
           })
           .catch((error) => {
-            console.error('[SW] Fetch failed:', error);
-            // Could return a custom offline page here
-            throw error;
+            console.error('[SW] Fetch failed (offline?):', error);
+            // When offline and not in cache, return a basic error response
+            // This prevents the "offline mode" error page
+            return new Response('Offline - resource not cached', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
           });
       })
   );

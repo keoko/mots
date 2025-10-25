@@ -33,6 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Register service worker for offline support
   registerServiceWorker();
+
+  // Monitor online/offline status
+  window.addEventListener('online', () => {
+    console.log('[App] 🟢 Online');
+  });
+
+  window.addEventListener('offline', () => {
+    console.log('[App] 🔴 Offline - running from cache');
+  });
+
+  // Log initial status
+  console.log(`[App] Network status: ${navigator.onLine ? '🟢 Online' : '🔴 Offline'}`);
 });
 
 // Handle keyboard input
