@@ -429,9 +429,13 @@ function attachPlayModeListeners() {
 
   // Mobile keyboard support
   const mobileInput = document.getElementById('mobile-keyboard-input');
-  let lastInputValue = '';
 
   if (mobileInput) {
+    // Auto-focus input to open keyboard on mobile when entering play mode
+    setTimeout(() => {
+      mobileInput.focus();
+    }, 300); // Small delay to ensure render is complete
+
     // Click on grid cells to open mobile keyboard
     document.querySelectorAll('[data-grid-cell]').forEach(cell => {
       cell.addEventListener('click', () => {
@@ -441,33 +445,45 @@ function attachPlayModeListeners() {
 
     // Handle input from mobile keyboard
     mobileInput.addEventListener('input', (e) => {
-      const newValue = e.target.value.toLowerCase();
+      const currentValue = e.target.value.toLowerCase();
       const state = getState();
       const word = getCurrentWord();
 
-      // Check if user typed a new letter
-      if (newValue.length > lastInputValue.length) {
-        const newLetter = newValue[newValue.length - 1];
+      // Filter out non-letter characters
+      const filteredValue = currentValue.replace(/[^a-z]/g, '');
 
-        // Only accept a-z letters
-        if (/[a-z]/.test(newLetter)) {
+      // Update input to only contain letters
+      if (filteredValue !== currentValue) {
+        e.target.value = filteredValue;
+      }
+
+      // Sync the input value with the current guess
+      const targetLength = Math.min(filteredValue.length, word.en.length);
+      const newGuess = filteredValue.substring(0, targetLength);
+
+      // Determine what changed
+      if (newGuess.length > state.currentGuess.length) {
+        // Letters were added
+        const lettersToAdd = newGuess.substring(state.currentGuess.length);
+        for (const letter of lettersToAdd) {
           if (state.currentGuess.length < word.en.length) {
             vibrateLetterInput();
-            addLetter(newLetter);
-            render();
+            addLetter(letter);
           }
         }
-      }
-      // Check if user deleted (backspace)
-      else if (newValue.length < lastInputValue.length) {
-        if (state.currentGuess.length > 0) {
+        render();
+      } else if (newGuess.length < state.currentGuess.length) {
+        // Letters were removed
+        const lettersToRemove = state.currentGuess.length - newGuess.length;
+        for (let i = 0; i < lettersToRemove; i++) {
           vibrateTap();
           removeLetter();
-          render();
         }
+        render();
       }
 
-      lastInputValue = newValue;
+      // Keep input in sync with actual guess
+      e.target.value = state.currentGuess.replace(/ /g, '');
     });
 
     // Handle Enter key from mobile keyboard
@@ -479,22 +495,27 @@ function attachPlayModeListeners() {
 
         if (state.currentGuess.length !== word.en.length) {
           vibrateInvalid();
+          return;
         }
 
         submitGuess();
         render();
 
-        // Refocus input after render
+        // Clear and refocus input after render for next word
         setTimeout(() => {
-          mobileInput.focus();
+          const input = document.getElementById('mobile-keyboard-input');
+          if (input) {
+            input.value = '';
+            input.focus();
+          }
         }, 100);
       }
     });
 
-    // Clear input value when focusing (to avoid autocomplete issues)
+    // Keep input synced when focusing
     mobileInput.addEventListener('focus', () => {
-      mobileInput.value = '';
-      lastInputValue = '';
+      const state = getState();
+      mobileInput.value = state.currentGuess.replace(/ /g, '');
     });
   }
 }
