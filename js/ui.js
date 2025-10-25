@@ -122,15 +122,15 @@ function renderModeSelection() {
       </div>
       <h2 class="section-title">Choose Mode</h2>
       <div class="mode-grid">
-        <button class="mode-card" data-mode="study" aria-label="Study mode - Review all words">
+        <button class="mode-card" data-mode="study" aria-label="Study mode - Review all words first, then play">
           <div class="mode-icon">📖</div>
           <div class="mode-name">Study Mode</div>
-          <div class="mode-description">Review words before playing</div>
+          <div class="mode-description">Review all words first, then play</div>
         </button>
-        <button class="mode-card" data-mode="play" aria-label="Play mode - Guess the words">
+        <button class="mode-card" data-mode="play" aria-label="Play mode - Jump straight in and test yourself">
           <div class="mode-icon">🎮</div>
           <div class="mode-name">Play Mode</div>
-          <div class="mode-description">Test your knowledge</div>
+          <div class="mode-description">Jump straight in and test yourself</div>
         </button>
       </div>
     </div>
