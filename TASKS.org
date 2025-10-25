@@ -17,11 +17,12 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE create favicon
 * DONE study word with same wordle design
 * DONE won/lost move it to the nav bar
-* TODO aligment header and subtitle
+* DONE aligment header and subtitle
 * TODO check long words like tooth bruise
 * IDEA sync progress in backend
 * IDEA vibration API - does it actually work?
 * IDEA gestures API
+* IDEA automatic functional testing
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * IDEA timing?
