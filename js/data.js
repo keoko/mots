@@ -84,5 +84,13 @@ export const topics = [
       { catalan: 'mestre', english: 'teacher' },
       { catalan: 'alumne', english: 'student' }
     ]
+  },
+  {
+    id: 'test',
+    name: 'test',
+    emoji: '📚',
+    words: [
+      { catalan: 'raspall de dents', english: 'toothbrush' }
+    ]
   }
 ];
