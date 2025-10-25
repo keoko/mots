@@ -1,5 +1,8 @@
 #+title: Tasks
 * TODO mobile keyboard
+* TODO enter key to continue
+* TODO improve desktop UI
+* TODO question mark icon does not render properly
 * TODO offline mode
 it works intermittently. It seems the service worker stops working.
 * TODO store progress
