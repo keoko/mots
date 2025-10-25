@@ -5,6 +5,7 @@
 *** improve offline mode
 it seems it crashes the service worker after refreshing the mage on mobile (airplane mode)
 *** feat: add version tracking, enhanced keyboard, help modal, and offline-first PWA
+*** feat: implement dynamic grid cell sizing
 ** 2025/Oct/24
 *** changed game UI like wordle
 *** started looking into local first apps: local persistence

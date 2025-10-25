@@ -31,6 +31,7 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE won/lost move it to the nav bar
 * DONE aligment header and subtitle
 * DONE feat: add version tracking, enhanced keyboard, help modal, and offline-first PWA
+* DONE feat: implement dynamic grid cell sizing
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

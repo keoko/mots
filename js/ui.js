@@ -184,7 +184,7 @@ function renderStudyMode() {
         </div>
 
         <div class="study-grid-wrapper" data-action="toggle-reveal">
-          <div class="grid-container">
+          <div class="grid-container" data-word-length="${word.english.length}" style="--word-length: ${word.english.length};">
             <div class="grid-row">
               ${Array.from({ length: word.english.length }).map((_, i) => {
                 const letter = isRevealed ? word.english[i].toUpperCase() : '';
@@ -291,7 +291,7 @@ function renderGrid() {
   const wordLength = word.english.length;
 
   return `
-    <div class="grid-container">
+    <div class="grid-container" data-word-length="${wordLength}" style="--word-length: ${wordLength};">
       ${Array.from({ length: state.maxAttempts }).map((_, rowIndex) => {
         const guess = state.guesses[rowIndex];
         const isCurrentRow = rowIndex === state.guesses.length && state.guesses.length < state.maxAttempts;

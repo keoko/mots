@@ -544,14 +544,18 @@ body {
 }
 
 .grid-cell {
-  width: 2.5rem;
-  height: 2.5rem;
+  /* Dynamic sizing based on word length */
+  /* Mobile: Max 2.5rem, but shrink for words longer than 6 letters */
+  /* Formula: min(2.5rem, (viewport-width - padding - gaps) / word-length) */
+  --cell-size: min(2.5rem, calc((100vw - 4rem) / var(--word-length)));
+  width: var(--cell-size);
+  height: var(--cell-size);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-xl);
+  font-size: clamp(0.875rem, calc(var(--cell-size) * 0.5), var(--font-size-xl));
   font-weight: 700;
   text-transform: uppercase;
   transition: all var(--transition-base);
@@ -559,9 +563,8 @@ body {
 
 @media (min-width: 640px) {
   .grid-cell {
-    width: 3.5rem;
-    height: 3.5rem;
-    font-size: var(--font-size-2xl);
+    --cell-size: min(3.5rem, calc((min(42rem, 100vw) - 6rem) / var(--word-length)));
+    font-size: clamp(1rem, calc(var(--cell-size) * 0.55), var(--font-size-2xl));
   }
 }
 
