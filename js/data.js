@@ -33,7 +33,7 @@ export const topics = [
   {
     id: 'infancy',
     name: 'Infancy',
-    emoji: '👶',
+    emoji: '🍼',
     words: [
       { ca: 'bolquer', en: 'nappy' },
       { ca: 'crema de bolquers', en: 'nappy cream' },
