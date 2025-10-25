@@ -86,11 +86,32 @@ export const topics = [
     ]
   },
   {
-    id: 'test',
-    name: 'test',
-    emoji: '📚',
+    id: 'cosmetics',
+    name: 'Cosmetics',
+    emoji: '💄',
     words: [
-      { catalan: 'raspall de dents', english: 'toothbrush' }
+      { catalan: 'bàlsam labial', english: 'lip balm' },
+      { catalan: 'gloss labial', english: 'lip gloss' },
+      { catalan: 'crema de dia', english: 'day cream' },
+      { catalan: 'crema anticel·lulítica', english: 'anti-cellulite cream' },
+      { catalan: 'desodorant', english: 'deodorant' },
+      { catalan: 'raspall de cabell', english: 'hairbrush' },
+      { catalan: 'cera per cabell', english: 'hair wax' },
+      { catalan: 'tint de cabell', english: 'hair colouring' },
+      { catalan: 'cotó fluix', english: 'cotton wool' },
+      { catalan: 'esmalt d\'ungles', english: 'nail varnish' },
+      { catalan: 'tisores d\'ungles', english: 'nail scissors' },
+      { catalan: 'maquillatge', english: 'make-up' },
+      { catalan: 'pintallavis', english: 'lipstick' },
+      { catalan: 'ombra d\'ulls', english: 'eyeshadow' },
+      { catalan: 'llapis d\'ulls', english: 'eyeliner' },
+      { catalan: 'rímel', english: 'mascara' },
+      { catalan: 'coloret', english: 'blusher' },
+      { catalan: 'pols facial', english: 'face powder' },
+      { catalan: 'llet de neteja', english: 'cleansing milk' },
+      { catalan: 'crema bronzejadora', english: 'suntan lotion' },
+      { catalan: 'protecció solar', english: 'sun protection' },
+      { catalan: 'crema per taló esquerdat', english: 'cracked heel cream' }
     ]
   }
 ];
