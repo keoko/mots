@@ -1,8 +1,5 @@
 #+title: Tasks
 * TODO mobile keyboard
-* TODO enter key to continue
-* TODO improve desktop UI
-* TODO question mark icon does not render properly
 * TODO offline mode
 it works intermittently. It seems the service worker stops working.
 * TODO store progress
@@ -10,6 +7,7 @@ it works intermittently. It seems the service worker stops working.
 * TODO display report
 * TODO display failed words
 * TODO vibration API - does it actually work?
+* IDEA improve desktop UI
 * IDEA gestures API
 * IDEA automatic functional testing
 https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
@@ -36,6 +34,8 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE feat: implement dynamic grid cell sizing
 * DONE feat: add support for multi-word phrases with auto-spacing and visual separators
 * DONE refactor: use ISO 639-1 language codes (ca/en) instead of full names (catalan/english)
+* DONE question mark icon does not render properly
+* DONE enter key to continue
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

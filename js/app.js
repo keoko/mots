@@ -1,7 +1,7 @@
 // app.js - Main application entry point
 
 import { render } from './ui.js';
-import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics } from './game.js';
+import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics, nextWord, GAME_STATES } from './game.js';
 import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
 import { VERSION, getDiagnosticInfo, formatDiagnosticInfo } from './version.js';
 
@@ -70,8 +70,31 @@ function handleKeyboardInput(e) {
   const state = getState();
   const word = getCurrentWord();
 
-  // Only handle letter keys (a-z)
-  if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
+  // Handle Enter key for different game states
+  if (e.key === 'Enter') {
+    // On won/lost screens, advance to next word
+    if (state.gameState === GAME_STATES.WON || state.gameState === GAME_STATES.LOST) {
+      e.preventDefault();
+      nextWord();
+      render();
+      return;
+    }
+
+    // During play mode, submit guess
+    if (state.gameState === GAME_STATES.PLAYING) {
+      // Vibrate invalid if word is incomplete
+      if (word && state.currentGuess.length !== word.en.length) {
+        vibrateInvalid();
+      }
+
+      submitGuess();
+      render();
+      return;
+    }
+  }
+
+  // Only handle letter keys (a-z) during play mode
+  if (state.gameState === GAME_STATES.PLAYING && e.key.length === 1 && /[a-z]/i.test(e.key)) {
     const letter = e.key.toLowerCase();
 
     // Only vibrate if letter will be added
@@ -82,8 +105,8 @@ function handleKeyboardInput(e) {
     addLetter(letter);
     render();
   }
-  // Handle backspace
-  else if (e.key === 'Backspace') {
+  // Handle backspace during play mode
+  else if (state.gameState === GAME_STATES.PLAYING && e.key === 'Backspace') {
     e.preventDefault();
 
     // Only vibrate if there's something to delete
@@ -92,16 +115,6 @@ function handleKeyboardInput(e) {
     }
 
     removeLetter();
-    render();
-  }
-  // Handle enter
-  else if (e.key === 'Enter') {
-    // Vibrate invalid if word is incomplete
-    if (word && state.currentGuess.length !== word.en.length) {
-      vibrateInvalid();
-    }
-
-    submitGuess();
     render();
   }
 }
