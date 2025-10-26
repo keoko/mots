@@ -352,16 +352,31 @@ function updateGridDisplay() {
   const state = getState();
   const word = getCurrentWord();
 
-  if (!word) return;
+  console.log('[updateGridDisplay] Called');
+  console.log('[updateGridDisplay] Current guess:', state.currentGuess);
+  console.log('[updateGridDisplay] Target word:', word?.en);
+
+  if (!word) {
+    console.log('[updateGridDisplay] No word found');
+    return;
+  }
 
   // Find the current row (the one being typed)
   const currentRowIndex = state.guesses.length;
   const gridRows = document.querySelectorAll('.grid-row');
 
-  if (!gridRows[currentRowIndex]) return;
+  console.log('[updateGridDisplay] Current row index:', currentRowIndex);
+  console.log('[updateGridDisplay] Total grid rows:', gridRows.length);
+
+  if (!gridRows[currentRowIndex]) {
+    console.log('[updateGridDisplay] Current row not found');
+    return;
+  }
 
   const currentRow = gridRows[currentRowIndex];
   const cells = currentRow.querySelectorAll('.grid-cell');
+
+  console.log('[updateGridDisplay] Cells found:', cells.length);
 
   // Update each cell in the current row
   let guessIndex = 0;
@@ -370,10 +385,15 @@ function updateGridDisplay() {
     if (word.en[i] === ' ') continue;
 
     const cell = cells[guessIndex];
-    if (!cell) continue;
+    if (!cell) {
+      console.log('[updateGridDisplay] Cell not found at index:', guessIndex);
+      continue;
+    }
 
     // Get the corresponding letter from currentGuess (accounting for spaces)
     const letter = state.currentGuess[i] || '';
+
+    console.log('[updateGridDisplay] Cell', guessIndex, '- Letter:', letter);
 
     // Update cell content and styling
     if (letter && letter !== ' ') {
@@ -386,6 +406,8 @@ function updateGridDisplay() {
 
     guessIndex++;
   }
+
+  console.log('[updateGridDisplay] Update complete');
 }
 
 // Render keyboard
@@ -507,13 +529,19 @@ function attachPlayModeListeners() {
     mobileInput.addEventListener('input', (e) => {
       const currentValue = e.target.value.toLowerCase();
 
+      console.log('[Mobile KB] Input event:', currentValue);
+
       // Skip if we already processed this value
       if (currentValue === lastProcessedValue) {
+        console.log('[Mobile KB] Skipping duplicate value');
         return;
       }
 
       const state = getState();
       const word = getCurrentWord();
+
+      console.log('[Mobile KB] Current word:', word.en);
+      console.log('[Mobile KB] Current guess before:', state.currentGuess);
 
       // Filter out non-letter characters including spaces
       const filteredValue = currentValue.replace(/[^a-z]/g, '');
@@ -535,6 +563,8 @@ function attachPlayModeListeners() {
         }
       }
 
+      console.log('[Mobile KB] New guess:', newGuess);
+
       // Directly update the state
       const oldGuessLength = state.currentGuess.replace(/ /g, '').length;
       const newGuessLength = newGuess.replace(/ /g, '').length;
@@ -548,10 +578,9 @@ function attachPlayModeListeners() {
         vibrateTap();
       }
 
+      console.log('[Mobile KB] Calling updateGridDisplay()');
       // Update the grid display without full re-render
-      requestAnimationFrame(() => {
-        updateGridDisplay();
-      });
+      updateGridDisplay();
 
       // Keep input value synced (letters only, no spaces)
       const cleanValue = newGuess.replace(/ /g, '');
