@@ -584,9 +584,6 @@ function attachPlayModeListeners() {
 
       state.currentGuess = newGuess;
 
-      // TEMPORARY DEBUG: Show alert
-      alert(`Typed: ${filteredValue}\nGuess is now: ${state.currentGuess}`);
-
       // Vibrate feedback
       if (newGuessLength > oldGuessLength) {
         vibrateLetterInput();
@@ -595,8 +592,18 @@ function attachPlayModeListeners() {
       }
 
       console.log('[Mobile KB] Calling updateGridDisplay()');
+      console.log('[Mobile KB] State before update:', JSON.stringify(state));
+
       // Update the grid display without full re-render
       updateGridDisplay();
+
+      // Check if cells were actually updated
+      const gridRows = document.querySelectorAll('.grid-row');
+      const currentRow = gridRows[state.guesses.length];
+      if (currentRow) {
+        const cells = currentRow.querySelectorAll('.grid-cell');
+        console.log('[Mobile KB] Cells after update:', Array.from(cells).map(c => c.textContent));
+      }
 
       // Keep input value synced (letters only, no spaces)
       const cleanValue = newGuess.replace(/ /g, '');
