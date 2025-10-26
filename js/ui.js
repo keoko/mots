@@ -495,7 +495,12 @@ function attachPlayModeListeners() {
   // Mobile keyboard support
   const mobileInput = document.getElementById('mobile-keyboard-input');
 
+  console.log('[Mobile KB Setup] Input element found:', !!mobileInput);
+  console.log('[Mobile KB Setup] Input element:', mobileInput);
+
   if (mobileInput) {
+    console.log('[Mobile KB Setup] Attaching event listeners');
+
     // Track last processed value to avoid duplicate updates
     let lastProcessedValue = '';
 
@@ -503,7 +508,10 @@ function attachPlayModeListeners() {
     // Use requestAnimationFrame for better compatibility
     requestAnimationFrame(() => {
       setTimeout(() => {
+        console.log('[Mobile KB Setup] Attempting to focus input');
         mobileInput.focus();
+        console.log('[Mobile KB Setup] Input focused, activeElement:', document.activeElement);
+
         // iOS Safari workaround - focus twice
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
           setTimeout(() => mobileInput.focus(), 100);
@@ -525,11 +533,16 @@ function attachPlayModeListeners() {
       });
     });
 
+    // Test that event listener is attached
+    console.log('[Mobile KB Setup] Adding input event listener');
+
     // Handle input from mobile keyboard
     mobileInput.addEventListener('input', (e) => {
+      console.log('[Mobile KB] ===== INPUT EVENT FIRED =====');
       const currentValue = e.target.value.toLowerCase();
 
       console.log('[Mobile KB] Input event:', currentValue);
+      console.log('[Mobile KB] Event target:', e.target);
 
       // Skip if we already processed this value
       if (currentValue === lastProcessedValue) {
