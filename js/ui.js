@@ -284,10 +284,12 @@ function renderPlayMode() {
           class="mobile-keyboard-input"
           autocomplete="off"
           autocorrect="off"
-          autocapitalize="off"
+          autocapitalize="none"
           spellcheck="false"
+          inputmode="text"
           aria-hidden="true"
           tabindex="-1"
+          enterkeyhint="go"
         />
 
         ${renderGrid()}
@@ -485,7 +487,11 @@ function attachPlayModeListeners() {
     });
 
     // Handle input from mobile keyboard
+    let isUpdating = false;
     mobileInput.addEventListener('input', (e) => {
+      if (isUpdating) return;
+      isUpdating = true;
+
       const currentValue = e.target.value.toLowerCase();
       const state = getState();
       const word = getCurrentWord();
@@ -493,42 +499,50 @@ function attachPlayModeListeners() {
       // Filter out non-letter characters including spaces
       const filteredValue = currentValue.replace(/[^a-z]/g, '');
 
-      // Sync the input value with the current guess (max word length)
-      const targetLength = Math.min(filteredValue.length, word.en.length);
-      const newGuess = filteredValue.substring(0, targetLength);
+      // Build the new guess with auto-inserted spaces
+      let newGuess = '';
+      let letterIndex = 0;
 
-      // Calculate how many letters to add or remove
-      const currentGuessNoSpaces = state.currentGuess.replace(/ /g, '');
+      for (let i = 0; i < word.en.length && letterIndex < filteredValue.length; i++) {
+        if (word.en[i] === ' ') {
+          newGuess += ' ';
+        } else {
+          newGuess += filteredValue[letterIndex];
+          letterIndex++;
+        }
+      }
 
-      if (newGuess.length > currentGuessNoSpaces.length) {
-        // Letters were added
-        const lettersToAdd = newGuess.substring(currentGuessNoSpaces.length);
-        for (const letter of lettersToAdd) {
-          if (state.currentGuess.length < word.en.length) {
-            vibrateLetterInput();
-            addLetter(letter);
-          }
-        }
-      } else if (newGuess.length < currentGuessNoSpaces.length) {
-        // Letters were removed (backspace)
-        const lettersToRemove = currentGuessNoSpaces.length - newGuess.length;
-        for (let i = 0; i < lettersToRemove; i++) {
-          if (state.currentGuess.length > 0) {
-            vibrateTap();
-            removeLetter();
-          }
-        }
+      // Directly update the state (bypass addLetter/removeLetter to avoid overhead)
+      const oldGuess = state.currentGuess;
+      state.currentGuess = newGuess;
+
+      // Vibrate feedback
+      if (newGuess.length > oldGuess.length) {
+        vibrateLetterInput();
+      } else if (newGuess.length < oldGuess.length) {
+        vibrateTap();
       }
 
       // Update the grid display without full re-render
       updateGridDisplay();
 
       // Keep input value synced (letters only, no spaces)
-      e.target.value = state.currentGuess.replace(/ /g, '');
+      const cleanValue = newGuess.replace(/ /g, '');
+      if (e.target.value !== cleanValue) {
+        e.target.value = cleanValue;
+      }
+
+      isUpdating = false;
     });
 
     // Handle Enter key from mobile keyboard
     mobileInput.addEventListener('keydown', (e) => {
+      // Prevent backspace from propagating if input is empty (iOS fix)
+      if (e.key === 'Backspace' && e.target.value === '') {
+        e.preventDefault();
+        return;
+      }
+
       if (e.key === 'Enter') {
         e.preventDefault();
         const state = getState();
