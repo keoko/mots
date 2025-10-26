@@ -584,6 +584,9 @@ function attachPlayModeListeners() {
 
       state.currentGuess = newGuess;
 
+      // TEMPORARY DEBUG: Show alert
+      alert(`Typed: ${filteredValue}\nGuess is now: ${state.currentGuess}`);
+
       // Vibrate feedback
       if (newGuessLength > oldGuessLength) {
         vibrateLetterInput();
