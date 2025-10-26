@@ -474,75 +474,97 @@ function attachPlayModeListeners() {
   const mobileInput = document.getElementById('mobile-keyboard-input');
 
   if (mobileInput) {
-    // Auto-focus input to open keyboard on mobile when entering play mode
-    setTimeout(() => {
-      mobileInput.focus();
-    }, 300); // Small delay to ensure render is complete
+    // Track last processed value to avoid duplicate updates
+    let lastProcessedValue = '';
 
-    // Click on grid cells to open mobile keyboard
-    document.querySelectorAll('[data-grid-cell]').forEach(cell => {
-      cell.addEventListener('click', () => {
+    // Auto-focus input to open keyboard on mobile when entering play mode
+    // Use requestAnimationFrame for better compatibility
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        mobileInput.focus();
+        // iOS Safari workaround - focus twice
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+          setTimeout(() => mobileInput.focus(), 100);
+        }
+      }, 300);
+    });
+
+    // Click on grid cells or word section to open mobile keyboard
+    const clickableElements = [
+      ...document.querySelectorAll('[data-grid-cell]'),
+      document.querySelector('.catalan-word'),
+      document.querySelector('.grid-container')
+    ].filter(Boolean);
+
+    clickableElements.forEach(element => {
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
         mobileInput.focus();
       });
     });
 
     // Handle input from mobile keyboard
-    let isUpdating = false;
     mobileInput.addEventListener('input', (e) => {
-      if (isUpdating) return;
-      isUpdating = true;
-
       const currentValue = e.target.value.toLowerCase();
+
+      // Skip if we already processed this value
+      if (currentValue === lastProcessedValue) {
+        return;
+      }
+
       const state = getState();
       const word = getCurrentWord();
 
       // Filter out non-letter characters including spaces
       const filteredValue = currentValue.replace(/[^a-z]/g, '');
 
+      // Limit to word length (without spaces)
+      const maxLength = word.en.replace(/ /g, '').length;
+      const trimmedValue = filteredValue.substring(0, maxLength);
+
       // Build the new guess with auto-inserted spaces
       let newGuess = '';
       let letterIndex = 0;
 
-      for (let i = 0; i < word.en.length && letterIndex < filteredValue.length; i++) {
+      for (let i = 0; i < word.en.length && letterIndex < trimmedValue.length; i++) {
         if (word.en[i] === ' ') {
           newGuess += ' ';
         } else {
-          newGuess += filteredValue[letterIndex];
+          newGuess += trimmedValue[letterIndex];
           letterIndex++;
         }
       }
 
-      // Directly update the state (bypass addLetter/removeLetter to avoid overhead)
-      const oldGuess = state.currentGuess;
+      // Directly update the state
+      const oldGuessLength = state.currentGuess.replace(/ /g, '').length;
+      const newGuessLength = newGuess.replace(/ /g, '').length;
+
       state.currentGuess = newGuess;
 
       // Vibrate feedback
-      if (newGuess.length > oldGuess.length) {
+      if (newGuessLength > oldGuessLength) {
         vibrateLetterInput();
-      } else if (newGuess.length < oldGuess.length) {
+      } else if (newGuessLength < oldGuessLength) {
         vibrateTap();
       }
 
       // Update the grid display without full re-render
-      updateGridDisplay();
+      requestAnimationFrame(() => {
+        updateGridDisplay();
+      });
 
       // Keep input value synced (letters only, no spaces)
       const cleanValue = newGuess.replace(/ /g, '');
+      lastProcessedValue = cleanValue;
+
+      // Only update if different to avoid cursor jumping
       if (e.target.value !== cleanValue) {
         e.target.value = cleanValue;
       }
-
-      isUpdating = false;
     });
 
-    // Handle Enter key from mobile keyboard
+    // Handle Enter/Return key from mobile keyboard
     mobileInput.addEventListener('keydown', (e) => {
-      // Prevent backspace from propagating if input is empty (iOS fix)
-      if (e.key === 'Backspace' && e.target.value === '') {
-        e.preventDefault();
-        return;
-      }
-
       if (e.key === 'Enter') {
         e.preventDefault();
         const state = getState();
@@ -557,21 +579,36 @@ function attachPlayModeListeners() {
         render();
 
         // Clear and refocus input after render for next word
-        setTimeout(() => {
-          const input = document.getElementById('mobile-keyboard-input');
-          if (input) {
-            input.value = '';
-            input.focus();
-          }
-        }, 100);
+        lastProcessedValue = '';
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const input = document.getElementById('mobile-keyboard-input');
+            if (input) {
+              input.value = '';
+              input.focus();
+            }
+          }, 150);
+        });
       }
     });
 
     // Keep input synced when focusing
     mobileInput.addEventListener('focus', () => {
       const state = getState();
-      mobileInput.value = state.currentGuess.replace(/ /g, '');
+      const cleanValue = state.currentGuess.replace(/ /g, '');
+      mobileInput.value = cleanValue;
+      lastProcessedValue = cleanValue;
     });
+
+    // Prevent input from losing focus on blur (optional - only if needed)
+    // Uncomment if keyboard keeps closing
+    // mobileInput.addEventListener('blur', () => {
+    //   setTimeout(() => {
+    //     if (document.activeElement !== mobileInput) {
+    //       mobileInput.focus();
+    //     }
+    //   }, 0);
+    // });
   }
 }
 
