@@ -374,38 +374,37 @@ function updateGridDisplay() {
   }
 
   const currentRow = gridRows[currentRowIndex];
-  const cells = currentRow.querySelectorAll('.grid-cell');
 
-  console.log('[updateGridDisplay] Cells found:', cells.length);
+  // Get ALL children (including .grid-space divs)
+  const allChildren = Array.from(currentRow.children);
+  console.log('[updateGridDisplay] Total children in row:', allChildren.length);
 
-  // Update each cell in the current row
-  let guessIndex = 0;
-  for (let i = 0; i < word.en.length; i++) {
-    // Skip spaces in the target word
-    if (word.en[i] === ' ') continue;
+  // Filter to only grid-cell elements
+  const cells = allChildren.filter(child => child.classList.contains('grid-cell'));
+  console.log('[updateGridDisplay] Grid cells found:', cells.length);
 
-    const cell = cells[guessIndex];
-    if (!cell) {
-      console.log('[updateGridDisplay] Cell not found at index:', guessIndex);
-      continue;
-    }
+  // Map each position in the target word to actual letters (excluding spaces)
+  const targetLetters = word.en.split('').filter(char => char !== ' ');
+  const guessLetters = state.currentGuess.split('').filter(char => char !== ' ');
 
-    // Get the corresponding letter from currentGuess (accounting for spaces)
-    const letter = state.currentGuess[i] || '';
+  console.log('[updateGridDisplay] Target letters (no spaces):', targetLetters);
+  console.log('[updateGridDisplay] Guess letters (no spaces):', guessLetters);
 
-    console.log('[updateGridDisplay] Cell', guessIndex, '- Letter:', letter);
+  // Update each cell
+  cells.forEach((cell, index) => {
+    const letter = guessLetters[index] || '';
 
-    // Update cell content and styling
-    if (letter && letter !== ' ') {
+    console.log(`[updateGridDisplay] Cell ${index} - Setting to: "${letter}"`);
+
+    if (letter) {
       cell.textContent = letter.toUpperCase();
       cell.classList.add('grid-cell-filled');
+      console.log(`[updateGridDisplay] Cell ${index} - textContent is now: "${cell.textContent}"`);
     } else {
       cell.textContent = '';
       cell.classList.remove('grid-cell-filled');
     }
-
-    guessIndex++;
-  }
+  });
 
   console.log('[updateGridDisplay] Update complete');
 }
@@ -543,12 +542,13 @@ function attachPlayModeListeners() {
 
       console.log('[Mobile KB] Input event:', currentValue);
       console.log('[Mobile KB] Event target:', e.target);
+      console.log('[Mobile KB] Last processed value:', lastProcessedValue);
 
-      // Skip if we already processed this value
-      if (currentValue === lastProcessedValue) {
-        console.log('[Mobile KB] Skipping duplicate value');
-        return;
-      }
+      // Don't skip - let it process every time for now
+      // if (currentValue === lastProcessedValue) {
+      //   console.log('[Mobile KB] Skipping duplicate value');
+      //   return;
+      // }
 
       const state = getState();
       const word = getCurrentWord();
