@@ -629,22 +629,32 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB Diagnostics] Focus event - timestamp:', Date.now());
     });
 
+    // iOS FIX: Track if we're actively typing to prevent keyboard dismissal
+    let isTyping = false;
+    let typingTimeout = null;
+
     mobileInput.addEventListener('blur', (e) => {
       console.log('[Mobile KB Diagnostics] ===> INPUT BLURRED <===');
       console.log('[Mobile KB Diagnostics] Blur event - activeElement:', document.activeElement?.id);
+      console.log('[Mobile KB Diagnostics] Blur event - isTyping flag:', isTyping);
 
-      // iOS FIX: Prevent blur during typing to keep keyboard open
-      // Only allow blur if user explicitly tapped elsewhere
+      // iOS FIX: Aggressively prevent blur during typing
       if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
         const state = getState();
         const word = getCurrentWord();
 
-        // If we're in playing state and word isn't complete, keep focus
+        // If we're in playing state and word isn't complete, FORCE focus back
         if (state.gameState === GAME_STATES.PLAYING &&
             word &&
             state.currentGuess.replace(/ /g, '').length < word.en.replace(/ /g, '').length) {
-          console.log('[Mobile KB] iOS - Preventing blur to keep keyboard open');
-          setTimeout(() => mobileInput.focus(), 0);
+          console.log('[Mobile KB] iOS - AGGRESSIVE blur prevention - forcing focus back');
+
+          // Try multiple times to ensure focus is regained
+          e.target.focus();
+          setTimeout(() => e.target.focus(), 0);
+          setTimeout(() => e.target.focus(), 10);
+          setTimeout(() => e.target.focus(), 50);
+          setTimeout(() => e.target.focus(), 100);
         }
       }
     });
@@ -751,8 +761,43 @@ function attachPlayModeListeners() {
       const verifyState = getState();
       console.log('[Mobile KB] Verified currentGuess:', verifyState.currentGuess);
 
-      // Update the grid display without full re-render
-      updateGridDisplay();
+      // iOS FIX: Lock focus before and after DOM update to prevent keyboard dismissal
+      const isIOS = navigator.userAgent.match(/iPhone|iPad|iPod/i);
+
+      if (isIOS) {
+        console.log('[Mobile KB] iOS - Locking focus before grid update');
+        // Set typing flag
+        isTyping = true;
+        clearTimeout(typingTimeout);
+
+        // iOS FIX: Use requestAnimationFrame to defer grid update
+        // This allows the input event to complete before DOM manipulation
+        requestAnimationFrame(() => {
+          console.log('[Mobile KB] iOS - Updating grid in animation frame');
+          updateGridDisplay();
+
+          // Immediately re-focus after DOM update
+          console.log('[Mobile KB] iOS - Re-focusing after grid update');
+          mobileInput.focus();
+
+          // Also try again after a tiny delay
+          setTimeout(() => {
+            if (document.activeElement !== mobileInput) {
+              console.log('[Mobile KB] iOS - Lost focus, re-focusing again');
+              mobileInput.focus();
+            }
+          }, 10);
+        });
+
+        // Keep typing flag active for a short period
+        typingTimeout = setTimeout(() => {
+          isTyping = false;
+          console.log('[Mobile KB] iOS - Typing session ended');
+        }, 500);
+      } else {
+        // Android/Desktop: Update grid immediately
+        updateGridDisplay();
+      }
 
       // Check if cells were actually updated
       const gridRows = document.querySelectorAll('.grid-row');
@@ -782,17 +827,7 @@ function attachPlayModeListeners() {
         }
       }
 
-      // iOS FIX: Re-focus input immediately to prevent keyboard from closing
-      // iOS Safari closes keyboard on any DOM change, so we need to re-focus
-      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-        console.log('[Mobile KB] iOS detected - re-focusing input to keep keyboard open');
-        setTimeout(() => {
-          if (document.activeElement !== mobileInput) {
-            console.log('[Mobile KB] iOS - Input lost focus, re-focusing...');
-            mobileInput.focus();
-          }
-        }, 0);
-      }
+      // Note: iOS re-focus is now handled above, right after updateGridDisplay()
     });
 
     // Handle Enter/Return key from mobile keyboard
