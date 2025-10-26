@@ -129,6 +129,12 @@ export function removeLetter() {
   }
 }
 
+// Set current guess directly (for mobile keyboard input)
+export function setCurrentGuess(value) {
+  state.currentGuess = value;
+  console.log('[Game] setCurrentGuess called, new value:', state.currentGuess);
+}
+
 // Update letter states for keyboard coloring
 function updateLetterStates(guess, feedback) {
   const guessLower = guess.toLowerCase();

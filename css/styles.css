@@ -619,13 +619,23 @@ body {
 }
 
 /* Hidden input for mobile keyboard */
+/* IMPORTANT: Must be accessible for focus but visually hidden */
 .mobile-keyboard-input {
   position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
+  /* Keep in viewport but hidden */
+  top: -100px;
+  left: 0;
+  /* Make it large enough for mobile browsers to recognize */
+  width: 100px;
+  height: 40px;
+  /* Visually hide but keep accessible */
   opacity: 0;
-  pointer-events: none;
+  /* CRITICAL: Do NOT use pointer-events: none - it prevents focus on Android */
+  /* pointer-events: auto by default */
+  /* Prevent browser zoom on focus (iOS) */
+  font-size: 16px;
+  /* Ensure it's above other content if needed */
+  z-index: -1;
 }
 
 /* Make grid cells look clickable on mobile */

@@ -19,7 +19,8 @@ import {
   backToModeSelection,
   startPlaying,
   restartGame,
-  toggleWordReveal
+  toggleWordReveal,
+  setCurrentGuess
 } from './game.js';
 
 import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
@@ -496,11 +497,44 @@ function attachPlayModeListeners() {
     render();
   });
 
-  // Mobile keyboard support
+  // Mobile keyboard support - COMPREHENSIVE DIAGNOSTICS
   const mobileInput = document.getElementById('mobile-keyboard-input');
 
-  console.log('[Mobile KB Setup] Input element found:', !!mobileInput);
-  console.log('[Mobile KB Setup] Input element:', mobileInput);
+  // === DIAGNOSTIC PHASE 1: Element Detection ===
+  console.log('========================================');
+  console.log('[Mobile KB Diagnostics] PHASE 1: Element Detection');
+  console.log('[Mobile KB Diagnostics] Input element found:', !!mobileInput);
+  console.log('[Mobile KB Diagnostics] Input element:', mobileInput);
+  console.log('[Mobile KB Diagnostics] Input ID:', mobileInput?.id);
+  console.log('[Mobile KB Diagnostics] Input type:', mobileInput?.type);
+  console.log('[Mobile KB Diagnostics] Input value:', mobileInput?.value);
+
+  // === DIAGNOSTIC PHASE 2: Computed Styles ===
+  if (mobileInput) {
+    const styles = window.getComputedStyle(mobileInput);
+    console.log('[Mobile KB Diagnostics] PHASE 2: Computed Styles');
+    console.log('[Mobile KB Diagnostics] Position:', styles.position);
+    console.log('[Mobile KB Diagnostics] Left:', styles.left);
+    console.log('[Mobile KB Diagnostics] Top:', styles.top);
+    console.log('[Mobile KB Diagnostics] Width:', styles.width);
+    console.log('[Mobile KB Diagnostics] Height:', styles.height);
+    console.log('[Mobile KB Diagnostics] Opacity:', styles.opacity);
+    console.log('[Mobile KB Diagnostics] Pointer-events:', styles.pointerEvents);
+    console.log('[Mobile KB Diagnostics] Display:', styles.display);
+    console.log('[Mobile KB Diagnostics] Visibility:', styles.visibility);
+    console.log('[Mobile KB Diagnostics] Z-index:', styles.zIndex);
+  }
+
+  // === DIAGNOSTIC PHASE 3: Device & Browser Info ===
+  console.log('[Mobile KB Diagnostics] PHASE 3: Device & Browser Info');
+  console.log('[Mobile KB Diagnostics] User Agent:', navigator.userAgent);
+  console.log('[Mobile KB Diagnostics] Platform:', navigator.platform);
+  console.log('[Mobile KB Diagnostics] Touch support:', 'ontouchstart' in window);
+  console.log('[Mobile KB Diagnostics] Screen width:', window.screen.width);
+  console.log('[Mobile KB Diagnostics] Screen height:', window.screen.height);
+  console.log('[Mobile KB Diagnostics] Viewport width:', window.innerWidth);
+  console.log('[Mobile KB Diagnostics] Viewport height:', window.innerHeight);
+  console.log('========================================');
 
   if (mobileInput) {
     console.log('[Mobile KB Setup] Attaching event listeners');
@@ -508,37 +542,134 @@ function attachPlayModeListeners() {
     // Track last processed value to avoid duplicate updates
     let lastProcessedValue = '';
 
+    // === DIAGNOSTIC PHASE 4: Focus Attempt ===
+    console.log('[Mobile KB Diagnostics] PHASE 4: Focus Attempt');
+    console.log('[Mobile KB Diagnostics] Active element before focus:', document.activeElement);
+    console.log('[Mobile KB Diagnostics] Input disabled?', mobileInput.disabled);
+    console.log('[Mobile KB Diagnostics] Input readonly?', mobileInput.readOnly);
+    console.log('[Mobile KB Diagnostics] Input tabIndex:', mobileInput.tabIndex);
+
     // Auto-focus input to open keyboard on mobile when entering play mode
     // Use requestAnimationFrame for better compatibility
     requestAnimationFrame(() => {
       setTimeout(() => {
-        console.log('[Mobile KB Setup] Attempting to focus input');
-        mobileInput.focus();
-        console.log('[Mobile KB Setup] Input focused, activeElement:', document.activeElement);
+        console.log('[Mobile KB Diagnostics] ==> Attempting to focus input now');
+        console.log('[Mobile KB Diagnostics] Before focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
+
+        try {
+          mobileInput.focus();
+          console.log('[Mobile KB Diagnostics] After focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
+          console.log('[Mobile KB Diagnostics] Focus successful?', document.activeElement === mobileInput);
+
+          // Log the input's position after focus
+          const rect = mobileInput.getBoundingClientRect();
+          console.log('[Mobile KB Diagnostics] Input position after focus:');
+          console.log('[Mobile KB Diagnostics]   - x:', rect.x);
+          console.log('[Mobile KB Diagnostics]   - y:', rect.y);
+          console.log('[Mobile KB Diagnostics]   - width:', rect.width);
+          console.log('[Mobile KB Diagnostics]   - height:', rect.height);
+          console.log('[Mobile KB Diagnostics]   - in viewport?', rect.y >= 0 && rect.y <= window.innerHeight);
+        } catch (error) {
+          console.error('[Mobile KB Diagnostics] ERROR focusing input:', error);
+        }
 
         // iOS Safari workaround - focus twice
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-          setTimeout(() => mobileInput.focus(), 100);
+          console.log('[Mobile KB Diagnostics] iOS detected - will focus again in 100ms');
+          setTimeout(() => {
+            mobileInput.focus();
+            console.log('[Mobile KB Diagnostics] iOS second focus - activeElement:', document.activeElement === mobileInput);
+          }, 100);
         }
       }, 300);
     });
 
-    // Click on grid cells or word section to open mobile keyboard
+    // === DIAGNOSTIC PHASE 5: Click Handlers ===
+    console.log('[Mobile KB Diagnostics] PHASE 5: Setting up click handlers');
     const clickableElements = [
       ...document.querySelectorAll('[data-grid-cell]'),
       document.querySelector('.catalan-word'),
       document.querySelector('.grid-container')
     ].filter(Boolean);
 
-    clickableElements.forEach(element => {
+    console.log('[Mobile KB Diagnostics] Clickable elements found:', clickableElements.length);
+    clickableElements.forEach((element, index) => {
+      console.log(`[Mobile KB Diagnostics] Clickable element ${index}:`, element.className);
+
       element.addEventListener('click', (e) => {
+        console.log(`[Mobile KB Diagnostics] Click event on element ${index}`);
+        console.log('[Mobile KB Diagnostics] Click - event type:', e.type);
+        console.log('[Mobile KB Diagnostics] Click - target:', e.target);
+        console.log('[Mobile KB Diagnostics] Click - currentTarget:', e.currentTarget);
+        e.preventDefault();
+
+        console.log('[Mobile KB Diagnostics] Click - attempting focus...');
+        const focusBefore = document.activeElement;
+        mobileInput.focus();
+        const focusAfter = document.activeElement;
+        console.log('[Mobile KB Diagnostics] Click - focus changed?', focusBefore !== focusAfter);
+        console.log('[Mobile KB Diagnostics] Click - input focused?', focusAfter === mobileInput);
+      });
+
+      // Also add touch event for mobile
+      element.addEventListener('touchend', (e) => {
+        console.log(`[Mobile KB Diagnostics] Touchend event on element ${index}`);
         e.preventDefault();
         mobileInput.focus();
       });
     });
 
-    // Test that event listener is attached
-    console.log('[Mobile KB Setup] Adding input event listener');
+    // === DIAGNOSTIC PHASE 6: Input Event Listener ===
+    console.log('[Mobile KB Diagnostics] PHASE 6: Setting up input event listener');
+
+    // Add focus/blur listeners for diagnostics
+    mobileInput.addEventListener('focus', () => {
+      console.log('[Mobile KB Diagnostics] ===> INPUT FOCUSED <===');
+      console.log('[Mobile KB Diagnostics] Focus event - activeElement:', document.activeElement?.id);
+      console.log('[Mobile KB Diagnostics] Focus event - timestamp:', Date.now());
+    });
+
+    mobileInput.addEventListener('blur', () => {
+      console.log('[Mobile KB Diagnostics] ===> INPUT BLURRED <===');
+      console.log('[Mobile KB Diagnostics] Blur event - activeElement:', document.activeElement?.id);
+    });
+
+    // Add beforeinput event for diagnostics (fires before input)
+    mobileInput.addEventListener('beforeinput', (e) => {
+      console.log('[Mobile KB Diagnostics] BEFOREINPUT event fired');
+      console.log('[Mobile KB Diagnostics] beforeinput - inputType:', e.inputType);
+      console.log('[Mobile KB Diagnostics] beforeinput - data:', e.data);
+    });
+
+    // Add keydown listener for diagnostics
+    mobileInput.addEventListener('keydown', (e) => {
+      console.log('[Mobile KB Diagnostics] KEYDOWN event fired');
+      console.log('[Mobile KB Diagnostics] keydown - key:', e.key);
+      console.log('[Mobile KB Diagnostics] keydown - code:', e.code);
+      console.log('[Mobile KB Diagnostics] keydown - keyCode:', e.keyCode);
+    });
+
+    // Add keyup listener for diagnostics
+    mobileInput.addEventListener('keyup', (e) => {
+      console.log('[Mobile KB Diagnostics] KEYUP event fired');
+      console.log('[Mobile KB Diagnostics] keyup - key:', e.key);
+      console.log('[Mobile KB Diagnostics] keyup - value:', e.target.value);
+    });
+
+    console.log('[Mobile KB Diagnostics] Event listeners attached:');
+    console.log('[Mobile KB Diagnostics]   - focus: YES');
+    console.log('[Mobile KB Diagnostics]   - blur: YES');
+    console.log('[Mobile KB Diagnostics]   - beforeinput: YES');
+    console.log('[Mobile KB Diagnostics]   - keydown: YES');
+    console.log('[Mobile KB Diagnostics]   - keyup: YES');
+    console.log('[Mobile KB Diagnostics]   - input: ADDING NOW...');
+    console.log('========================================');
+    console.log('[Mobile KB Diagnostics] ✅ Setup Complete!');
+    console.log('[Mobile KB Diagnostics] Test by:');
+    console.log('[Mobile KB Diagnostics]   1. Tapping grid cells or word');
+    console.log('[Mobile KB Diagnostics]   2. Typing on keyboard');
+    console.log('[Mobile KB Diagnostics]   3. Check for focus/input events above');
+    console.log('========================================');
 
     // Handle input from mobile keyboard
     mobileInput.addEventListener('input', (e) => {
@@ -548,6 +679,7 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB] Input event:', currentValue);
       console.log('[Mobile KB] Event target:', e.target);
       console.log('[Mobile KB] Last processed value:', lastProcessedValue);
+      console.log('[Mobile KB] Event timestamp:', e.timeStamp);
 
       // Don't skip - let it process every time for now
       // if (currentValue === lastProcessedValue) {
@@ -583,11 +715,12 @@ function attachPlayModeListeners() {
 
       console.log('[Mobile KB] New guess:', newGuess);
 
-      // Directly update the state
+      // Update the state using proper action function
       const oldGuessLength = state.currentGuess.replace(/ /g, '').length;
       const newGuessLength = newGuess.replace(/ /g, '').length;
 
-      state.currentGuess = newGuess;
+      // FIX: Use setCurrentGuess instead of directly mutating state copy
+      setCurrentGuess(newGuess);
 
       // Vibrate feedback
       if (newGuessLength > oldGuessLength) {
@@ -596,8 +729,12 @@ function attachPlayModeListeners() {
         vibrateTap();
       }
 
+      console.log('[Mobile KB] ✅ Called setCurrentGuess with:', newGuess);
       console.log('[Mobile KB] Calling updateGridDisplay()');
-      console.log('[Mobile KB] State before update:', JSON.stringify(state));
+
+      // Verify state was actually updated
+      const verifyState = getState();
+      console.log('[Mobile KB] Verified currentGuess:', verifyState.currentGuess);
 
       // Update the grid display without full re-render
       updateGridDisplay();
