@@ -629,9 +629,24 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB Diagnostics] Focus event - timestamp:', Date.now());
     });
 
-    mobileInput.addEventListener('blur', () => {
+    mobileInput.addEventListener('blur', (e) => {
       console.log('[Mobile KB Diagnostics] ===> INPUT BLURRED <===');
       console.log('[Mobile KB Diagnostics] Blur event - activeElement:', document.activeElement?.id);
+
+      // iOS FIX: Prevent blur during typing to keep keyboard open
+      // Only allow blur if user explicitly tapped elsewhere
+      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+        const state = getState();
+        const word = getCurrentWord();
+
+        // If we're in playing state and word isn't complete, keep focus
+        if (state.gameState === GAME_STATES.PLAYING &&
+            word &&
+            state.currentGuess.replace(/ /g, '').length < word.en.replace(/ /g, '').length) {
+          console.log('[Mobile KB] iOS - Preventing blur to keep keyboard open');
+          setTimeout(() => mobileInput.focus(), 0);
+        }
+      }
     });
 
     // Add beforeinput event for diagnostics (fires before input)
@@ -751,9 +766,32 @@ function attachPlayModeListeners() {
       const cleanValue = newGuess.replace(/ /g, '');
       lastProcessedValue = cleanValue;
 
-      // Only update if different to avoid cursor jumping
+      // Only update if different to avoid cursor jumping and keyboard closing on iOS
       if (e.target.value !== cleanValue) {
-        e.target.value = cleanValue;
+        console.log('[Mobile KB] Updating input value from', e.target.value, 'to', cleanValue);
+
+        // iOS FIX: Don't change the input value if it's essentially the same
+        // This prevents keyboard from closing
+        const currentInputClean = e.target.value.toLowerCase().replace(/[^a-z]/g, '');
+        const newValueClean = cleanValue.toLowerCase().replace(/[^a-z]/g, '');
+
+        if (currentInputClean !== newValueClean) {
+          e.target.value = cleanValue;
+        } else {
+          console.log('[Mobile KB] Skipping input value update - values are essentially the same');
+        }
+      }
+
+      // iOS FIX: Re-focus input immediately to prevent keyboard from closing
+      // iOS Safari closes keyboard on any DOM change, so we need to re-focus
+      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+        console.log('[Mobile KB] iOS detected - re-focusing input to keep keyboard open');
+        setTimeout(() => {
+          if (document.activeElement !== mobileInput) {
+            console.log('[Mobile KB] iOS - Input lost focus, re-focusing...');
+            mobileInput.focus();
+          }
+        }, 0);
       }
     });
 
