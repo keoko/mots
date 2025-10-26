@@ -3,6 +3,7 @@
 * TODO offline mode
 it works intermittently. It seems the service worker stops working.
 * TODO why I need to hard-refresh every time (sw?)
+* TODO help page, the button let's go should be visible without needing to go the bottom of the page
 * TODO store progress
 * TODO display metrics
 * TODO display report
