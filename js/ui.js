@@ -394,12 +394,17 @@ function updateGridDisplay() {
   cells.forEach((cell, index) => {
     const letter = guessLetters[index] || '';
 
-    console.log(`[updateGridDisplay] Cell ${index} - Setting to: "${letter}"`);
+    console.log(`[updateGridDisplay] Cell ${index} - Letter to set: "${letter}"`);
+    console.log(`[updateGridDisplay] Cell ${index} - Before: "${cell.textContent}"`);
+    console.log(`[updateGridDisplay] Cell ${index} - Cell element:`, cell);
 
     if (letter) {
-      cell.textContent = letter.toUpperCase();
+      const upperLetter = letter.toUpperCase();
+      console.log(`[updateGridDisplay] Cell ${index} - Setting textContent to: "${upperLetter}"`);
+      cell.textContent = upperLetter;
+      console.log(`[updateGridDisplay] Cell ${index} - After setting: "${cell.textContent}"`);
+      console.log(`[updateGridDisplay] Cell ${index} - innerHTML: "${cell.innerHTML}"`);
       cell.classList.add('grid-cell-filled');
-      console.log(`[updateGridDisplay] Cell ${index} - textContent is now: "${cell.textContent}"`);
     } else {
       cell.textContent = '';
       cell.classList.remove('grid-cell-filled');
