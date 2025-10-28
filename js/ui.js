@@ -360,10 +360,7 @@ function renderGrid() {
                 cellClass += ' grid-cell-filled';
               }
 
-              // Make current row cells clickable to open mobile keyboard
-              const clickable = isCurrentRow ? 'data-grid-cell' : '';
-
-              return `<div class="${cellClass}" ${clickable}>${letter}</div>`;
+              return `<div class="${cellClass}">${letter}</div>`;
             }).join('')}
           </div>
         `;
