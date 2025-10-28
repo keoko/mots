@@ -479,7 +479,7 @@ function attachPlayModeListeners() {
   if (mobileInput) {
     let lastProcessedValue = '';
 
-    // Make grid cells clickable to focus input
+    // Make grid cells and areas clickable to toggle keyboard
     const clickableElements = [
       ...document.querySelectorAll('[data-grid-cell]'),
       document.querySelector('.catalan-word'),
@@ -487,15 +487,18 @@ function attachPlayModeListeners() {
     ].filter(Boolean);
 
     clickableElements.forEach((element) => {
-      element.addEventListener('click', (e) => {
+      const handleToggle = (e) => {
         e.preventDefault();
-        mobileInput.focus();
-      });
+        // Toggle keyboard: if input is focused, blur it; otherwise focus it
+        if (document.activeElement === mobileInput) {
+          mobileInput.blur();
+        } else {
+          mobileInput.focus();
+        }
+      };
 
-      element.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        mobileInput.focus();
-      });
+      element.addEventListener('click', handleToggle);
+      element.addEventListener('touchend', handleToggle);
     });
 
     // Handle input from mobile keyboard

@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** feat: allow closing mobile keyboard by tapping grid on Android
+Changed grid/word tap behavior to toggle the keyboard instead of only opening it. Now tapping these areas when the keyboard is open will close it, solving the issue where Android users couldn't dismiss the keyboard.
 *** fix: preserve visual keyboard input when switching to mobile keyboard
 When switching from visual keyboard to mobile keyboard, the mobile input now syncs with the current guess state, preserving any letters already typed with the visual keyboard.
 *** fix: remove auto-focus behavior on Android to allow users to see keyboard feedback
