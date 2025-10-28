@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mots - How to Play</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      padding: var(--spacing-lg);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+    .help-content {
+      background: var(--color-surface);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .help-content p {
+      margin: var(--spacing-md) 0;
+      line-height: 1.6;
+    }
+    .color-demo {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      margin: var(--spacing-lg) 0;
+      flex-wrap: wrap;
+    }
+    .color-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    .demo-cell {
+      width: 3rem;
+      height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xl);
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      color: white;
+    }
+    .demo-correct { background: #10b981; }
+    .demo-present { background: #f59e0b; }
+    .demo-absent { background: #64748b; }
+    .back-link {
+      display: inline-block;
+      margin-top: var(--spacing-lg);
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 How to Play Mots</h1>
+
+  <div class="help-content">
+    <p><strong>Goal:</strong> Translate Catalan words to English.</p>
+
+    <p>You have <strong>5 attempts</strong> per word to guess the correct translation.</p>
+
+    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Color Guide</h2>
+
+    <div class="color-demo">
+      <div class="color-item">
+        <div class="demo-cell demo-correct">H</div>
+        <span>Correct position</span>
+      </div>
+      <div class="color-item">
+        <div class="demo-cell demo-present">O</div>
+        <span>Wrong position</span>
+      </div>
+      <div class="color-item">
+        <div class="demo-cell demo-absent">U</div>
+        <span>Not in word</span>
+      </div>
+    </div>
+
+    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Game Modes</h2>
+    <p><strong>📖 Study Mode:</strong> Review all words and their translations before playing.</p>
+    <p><strong>🎮 Play Mode:</strong> Jump straight into the game and test yourself.</p>
+
+    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Tips</h2>
+    <ul style="padding-left: var(--spacing-lg);">
+      <li>Click the <strong>🎮 Mots</strong> title to return home anytime</li>
+      <li>Your progress is saved automatically</li>
+      <li>Works offline after first visit</li>
+    </ul>
+  </div>
+
+  <a href="index.html" class="back-link">← Back to Game</a>
+</body>
+</html>

@@ -7,6 +7,7 @@ const CACHE_NAME = getCacheName();
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './help.html',
   './css/styles.css',
   './js/app.js',
   './js/ui.js',

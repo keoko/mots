@@ -14,6 +14,7 @@
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE refactor: replace help modal with dedicated help page for better mobile UX
 * DONE refactor: remove welcome modal and simplify help modal for better mobile UX
 * DONE improve UX to understand the game
 * DONE mobile first
