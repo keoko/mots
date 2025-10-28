@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** feat: improve help page with better structure and more detailed instructions
+Enhanced the help page with better visual organization, separate sections for each topic, improved examples, mobile-specific instructions, and a more comprehensive tips section. Added mode comparison, example boxes, and better styling.
 *** feat: allow closing mobile keyboard by tapping grid on Android
 Changed grid/word tap behavior to toggle the keyboard instead of only opening it. Now tapping these areas when the keyboard is open will close it, solving the issue where Android users couldn't dismiss the keyboard.
 *** fix: preserve visual keyboard input when switching to mobile keyboard

@@ -14,6 +14,7 @@ only available in Safari
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE feat: improve help page with better structure and more detailed instructions
 * DONE feat: allow closing mobile keyboard by tapping grid on Android
 * DONE fix: preserve visual keyboard input when switching to mobile keyboard
 * DONE fix: remove auto-focus behavior on Android to allow users to see keyboard feedback

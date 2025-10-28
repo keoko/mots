@@ -8,22 +8,48 @@
   <style>
     body {
       padding: var(--spacing-lg);
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
     }
     h1 {
       text-align: center;
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
+      font-size: var(--font-size-3xl);
     }
-    .help-content {
+    .subtitle {
+      text-align: center;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-xl);
+      font-size: var(--font-size-lg);
+    }
+    .help-section {
       background: var(--color-surface);
       padding: var(--spacing-lg);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-md);
+      margin-bottom: var(--spacing-lg);
     }
-    .help-content p {
+    .help-section h2 {
+      margin-top: 0;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-primary);
+      font-size: var(--font-size-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    .help-section p {
+      margin: var(--spacing-sm) 0;
+      line-height: 1.7;
+      color: var(--color-text);
+    }
+    .help-section ul, .help-section ol {
       margin: var(--spacing-md) 0;
-      line-height: 1.6;
+      padding-left: var(--spacing-xl);
+      line-height: 1.7;
+    }
+    .help-section li {
+      margin: var(--spacing-xs) 0;
     }
     .color-demo {
       display: flex;
@@ -36,15 +62,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--spacing-xs);
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md);
+      background: var(--color-background);
+      border-radius: var(--radius-md);
     }
     .demo-cell {
-      width: 3rem;
-      height: 3rem;
+      width: 3.5rem;
+      height: 3.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: var(--font-size-xl);
+      font-size: var(--font-size-2xl);
       font-weight: 700;
       border-radius: var(--radius-sm);
       color: white;
@@ -52,53 +81,165 @@
     .demo-correct { background: #10b981; }
     .demo-present { background: #f59e0b; }
     .demo-absent { background: #64748b; }
+    .color-item span {
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+    .example-box {
+      background: var(--color-background);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin: var(--spacing-md) 0;
+      border-left: 4px solid var(--color-primary);
+    }
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md);
+      margin: var(--spacing-md) 0;
+    }
+    .mode-box {
+      padding: var(--spacing-md);
+      background: var(--color-background);
+      border-radius: var(--radius-md);
+      text-align: center;
+    }
+    .mode-box-icon {
+      font-size: 2rem;
+      margin-bottom: var(--spacing-xs);
+    }
+    .mode-box-title {
+      font-weight: 700;
+      margin-bottom: var(--spacing-xs);
+      color: var(--color-text);
+    }
+    .mode-box-desc {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+    .tip-item {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-sm) 0;
+      align-items: flex-start;
+    }
+    .tip-icon {
+      font-size: var(--font-size-lg);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
     .back-link {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
       margin-top: var(--spacing-lg);
-      color: var(--color-primary);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-primary);
+      color: white;
       text-decoration: none;
       font-weight: 600;
+      border-radius: var(--radius-md);
+      transition: all var(--transition-base);
     }
     .back-link:hover {
-      text-decoration: underline;
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    @media (max-width: 640px) {
+      .mode-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <h1>🎮 How to Play Mots</h1>
+  <p class="subtitle">A Wordle-style vocabulary trainer for learning English from Catalan</p>
 
-  <div class="help-content">
-    <p><strong>Goal:</strong> Translate Catalan words to English.</p>
+  <div class="help-section">
+    <h2>🎯 Objective</h2>
+    <p>Your goal is to guess the English translation of a Catalan word. You have <strong>6 attempts</strong> to figure out the correct word.</p>
 
-    <p>You have <strong>5 attempts</strong> per word to guess the correct translation.</p>
+    <div class="example-box">
+      <strong>Example:</strong> If you see <em>"gat"</em> (Catalan), you need to guess <em>"cat"</em> (English).
+    </div>
+  </div>
 
-    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Color Guide</h2>
+  <div class="help-section">
+    <h2>🎨 Color Guide</h2>
+    <p>After each guess, the color of the tiles will change to show how close your guess was:</p>
 
     <div class="color-demo">
       <div class="color-item">
-        <div class="demo-cell demo-correct">H</div>
-        <span>Correct position</span>
+        <div class="demo-cell demo-correct">C</div>
+        <span>Correct letter<br>Correct position</span>
       </div>
       <div class="color-item">
-        <div class="demo-cell demo-present">O</div>
-        <span>Wrong position</span>
+        <div class="demo-cell demo-present">A</div>
+        <span>Correct letter<br>Wrong position</span>
       </div>
       <div class="color-item">
-        <div class="demo-cell demo-absent">U</div>
-        <span>Not in word</span>
+        <div class="demo-cell demo-absent">T</div>
+        <span>Letter not<br>in word</span>
       </div>
     </div>
 
-    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Game Modes</h2>
-    <p><strong>📖 Study Mode:</strong> Review all words and their translations before playing.</p>
-    <p><strong>🎮 Play Mode:</strong> Jump straight into the game and test yourself.</p>
+    <div class="example-box">
+      <strong>Tip:</strong> The keyboard at the bottom also changes color to help you track which letters you've tried!
+    </div>
+  </div>
 
-    <h2 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">Tips</h2>
-    <ul style="padding-left: var(--spacing-lg);">
-      <li>Click the <strong>🎮 Mots</strong> title to return home anytime</li>
-      <li>Your progress is saved automatically</li>
-      <li>Works offline after first visit</li>
-    </ul>
+  <div class="help-section">
+    <h2>🎮 Game Modes</h2>
+
+    <div class="mode-grid">
+      <div class="mode-box">
+        <div class="mode-box-icon">📖</div>
+        <div class="mode-box-title">Study Mode</div>
+        <div class="mode-box-desc">Review all words and their translations before testing yourself</div>
+      </div>
+      <div class="mode-box">
+        <div class="mode-box-icon">🎯</div>
+        <div class="mode-box-title">Play Mode</div>
+        <div class="mode-box-desc">Jump straight into the challenge and test your knowledge</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="help-section">
+    <h2>📱 How to Play on Mobile</h2>
+    <ol>
+      <li><strong>Tap the grid or word area</strong> to open your device keyboard</li>
+      <li><strong>Type letters</strong> using either your keyboard or the visual keyboard</li>
+      <li><strong>Tap again</strong> to close the keyboard and see your progress</li>
+      <li><strong>Press Enter</strong> or the Enter button to submit your guess</li>
+    </ol>
+  </div>
+
+  <div class="help-section">
+    <h2>💡 Tips & Tricks</h2>
+    <div class="tip-item">
+      <span class="tip-icon">🏠</span>
+      <span>Click the <strong>🎮 Mots</strong> title at any time to return to the topic selection screen</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-icon">💾</span>
+      <span>Your progress is automatically saved, so you can pick up where you left off</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-icon">📡</span>
+      <span>Works <strong>offline</strong> after your first visit - perfect for learning on the go!</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-icon">🔥</span>
+      <span>Build streaks by guessing words correctly to track your improvement</span>
+    </div>
+    <div class="tip-item">
+      <span class="tip-icon">⌨️</span>
+      <span>You can use both the visual keyboard and your device keyboard interchangeably</span>
+    </div>
   </div>
 
   <a href="index.html" class="back-link">← Back to Game</a>
