@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** feat: display app version in footer for easier version tracking
+Added version display to the footer on both main page and help page. This helps users verify they're not using a stale cached version.
 *** fix: limit mobile keyboard input to word length and sync with display to fix backspace behavior
 The mobile keyboard allowed typing more letters than the word length, causing backspace to delete invisible characters instead of visible ones. Fixed by syncing the input field value to match the trimmed/displayed value.
 *** refactor: remove diagnostic console.log statements and hide mobile keyboard input placeholder

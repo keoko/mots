@@ -9,6 +9,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎮 Mots - Starting game...');
   console.log(`📦 Version: ${VERSION.app} (${VERSION.gitCommit})`);
 
+  // Display version in footer
+  const versionElement = document.getElementById('app-version');
+  if (versionElement) {
+    versionElement.textContent = `v${VERSION.app}`;
+  }
+
   // Initial render
   render();
 

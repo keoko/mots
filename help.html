@@ -102,5 +102,14 @@
   </div>
 
   <a href="index.html" class="back-link">← Back to Game</a>
+
+  <footer style="text-align: center; margin-top: var(--spacing-xl); padding: var(--spacing-lg) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm);">
+    <span id="app-version"></span>
+  </footer>
+
+  <script type="module">
+    import { VERSION } from './js/version.js';
+    document.getElementById('app-version').textContent = `v${VERSION.app}`;
+  </script>
 </body>
 </html>
