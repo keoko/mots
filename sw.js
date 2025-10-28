@@ -1,9 +1,17 @@
 // Service Worker for Mots - Offline-first PWA
-// Version controlled by js/version.js
+// IMPORTANT: Update VERSION when making changes to trigger cache update
 
-import { VERSION, getCacheName } from './js/version.js';
+const VERSION = '1.0.27';
+const CACHE_NAME = `mots-v${VERSION}`;
 
-const CACHE_NAME = getCacheName();
+// Error handler for unhandled errors
+self.addEventListener('error', (event) => {
+  console.error('[SW] Unhandled error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  console.error('[SW] Unhandled promise rejection:', event.reason);
+});
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,7 +32,7 @@ const ASSETS_TO_CACHE = [
 
 // Install event - cache all static assets
 self.addEventListener('install', (event) => {
-  console.log(`[SW] Installing service worker v${VERSION.app}...`);
+  console.log(`[SW] Installing service worker v${VERSION}...`);
 
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -74,47 +82,47 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true })
-      .then((cachedResponse) => {
+    (async () => {
+      try {
+        // Try cache first
+        const cachedResponse = await caches.match(event.request, { ignoreSearch: true });
         if (cachedResponse) {
-          // Cache hit - return cached response
           console.log('[SW] Serving from cache:', event.request.url);
           return cachedResponse;
         }
 
-        // Cache miss - try to fetch from network
+        // Cache miss - try network
         console.log('[SW] Fetching from network:', event.request.url);
-        return fetch(event.request)
-          .then((networkResponse) => {
-            // Don't cache non-successful responses
-            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
+        try {
+          const networkResponse = await fetch(event.request);
 
-            // Clone the response (can only be consumed once)
-            const responseToCache = networkResponse.clone();
+          // Cache successful responses
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(event.request, networkResponse.clone());
+          }
 
-            // Add to cache for future use
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return networkResponse;
-          })
-          .catch((error) => {
-            console.error('[SW] Fetch failed (offline?):', error);
-            // When offline and not in cache, return a basic error response
-            // This prevents the "offline mode" error page
-            return new Response('Offline - resource not cached', {
-              status: 503,
-              statusText: 'Service Unavailable',
-              headers: new Headers({
-                'Content-Type': 'text/plain'
-              })
-            });
+          return networkResponse;
+        } catch (fetchError) {
+          console.error('[SW] Fetch failed:', fetchError);
+          // Return offline response
+          return new Response('Offline - resource not cached', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/plain' }
           });
-      })
+        }
+      } catch (error) {
+        console.error('[SW] Cache operation failed:', error);
+        // Try to fetch anyway
+        return fetch(event.request).catch(() => {
+          return new Response('Error loading resource', {
+            status: 500,
+            headers: { 'Content-Type': 'text/plain' }
+          });
+        });
+      }
+    })()
   );
 });
 

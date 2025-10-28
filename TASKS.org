@@ -14,6 +14,7 @@
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE fix: refactor service worker to remove ES6 imports and add error handling
 * DONE refactor: replace help modal with dedicated help page for better mobile UX
 * DONE refactor: remove welcome modal and simplify help modal for better mobile UX
 * DONE improve UX to understand the game
