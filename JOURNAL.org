@@ -1,6 +1,10 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: limit mobile keyboard input to word length and sync with display to fix backspace behavior
+The mobile keyboard allowed typing more letters than the word length, causing backspace to delete invisible characters instead of visible ones. Fixed by syncing the input field value to match the trimmed/displayed value.
+*** refactor: remove diagnostic console.log statements and hide mobile keyboard input placeholder
+Cleaned up all verbose console.log statements added during iOS keyboard debugging. Removed the "Type here..." placeholder and added aria-hidden to the mobile keyboard input for better UX.
 *** fix: iOS keyboard now works by preventing global keydown handler from calling render()
 The issue was that the global keydown listener in app.js was catching mobile keyboard events and calling render(), which destroyed the input element while typing. Fixed by ignoring events from mobile-keyboard-input in the global handler.
 *** refactor: remove vibration/haptics API (Chrome-only, not widely supported)

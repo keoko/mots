@@ -518,6 +518,11 @@ function attachPlayModeListeners() {
       const maxLength = word.en.replace(/ /g, '').length;
       const trimmedValue = filteredValue.substring(0, maxLength);
 
+      // Sync the input value back to prevent extra characters
+      if (e.target.value !== trimmedValue) {
+        e.target.value = trimmedValue;
+      }
+
       // Build new guess with auto-inserted spaces
       let newGuess = '';
       let letterIndex = 0;
@@ -535,7 +540,7 @@ function attachPlayModeListeners() {
       setCurrentGuess(newGuess);
       updateGridDisplay();
 
-      lastProcessedValue = e.target.value;
+      lastProcessedValue = trimmedValue;
     });
 
     // Handle Enter key from mobile keyboard

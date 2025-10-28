@@ -14,6 +14,8 @@ only available in Safari
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE fix: limit mobile keyboard input to word length and sync with display to fix backspace behavior
+* DONE refactor: remove diagnostic console.log statements and hide mobile keyboard input placeholder
 * DONE fix: iOS keyboard now works by preventing global keydown handler from calling render()
 * DONE refactor: remove vibration/haptics API (Chrome-only, not widely supported)
 * DONE fix: refactor service worker to remove ES6 imports and add error handling
