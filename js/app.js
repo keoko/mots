@@ -2,7 +2,6 @@
 
 import { render } from './ui.js';
 import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics, nextWord, GAME_STATES } from './game.js';
-import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
 import { VERSION } from './version.js';
 
 // Initialize app when DOM is ready
@@ -66,11 +65,6 @@ function handleKeyboardInput(e) {
 
     // During play mode, submit guess
     if (state.gameState === GAME_STATES.PLAYING) {
-      // Vibrate invalid if word is incomplete
-      if (word && state.currentGuess.length !== word.en.length) {
-        vibrateInvalid();
-      }
-
       submitGuess();
       render();
       return;
@@ -80,24 +74,12 @@ function handleKeyboardInput(e) {
   // Only handle letter keys (a-z) during play mode
   if (state.gameState === GAME_STATES.PLAYING && e.key.length === 1 && /[a-z]/i.test(e.key)) {
     const letter = e.key.toLowerCase();
-
-    // Only vibrate if letter will be added
-    if (word && state.currentGuess.length < word.en.length) {
-      vibrateLetterInput();
-    }
-
     addLetter(letter);
     render();
   }
   // Handle backspace during play mode
   else if (state.gameState === GAME_STATES.PLAYING && e.key === 'Backspace') {
     e.preventDefault();
-
-    // Only vibrate if there's something to delete
-    if (state.currentGuess.length > 0) {
-      vibrateTap();
-    }
-
     removeLetter();
     render();
   }

@@ -1,10 +1,12 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** refactor: remove vibration/haptics API (Chrome-only, not widely supported)
 *** fix: refactor service worker to remove ES6 imports and add error handling
 *** refactor: replace help modal with dedicated help page for better mobile UX
 *** refactor: remove welcome modal and simplify help modal for better mobile UX
 ** 2025/Oct/25
+*** waste a lot of time troubleshooting why iphone keyboard does not work, still no clear answer
 *** improve UX to understand the game
 *** improve offline mode
 it seems it crashes the service worker after refreshing the mage on mobile (airplane mode)

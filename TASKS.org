@@ -1,19 +1,21 @@
 #+title: Tasks
 * TODO mobile iphne keyboard
-* TODO service worker not working properly
-** offline mode it works intermittently. It seems the service worker stops working.
 * TODO store progress
 * TODO display metrics
 * TODO display report
 * TODO display failed words
-* TODO vibration API - does it actually work?
-* IDEA improve desktop UI
-* IDEA gestures API
 * IDEA automatic functional testing
+* KILL vibration API
+it only works on Chrome
+* IDEA improve desktop UI
+* KILL gestures API
+only available in Safari
+* IDEA touch events API
 * IDEA sync progress in backend
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE refactor: remove vibration/haptics API (Chrome-only, not widely supported)
 * DONE fix: refactor service worker to remove ES6 imports and add error handling
 * DONE refactor: replace help modal with dedicated help page for better mobile UX
 * DONE refactor: remove welcome modal and simplify help modal for better mobile UX
@@ -41,6 +43,9 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE feat: add native mobile keyboard support with clickable grid cells
 * DONE why I need to hard-refresh every time (sw?)
 sw, but it is not clear why
+* DONE service worker not working properly
+** offline mode it works intermittently. It seems the service worker stops working.
+it seems it was due to ES6 modules, it is not supported.
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

@@ -22,7 +22,6 @@ const ASSETS_TO_CACHE = [
   './js/game.js',
   './js/data.js',
   './js/storage.js',
-  './js/haptics.js',
   './js/version.js',
   './favicon.svg',
   './manifest.json',

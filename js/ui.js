@@ -23,8 +23,6 @@ import {
   setCurrentGuess
 } from './game.js';
 
-import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
-
 // Debug logging to visible panel (for iPhone where Eruda doesn't work)
 function debugLog(message) {
   console.log(message);
@@ -517,14 +515,6 @@ function attachPlayModeListeners() {
   document.querySelectorAll('[data-letter]').forEach(button => {
     button.addEventListener('click', (e) => {
       const letter = e.currentTarget.dataset.letter;
-      const state = getState();
-      const word = getCurrentWord();
-
-      // Only vibrate if letter was actually added
-      if (state.currentGuess.length < word.en.length) {
-        vibrateLetterInput();
-      }
-
       addLetter(letter);
       render();
     });
@@ -532,27 +522,12 @@ function attachPlayModeListeners() {
 
   // Backspace button
   document.querySelector('[data-action="backspace"]')?.addEventListener('click', () => {
-    const state = getState();
-
-    // Only vibrate if there's something to delete
-    if (state.currentGuess.length > 0) {
-      vibrateTap();
-    }
-
     removeLetter();
     render();
   });
 
   // Enter button
   document.querySelector('[data-action="enter"]')?.addEventListener('click', () => {
-    const state = getState();
-    const word = getCurrentWord();
-
-    // Vibrate invalid if word is incomplete
-    if (state.currentGuess.length !== word.en.length) {
-      vibrateInvalid();
-    }
-
     submitGuess();
     render();
   });
@@ -765,16 +740,6 @@ function attachPlayModeListeners() {
             // Update state
             setCurrentGuess(newGuess);
 
-            // Vibrate feedback
-            const oldLength = lastValue.replace(/[^a-z]/g, '').length;
-            const newLength = trimmedValue.length;
-
-            if (newLength > oldLength) {
-              vibrateLetterInput();
-            } else if (newLength < oldLength) {
-              vibrateTap();
-            }
-
             // Update grid
             updateGridDisplay();
 
@@ -908,18 +873,8 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB] New guess:', newGuess);
 
       // Update the state using proper action function
-      const oldGuessLength = state.currentGuess.replace(/ /g, '').length;
-      const newGuessLength = newGuess.replace(/ /g, '').length;
-
       // FIX: Use setCurrentGuess instead of directly mutating state copy
       setCurrentGuess(newGuess);
-
-      // Vibrate feedback
-      if (newGuessLength > oldGuessLength) {
-        vibrateLetterInput();
-      } else if (newGuessLength < oldGuessLength) {
-        vibrateTap();
-      }
 
       console.log('[Mobile KB] ✅ Called setCurrentGuess with:', newGuess);
       console.log('[Mobile KB] Calling updateGridDisplay()');
@@ -987,7 +942,6 @@ function attachPlayModeListeners() {
         const word = getCurrentWord();
 
         if (state.currentGuess.length !== word.en.length) {
-          vibrateInvalid();
           return;
         }
 
