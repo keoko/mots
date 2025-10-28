@@ -4,16 +4,10 @@
 * TODO display report
 * TODO display failed words
 * IDEA automatic functional testing
-* KILL vibration API
-it only works on Chrome
 * IDEA improve desktop UI
-* KILL gestures API
-only available in Safari
 * IDEA touch events API
 * IDEA sync progress in backend
-* IDEA timing?
-* IDEA multiplayer?
-* IDEA deploy to fly.io
+* DONE fix: prevent iOS auto-zoom when focusing mobile keyboard input
 * DONE feat: improve help page with better structure and more detailed instructions
 * DONE feat: allow closing mobile keyboard by tapping grid on Android
 * DONE fix: preserve visual keyboard input when switching to mobile keyboard
@@ -57,3 +51,10 @@ it seems it was due to ES6 modules, it is not supported.
 * KILL word collections stored on the backend
 * KILL full stack deployment
 * KILL how external works
+* KILL vibration API
+it only works on Chrome
+* KILL gestures API
+it only works on Safari
+* KILL timing?
+* KILL multiplayer?
+* KILL deploy to fly.io

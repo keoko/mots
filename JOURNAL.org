@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: prevent iOS auto-zoom when focusing mobile keyboard input
+Fixed the misleading UX on iPhone where tapping the grid appeared to maximize the screen. Added maximum-scale=1.0 and user-scalable=no to viewport, plus font-size: 16px to the mobile input to prevent iOS's automatic zoom behavior when focusing on input fields.
 *** feat: improve help page with better structure and more detailed instructions
 Enhanced the help page with better visual organization, separate sections for each topic, improved examples, mobile-specific instructions, and a more comprehensive tips section. Added mode comparison, example boxes, and better styling.
 *** feat: allow closing mobile keyboard by tapping grid on Android
