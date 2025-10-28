@@ -34,18 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Register service worker for offline support
   registerServiceWorker();
-
-  // Monitor online/offline status
-  window.addEventListener('online', () => {
-    console.log('[App] 🟢 Online');
-  });
-
-  window.addEventListener('offline', () => {
-    console.log('[App] 🔴 Offline - running from cache');
-  });
-
-  // Log initial status
-  console.log(`[App] Network status: ${navigator.onLine ? '🟢 Online' : '🔴 Offline'}`);
 });
 
 // Handle keyboard input
@@ -99,13 +87,11 @@ function handleTitleClick() {
 // Register service worker for offline-first functionality
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
-    console.log('[App] Service workers not supported');
     return;
   }
 
   try {
     const registration = await navigator.serviceWorker.register('/sw.js');
-    console.log('[App] Service worker registered:', registration.scope);
 
     // Check for updates on page load
     registration.update();
@@ -113,11 +99,9 @@ async function registerServiceWorker() {
     // Listen for updates
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing;
-      console.log('[App] Service worker update found');
 
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          console.log('[App] New service worker installed, ready to activate');
           // Could show a "New version available" notification here
         }
       });
@@ -126,5 +110,3 @@ async function registerServiceWorker() {
     console.error('[App] Service worker registration failed:', error);
   }
 }
-
-console.log('✅ Mots loaded successfully!');

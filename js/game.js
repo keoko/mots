@@ -131,14 +131,11 @@ export function removeLetter() {
 // Set current guess directly (for mobile keyboard input)
 export function setCurrentGuess(value) {
   state.currentGuess = value;
-  console.log('[Game] setCurrentGuess called, new value:', state.currentGuess);
 }
 
 // Update letter states for keyboard coloring
 function updateLetterStates(guess, feedback) {
   const guessLower = guess.toLowerCase();
-
-  console.log('[Game] Updating letter states for:', guessLower, 'feedback:', feedback);
 
   for (let i = 0; i < guessLower.length; i++) {
     const letter = guessLower[i];
@@ -159,8 +156,6 @@ function updateLetterStates(guess, feedback) {
       state.letterStates[letter] = 'absent';
     }
   }
-
-  console.log('[Game] Letter states now:', state.letterStates);
 }
 
 // Get feedback for a guess (Wordle-style)

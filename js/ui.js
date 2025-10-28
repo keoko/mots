@@ -377,12 +377,7 @@ function updateGridDisplay() {
   const state = getState();
   const word = getCurrentWord();
 
-  console.log('[updateGridDisplay] Called');
-  console.log('[updateGridDisplay] Current guess:', state.currentGuess);
-  console.log('[updateGridDisplay] Target word:', word?.en);
-
   if (!word) {
-    console.log('[updateGridDisplay] No word found');
     return;
   }
 
@@ -390,11 +385,7 @@ function updateGridDisplay() {
   const currentRowIndex = state.guesses.length;
   const gridRows = document.querySelectorAll('.grid-row');
 
-  console.log('[updateGridDisplay] Current row index:', currentRowIndex);
-  console.log('[updateGridDisplay] Total grid rows:', gridRows.length);
-
   if (!gridRows[currentRowIndex]) {
-    console.log('[updateGridDisplay] Current row not found');
     return;
   }
 
@@ -402,49 +393,33 @@ function updateGridDisplay() {
 
   // Get ALL children (including .grid-space divs)
   const allChildren = Array.from(currentRow.children);
-  console.log('[updateGridDisplay] Total children in row:', allChildren.length);
 
   // Filter to only grid-cell elements
   const cells = allChildren.filter(child => child.classList.contains('grid-cell'));
-  console.log('[updateGridDisplay] Grid cells found:', cells.length);
 
   // Map each position in the target word to actual letters (excluding spaces)
   const targetLetters = word.en.split('').filter(char => char !== ' ');
   const guessLetters = state.currentGuess.split('').filter(char => char !== ' ');
 
-  console.log('[updateGridDisplay] Target letters (no spaces):', targetLetters);
-  console.log('[updateGridDisplay] Guess letters (no spaces):', guessLetters);
-
   // Update each cell
   cells.forEach((cell, index) => {
     const letter = guessLetters[index] || '';
 
-    console.log(`[updateGridDisplay] Cell ${index} - Letter to set: "${letter}"`);
-    console.log(`[updateGridDisplay] Cell ${index} - Before: "${cell.textContent}"`);
-    console.log(`[updateGridDisplay] Cell ${index} - Cell element:`, cell);
-
     if (letter) {
       const upperLetter = letter.toUpperCase();
-      console.log(`[updateGridDisplay] Cell ${index} - Setting textContent to: "${upperLetter}"`);
       cell.textContent = upperLetter;
-      console.log(`[updateGridDisplay] Cell ${index} - After setting: "${cell.textContent}"`);
-      console.log(`[updateGridDisplay] Cell ${index} - innerHTML: "${cell.innerHTML}"`);
       cell.classList.add('grid-cell-filled');
     } else {
       cell.textContent = '';
       cell.classList.remove('grid-cell-filled');
     }
   });
-
-  console.log('[updateGridDisplay] Update complete');
 }
 
 // Render keyboard
 function renderKeyboard() {
   const state = getState();
   const letterStates = state.letterStates || {};
-
-  console.log('[UI] Rendering keyboard with letter states:', letterStates);
 
   return `
     <div class="keyboard" role="group" aria-label="Letter keyboard">
