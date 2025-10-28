@@ -1,9 +1,7 @@
 #+title: Tasks
-* TODO mobile keyboard
-* TODO offline mode
-it works intermittently. It seems the service worker stops working.
-* TODO why I need to hard-refresh every time (sw?)
-* TODO help page, the button let's go should be visible without needing to go the bottom of the page
+* TODO mobile iphne keyboard
+* TODO service worker not working properly
+** offline mode it works intermittently. It seems the service worker stops working.
 * TODO store progress
 * TODO display metrics
 * TODO display report
@@ -12,11 +10,11 @@ it works intermittently. It seems the service worker stops working.
 * IDEA improve desktop UI
 * IDEA gestures API
 * IDEA automatic functional testing
-https://hexdocs.pm/lustre/guide/07-full-stack-deployments.html
 * IDEA sync progress in backend
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE refactor: remove welcome modal and simplify help modal for better mobile UX
 * DONE improve UX to understand the game
 * DONE mobile first
 * DONE deploy with GH actions
@@ -39,6 +37,8 @@ https://hexdocs.pm/lustre/guide/04-spa-deployments.html
 * DONE question mark icon does not render properly
 * DONE enter key to continue
 * DONE feat: add native mobile keyboard support with clickable grid cells
+* DONE why I need to hard-refresh every time (sw?)
+sw, but it is not clear why
 * KILL game logic generic. 2 UIs: terminal and web
 * KILL word collections stored on the backend
 * KILL full stack deployment

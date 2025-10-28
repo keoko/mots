@@ -25,6 +25,44 @@ import {
 
 import { vibrateLetterInput, vibrateTap, vibrateInvalid } from './haptics.js';
 
+// Debug logging to visible panel (for iPhone where Eruda doesn't work)
+function debugLog(message) {
+  console.log(message);
+  const panel = document.getElementById('debug-panel');
+  if (panel) {
+    const timestamp = new Date().toLocaleTimeString();
+    panel.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+
+// Better iOS detection - multiple methods
+function isIOS() {
+  // Method 1: User Agent
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/i.test(ua)) {
+    return true;
+  }
+
+  // Method 2: Platform (older method)
+  if (/iPhone|iPad|iPod/.test(navigator.platform)) {
+    return true;
+  }
+
+  // Method 3: iOS 13+ detection (iPad reports as desktop)
+  if (navigator.maxTouchPoints > 1 && /MacIntel/.test(navigator.platform)) {
+    return true;
+  }
+
+  // Method 4: Check for Safari-specific features
+  if (navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+      navigator.maxTouchPoints && navigator.maxTouchPoints > 1) {
+    return true;
+  }
+
+  return false;
+}
+
 // Main render function
 export function render() {
   const mainContent = document.getElementById('main-content');
@@ -278,20 +316,42 @@ function renderPlayMode() {
           </div>
         </div>
 
-        <!-- Hidden input for mobile keyboard -->
+        <!-- iOS: Message explaining to use on-screen buttons -->
+        <div class="ios-keyboard-message ${isIOS() ? 'ios-device' : ''}">
+          💡 Use the letter buttons below to play
+        </div>
+
+        <!-- Android: Text input for native keyboard -->
         <input
           type="text"
           id="mobile-keyboard-input"
-          class="mobile-keyboard-input"
+          class="mobile-keyboard-input ${isIOS() ? 'ios-device' : ''}"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="none"
           spellcheck="false"
           inputmode="text"
-          aria-hidden="true"
-          tabindex="-1"
           enterkeyhint="go"
+          placeholder="Type here..."
         />
+
+        <!-- Debug panel for iPhone testing -->
+        <div id="debug-panel" style="
+          position: fixed;
+          bottom: 10px;
+          left: 10px;
+          right: 10px;
+          background: rgba(0,0,0,0.8);
+          color: #0f0;
+          font-family: monospace;
+          font-size: 11px;
+          padding: 10px;
+          border-radius: 8px;
+          z-index: 9999;
+          max-height: 150px;
+          overflow-y: auto;
+          line-height: 1.3;
+        "></div>
 
         ${renderGrid()}
         ${renderKeyboard()}
@@ -536,6 +596,21 @@ function attachPlayModeListeners() {
   console.log('[Mobile KB Diagnostics] Viewport height:', window.innerHeight);
   console.log('========================================');
 
+  // Debug to visible panel
+  const isIOSDetected = isIOS();
+  debugLog('=== DEVICE INFO ===');
+  debugLog('FULL UA:');
+  debugLog(navigator.userAgent);
+  debugLog('---');
+  debugLog('Platform: ' + navigator.platform);
+  debugLog('Vendor: ' + navigator.vendor);
+  debugLog('maxTouchPoints: ' + navigator.maxTouchPoints);
+  debugLog('---');
+  debugLog('iOS Detection (OLD): ' + (navigator.userAgent.match(/iPhone|iPad|iPod/i) ? 'YES' : 'NO'));
+  debugLog('iOS Detection (NEW): ' + (isIOSDetected ? 'YES ✅' : 'NO ❌'));
+  debugLog('Touch: ' + ('ontouchstart' in window ? 'YES' : 'NO'));
+  debugLog('==================');
+
   if (mobileInput) {
     console.log('[Mobile KB Setup] Attaching event listeners');
 
@@ -549,40 +624,36 @@ function attachPlayModeListeners() {
     console.log('[Mobile KB Diagnostics] Input readonly?', mobileInput.readOnly);
     console.log('[Mobile KB Diagnostics] Input tabIndex:', mobileInput.tabIndex);
 
-    // Auto-focus input to open keyboard on mobile when entering play mode
-    // Use requestAnimationFrame for better compatibility
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        console.log('[Mobile KB Diagnostics] ==> Attempting to focus input now');
-        console.log('[Mobile KB Diagnostics] Before focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
+    // iOS: Don't auto-focus (native keyboard is broken, use on-screen buttons only)
+    // Android: Auto-focus input to open keyboard
+    if (!isIOS()) {
+      // Auto-focus input to open keyboard on mobile when entering play mode
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          console.log('[Mobile KB Diagnostics] ==> Attempting to focus input now');
+          console.log('[Mobile KB Diagnostics] Before focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
 
-        try {
-          mobileInput.focus();
-          console.log('[Mobile KB Diagnostics] After focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
-          console.log('[Mobile KB Diagnostics] Focus successful?', document.activeElement === mobileInput);
-
-          // Log the input's position after focus
-          const rect = mobileInput.getBoundingClientRect();
-          console.log('[Mobile KB Diagnostics] Input position after focus:');
-          console.log('[Mobile KB Diagnostics]   - x:', rect.x);
-          console.log('[Mobile KB Diagnostics]   - y:', rect.y);
-          console.log('[Mobile KB Diagnostics]   - width:', rect.width);
-          console.log('[Mobile KB Diagnostics]   - height:', rect.height);
-          console.log('[Mobile KB Diagnostics]   - in viewport?', rect.y >= 0 && rect.y <= window.innerHeight);
-        } catch (error) {
-          console.error('[Mobile KB Diagnostics] ERROR focusing input:', error);
-        }
-
-        // iOS Safari workaround - focus twice
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-          console.log('[Mobile KB Diagnostics] iOS detected - will focus again in 100ms');
-          setTimeout(() => {
+          try {
             mobileInput.focus();
-            console.log('[Mobile KB Diagnostics] iOS second focus - activeElement:', document.activeElement === mobileInput);
-          }, 100);
-        }
-      }, 300);
-    });
+            console.log('[Mobile KB Diagnostics] After focus() - activeElement:', document.activeElement?.tagName, document.activeElement?.id);
+            console.log('[Mobile KB Diagnostics] Focus successful?', document.activeElement === mobileInput);
+
+            // Log the input's position after focus
+            const rect = mobileInput.getBoundingClientRect();
+            console.log('[Mobile KB Diagnostics] Input position after focus:');
+            console.log('[Mobile KB Diagnostics]   - x:', rect.x);
+            console.log('[Mobile KB Diagnostics]   - y:', rect.y);
+            console.log('[Mobile KB Diagnostics]   - width:', rect.width);
+            console.log('[Mobile KB Diagnostics]   - height:', rect.height);
+            console.log('[Mobile KB Diagnostics]   - in viewport?', rect.y >= 0 && rect.y <= window.innerHeight);
+          } catch (error) {
+            console.error('[Mobile KB Diagnostics] ERROR focusing input:', error);
+          }
+        }, 300);
+      });
+    } else {
+      console.log('[iOS] Auto-focus disabled - use on-screen buttons');
+    }
 
     // === DIAGNOSTIC PHASE 5: Click Handlers ===
     console.log('[Mobile KB Diagnostics] PHASE 5: Setting up click handlers');
@@ -623,10 +694,105 @@ function attachPlayModeListeners() {
     console.log('[Mobile KB Diagnostics] PHASE 6: Setting up input event listener');
 
     // Add focus/blur listeners for diagnostics
+    let lastFocusTime = 0;
     mobileInput.addEventListener('focus', () => {
+      lastFocusTime = Date.now();
       console.log('[Mobile KB Diagnostics] ===> INPUT FOCUSED <===');
       console.log('[Mobile KB Diagnostics] Focus event - activeElement:', document.activeElement?.id);
-      console.log('[Mobile KB Diagnostics] Focus event - timestamp:', Date.now());
+      console.log('[Mobile KB Diagnostics] Focus event - timestamp:', lastFocusTime);
+
+      // iOS: Don't call debugLog or any DOM modifications during focus
+      if (!isIOS()) {
+        debugLog('✅ INPUT FOCUSED @ ' + new Date().toLocaleTimeString());
+
+        // Check if blur happens quickly
+        setTimeout(() => {
+          if (document.activeElement !== mobileInput) {
+            debugLog('⚠️ Lost focus after 100ms!');
+          }
+        }, 100);
+
+        setTimeout(() => {
+          if (document.activeElement !== mobileInput) {
+            debugLog('⚠️ Lost focus after 500ms!');
+          } else {
+            debugLog('✓ Still focused after 500ms');
+          }
+        }, 500);
+      } else {
+        console.log('[iOS] Focus event - NO DOM modifications');
+      }
+
+      // Monitor value changes even if events don't fire (Chrome iOS workaround)
+      // iOS: Disabled polling to test if it's causing keyboard to close
+      if (!isIOS()) {
+        let lastValue = mobileInput.value;
+        const valueMonitor = setInterval(() => {
+          const currentValue = mobileInput.value;
+
+          if (currentValue !== lastValue) {
+            console.log('🔄 Silent change: "' + lastValue + '" -> "' + currentValue + '"');
+
+            // Chrome iOS doesn't fire input events, so manually trigger game logic
+            const state = getState();
+            const word = getCurrentWord();
+
+            if (!word) {
+              lastValue = currentValue;
+              return;
+            }
+
+            // Filter and process the value
+            const filteredValue = currentValue.toLowerCase().replace(/[^a-z]/g, '');
+            const maxLength = word.en.replace(/ /g, '').length;
+            const trimmedValue = filteredValue.substring(0, maxLength);
+
+            // Build the new guess with auto-inserted spaces
+            let newGuess = '';
+            let letterIndex = 0;
+
+            for (let i = 0; i < word.en.length && letterIndex < trimmedValue.length; i++) {
+              if (word.en[i] === ' ') {
+                newGuess += ' ';
+              } else {
+                newGuess += trimmedValue[letterIndex];
+                letterIndex++;
+              }
+            }
+
+            console.log('📝 Manual update: "' + newGuess + '"');
+
+            // Update state
+            setCurrentGuess(newGuess);
+
+            // Vibrate feedback
+            const oldLength = lastValue.replace(/[^a-z]/g, '').length;
+            const newLength = trimmedValue.length;
+
+            if (newLength > oldLength) {
+              vibrateLetterInput();
+            } else if (newLength < oldLength) {
+              vibrateTap();
+            }
+
+            // Update grid
+            updateGridDisplay();
+
+            // Sync input value
+            const cleanValue = newGuess.replace(/ /g, '');
+            if (currentValue !== cleanValue) {
+              mobileInput.value = cleanValue;
+            }
+            lastValue = cleanValue;
+          }
+
+          if (document.activeElement !== mobileInput) {
+            clearInterval(valueMonitor);
+          }
+        }, 100);
+      } else {
+        console.log('[iOS] Polling disabled - testing keyboard stability');
+      }
     });
 
     // iOS FIX: Track if we're actively typing to prevent keyboard dismissal
@@ -634,28 +800,18 @@ function attachPlayModeListeners() {
     let typingTimeout = null;
 
     mobileInput.addEventListener('blur', (e) => {
+      const blurTime = Date.now();
+      const timeSinceFocus = blurTime - lastFocusTime;
       console.log('[Mobile KB Diagnostics] ===> INPUT BLURRED <===');
       console.log('[Mobile KB Diagnostics] Blur event - activeElement:', document.activeElement?.id);
       console.log('[Mobile KB Diagnostics] Blur event - isTyping flag:', isTyping);
+      console.log('[Mobile KB Diagnostics] Time since focus:', timeSinceFocus + 'ms');
 
-      // iOS FIX: Aggressively prevent blur during typing
-      if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-        const state = getState();
-        const word = getCurrentWord();
-
-        // If we're in playing state and word isn't complete, FORCE focus back
-        if (state.gameState === GAME_STATES.PLAYING &&
-            word &&
-            state.currentGuess.replace(/ /g, '').length < word.en.replace(/ /g, '').length) {
-          console.log('[Mobile KB] iOS - AGGRESSIVE blur prevention - forcing focus back');
-
-          // Try multiple times to ensure focus is regained
-          e.target.focus();
-          setTimeout(() => e.target.focus(), 0);
-          setTimeout(() => e.target.focus(), 10);
-          setTimeout(() => e.target.focus(), 50);
-          setTimeout(() => e.target.focus(), 100);
-        }
+      // iOS: Don't call debugLog or try to prevent blur - just let it happen naturally
+      if (!isIOS()) {
+        debugLog('❌ INPUT BLURRED (' + timeSinceFocus + 'ms after focus)');
+      } else {
+        console.log('[iOS] Blur event - NO intervention');
       }
     });
 
@@ -664,6 +820,9 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB Diagnostics] BEFOREINPUT event fired');
       console.log('[Mobile KB Diagnostics] beforeinput - inputType:', e.inputType);
       console.log('[Mobile KB Diagnostics] beforeinput - data:', e.data);
+      if (!isIOS()) {
+        debugLog('⌨️ BEFOREINPUT: ' + e.data);
+      }
     });
 
     // Add keydown listener for diagnostics
@@ -672,6 +831,9 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB Diagnostics] keydown - key:', e.key);
       console.log('[Mobile KB Diagnostics] keydown - code:', e.code);
       console.log('[Mobile KB Diagnostics] keydown - keyCode:', e.keyCode);
+      if (!isIOS()) {
+        debugLog('⬇️ KEYDOWN: ' + e.key);
+      }
     });
 
     // Add keyup listener for diagnostics
@@ -679,6 +841,9 @@ function attachPlayModeListeners() {
       console.log('[Mobile KB Diagnostics] KEYUP event fired');
       console.log('[Mobile KB Diagnostics] keyup - key:', e.key);
       console.log('[Mobile KB Diagnostics] keyup - value:', e.target.value);
+      if (!isIOS()) {
+        debugLog('⬆️ KEYUP: ' + e.key + ' | val: ' + e.target.value);
+      }
     });
 
     console.log('[Mobile KB Diagnostics] Event listeners attached:');
@@ -699,6 +864,8 @@ function attachPlayModeListeners() {
     // Handle input from mobile keyboard
     mobileInput.addEventListener('input', (e) => {
       console.log('[Mobile KB] ===== INPUT EVENT FIRED =====');
+      debugLog('📝 INPUT EVENT: ' + e.target.value);
+
       const currentValue = e.target.value.toLowerCase();
 
       console.log('[Mobile KB] Input event:', currentValue);
@@ -761,43 +928,38 @@ function attachPlayModeListeners() {
       const verifyState = getState();
       console.log('[Mobile KB] Verified currentGuess:', verifyState.currentGuess);
 
-      // iOS FIX: Lock focus before and after DOM update to prevent keyboard dismissal
-      const isIOS = navigator.userAgent.match(/iPhone|iPad|iPod/i);
+      // iOS FIX: Skip grid update during typing to prevent keyboard dismissal
+      const isiOSDevice = isIOS();
 
-      if (isIOS) {
-        console.log('[Mobile KB] iOS - Locking focus before grid update');
+      if (isiOSDevice) {
+        console.log('[Mobile KB] iOS - SKIPPING ALL DOM operations to keep keyboard open');
+        console.log('[Mobile KB] iOS - Grid will update when word is submitted');
+        debugLog('iOS: Typed "' + newGuess + '" - NO grid update');
+
+        // Don't call updateGridDisplay() at all - Safari dismisses keyboard on DOM changes
+        // Don't query DOM, don't modify input value - do NOTHING that could close keyboard
+
         // Set typing flag
         isTyping = true;
         clearTimeout(typingTimeout);
 
-        // iOS FIX: Use requestAnimationFrame to defer grid update
-        // This allows the input event to complete before DOM manipulation
-        requestAnimationFrame(() => {
-          console.log('[Mobile KB] iOS - Updating grid in animation frame');
-          updateGridDisplay();
-
-          // Immediately re-focus after DOM update
-          console.log('[Mobile KB] iOS - Re-focusing after grid update');
-          mobileInput.focus();
-
-          // Also try again after a tiny delay
-          setTimeout(() => {
-            if (document.activeElement !== mobileInput) {
-              console.log('[Mobile KB] iOS - Lost focus, re-focusing again');
-              mobileInput.focus();
-            }
-          }, 10);
-        });
-
-        // Keep typing flag active for a short period
+        // Keep typing flag active
         typingTimeout = setTimeout(() => {
           isTyping = false;
           console.log('[Mobile KB] iOS - Typing session ended');
         }, 500);
-      } else {
-        // Android/Desktop: Update grid immediately
-        updateGridDisplay();
+
+        // iOS: Just update the last processed value, don't touch anything else
+        lastProcessedValue = newGuess.replace(/ /g, '');
+
+        // Exit early - do NOTHING else on iOS
+        return;
       }
+
+      // === ANDROID/DESKTOP ONLY - Everything below this point ===
+      console.log('[Mobile KB] Non-iOS - Updating grid');
+      debugLog('Non-iOS: Typed "' + newGuess + '" - updating grid');
+      updateGridDisplay();
 
       // Check if cells were actually updated
       const gridRows = document.querySelectorAll('.grid-row');
@@ -811,23 +973,10 @@ function attachPlayModeListeners() {
       const cleanValue = newGuess.replace(/ /g, '');
       lastProcessedValue = cleanValue;
 
-      // Only update if different to avoid cursor jumping and keyboard closing on iOS
+      // Only update if different to avoid cursor jumping
       if (e.target.value !== cleanValue) {
-        console.log('[Mobile KB] Updating input value from', e.target.value, 'to', cleanValue);
-
-        // iOS FIX: Don't change the input value if it's essentially the same
-        // This prevents keyboard from closing
-        const currentInputClean = e.target.value.toLowerCase().replace(/[^a-z]/g, '');
-        const newValueClean = cleanValue.toLowerCase().replace(/[^a-z]/g, '');
-
-        if (currentInputClean !== newValueClean) {
-          e.target.value = cleanValue;
-        } else {
-          console.log('[Mobile KB] Skipping input value update - values are essentially the same');
-        }
+        e.target.value = cleanValue;
       }
-
-      // Note: iOS re-focus is now handled above, right after updateGridDisplay()
     });
 
     // Handle Enter/Return key from mobile keyboard

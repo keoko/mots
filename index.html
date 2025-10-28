@@ -40,49 +40,6 @@
       </button>
     </header>
 
-    <!-- Welcome Modal -->
-    <div id="welcome-modal" class="modal" role="dialog" aria-labelledby="welcome-title" aria-hidden="true">
-      <div class="modal-overlay"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2 id="welcome-title">Welcome to Mots! 👋</h2>
-        </div>
-        <div class="modal-body">
-          <section class="help-section">
-            <h3>🎯 What is Mots?</h3>
-            <p>A fun way to learn English vocabulary for FAR students. Translate Catalan words to English with Wordle-style gameplay!</p>
-          </section>
-
-          <section class="help-section">
-            <h3>🎨 How it works</h3>
-            <p>Guess the English word and get color feedback:</p>
-            <div class="color-guide">
-              <div class="color-example">
-                <div class="grid-cell grid-cell-correct">H</div>
-                <span><strong>Green</strong> = Correct position</span>
-              </div>
-              <div class="color-example">
-                <div class="grid-cell grid-cell-present">O</div>
-                <span><strong>Orange</strong> = Wrong position</span>
-              </div>
-              <div class="color-example">
-                <div class="grid-cell grid-cell-absent">U</div>
-                <span><strong>Gray</strong> = Not in word</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="help-section">
-            <p><strong>💡 Tip:</strong> Click the <strong>❓</strong> button anytime for help!</p>
-          </section>
-
-          <button class="btn btn-primary" id="close-welcome" style="width: 100%; margin-top: var(--spacing-md);">
-            Let's Go! 🚀
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- Help Modal -->
     <div id="help-modal" class="modal" role="dialog" aria-labelledby="help-title" aria-hidden="true">
       <div class="modal-overlay" id="help-modal-overlay"></div>
@@ -92,43 +49,13 @@
           <button id="close-help" class="modal-close" aria-label="Close help">×</button>
         </div>
         <div class="modal-body">
-          <section class="help-section">
-            <h3>🎯 Goal</h3>
-            <p>Translate Catalan words to English. You have <strong>5 attempts</strong> per word.</p>
-          </section>
+          <p style="text-align: center; margin-bottom: var(--spacing-md);">Translate Catalan to English. 5 attempts per word.</p>
 
-          <section class="help-section">
-            <h3>🎮 Game Modes</h3>
-            <p><strong>📖 Study Mode:</strong> Review all words before playing</p>
-            <p><strong>🎮 Play Mode:</strong> Jump straight in and test yourself</p>
-          </section>
-
-          <section class="help-section">
-            <h3>🎨 Color Guide</h3>
-            <div class="color-guide">
-              <div class="color-example">
-                <div class="grid-cell grid-cell-correct">H</div>
-                <span>Correct letter, correct position</span>
-              </div>
-              <div class="color-example">
-                <div class="grid-cell grid-cell-present">O</div>
-                <span>Correct letter, wrong position</span>
-              </div>
-              <div class="color-example">
-                <div class="grid-cell grid-cell-absent">U</div>
-                <span>Letter not in word</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="help-section">
-            <h3>💡 Tips</h3>
-            <ul>
-              <li>Click the <strong>🎮 Mots</strong> title to return home anytime</li>
-              <li>Progress is saved automatically</li>
-              <li>Works completely offline after first visit</li>
-            </ul>
-          </section>
+          <p style="text-align: center; margin-bottom: var(--spacing-md);">
+            <span style="display: inline-block; background: #10b981; color: white; padding: 0.5rem; border-radius: 0.375rem; margin: 0 0.25rem;">✓</span>
+            <span style="display: inline-block; background: #f59e0b; color: white; padding: 0.5rem; border-radius: 0.375rem; margin: 0 0.25rem;">~</span>
+            <span style="display: inline-block; background: #64748b; color: white; padding: 0.5rem; border-radius: 0.375rem; margin: 0 0.25rem;">✗</span>
+          </p>
         </div>
         <div class="modal-footer">
           <div class="version-info">

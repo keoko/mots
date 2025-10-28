@@ -1,5 +1,7 @@
 #+title: Journal
 * 2025
+** 2025/Oct/28
+*** refactor: remove welcome modal and simplify help modal for better mobile UX
 ** 2025/Oct/25
 *** improve UX to understand the game
 *** improve offline mode

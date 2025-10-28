@@ -60,9 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Update version display
   updateVersionDisplay();
-
-  // Show welcome modal on first visit
-  showWelcomeIfFirstVisit();
 });
 
 // Handle keyboard input
@@ -123,35 +120,6 @@ function handleKeyboardInput(e) {
 function handleTitleClick() {
   backToTopics();
   render();
-}
-
-// Show welcome modal on first visit
-function showWelcomeIfFirstVisit() {
-  const WELCOME_SHOWN_KEY = 'mots_welcome_shown';
-  const welcomeModal = document.getElementById('welcome-modal');
-  const closeWelcome = document.getElementById('close-welcome');
-
-  if (!welcomeModal) return;
-
-  // Check if welcome has been shown before
-  const hasSeenWelcome = localStorage.getItem(WELCOME_SHOWN_KEY);
-
-  if (!hasSeenWelcome) {
-    // Show welcome modal
-    setTimeout(() => {
-      welcomeModal.classList.add('active');
-      welcomeModal.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
-    }, 500); // Small delay for better UX
-
-    // Close and mark as seen
-    closeWelcome?.addEventListener('click', () => {
-      welcomeModal.classList.remove('active');
-      welcomeModal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
-      localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
-    });
-  }
 }
 
 // Update version display in help modal
