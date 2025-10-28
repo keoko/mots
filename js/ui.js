@@ -303,6 +303,9 @@ function renderPlayMode() {
           </div>
         </div>
 
+        ${renderGrid()}
+        ${renderKeyboard()}
+
         <!-- Mobile keyboard input (hidden but functional) -->
         <input
           type="text"
@@ -316,9 +319,6 @@ function renderPlayMode() {
           enterkeyhint="go"
           aria-hidden="true"
         />
-
-        ${renderGrid()}
-        ${renderKeyboard()}
       </div>
     </div>
   `;
