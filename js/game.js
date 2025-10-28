@@ -33,7 +33,12 @@ const state = {
   currentStreak: 0,
   gameState: GAME_STATES.TOPIC_SELECTION,
   isWordRevealed: false,
-  letterStates: {} // Track letter states: {a: 'correct', b: 'present', c: 'absent'}
+  letterStates: {}, // Track letter states: {a: 'correct', b: 'present', c: 'absent'}
+  // Gamification: timing and scoring
+  sessionStartTime: null,
+  sessionEndTime: null,
+  wordStats: [], // Track stats per word: [{word, attempts, won, timeMs}]
+  totalScore: 0
 };
 
 // Alphabet for keyboard
@@ -87,6 +92,15 @@ export function selectMode(mode) {
   state.currentStreak = 0;
   state.isWordRevealed = false;
   state.letterStates = {};
+
+  // Start timing when entering play mode
+  if (mode === GAME_MODES.PLAY) {
+    state.sessionStartTime = Date.now();
+    state.wordStats = [];
+    state.totalScore = 0;
+    state.totalWon = 0;
+    state.totalLost = 0;
+  }
 
   if (mode === GAME_MODES.STUDY) {
     state.gameState = GAME_STATES.STUDYING;
@@ -233,15 +247,58 @@ export function submitGuess() {
   state.currentGuess = '';
 }
 
+// Calculate score for a word
+// Score formula: baseScore * (attemptsBonus) * (timeBonus) * (streakBonus)
+function calculateWordScore(won, attemptsUsed, timeTaken) {
+  if (!won) return 0;
+
+  const BASE_SCORE = 100;
+
+  // Attempts bonus: 100% for 1 attempt, decreasing by 15% per attempt
+  const attemptsBonus = Math.max(0.25, 1 - ((attemptsUsed - 1) * 0.15));
+
+  // Time bonus: 100% for <10s, decreasing to 50% at 60s
+  const timeSeconds = timeTaken / 1000;
+  const timeBonus = timeSeconds < 10 ? 1.0 : Math.max(0.5, 1 - ((timeSeconds - 10) / 100));
+
+  // Streak bonus: +10% per word in streak (capped at 50%)
+  const streakBonus = 1 + Math.min(0.5, state.currentStreak * 0.1);
+
+  return Math.round(BASE_SCORE * attemptsBonus * timeBonus * streakBonus);
+}
+
 // Move to next word
 export function nextWord() {
-  // Update score if in play mode
+  const word = getCurrentWord();
+  const wordStartTime = state.sessionStartTime + (state.wordStats.length > 0
+    ? state.wordStats.reduce((sum, s) => sum + s.timeMs, 0)
+    : 0);
+  const wordEndTime = Date.now();
+  const timeTaken = wordEndTime - wordStartTime;
+
+  // Update score and stats if in play mode
   if (state.gameMode === GAME_MODES.PLAY) {
-    if (state.gameState === GAME_STATES.WON) {
+    const won = state.gameState === GAME_STATES.WON;
+    const attemptsUsed = state.guesses.length;
+
+    if (won) {
       state.totalWon++;
     } else if (state.gameState === GAME_STATES.LOST) {
       state.totalLost++;
     }
+
+    // Calculate score for this word
+    const wordScore = calculateWordScore(won, attemptsUsed, timeTaken);
+    state.totalScore += wordScore;
+
+    // Track word stats
+    state.wordStats.push({
+      word: word.en,
+      attempts: attemptsUsed,
+      won: won,
+      timeMs: timeTaken,
+      score: wordScore
+    });
   }
 
   // Move to next word
@@ -250,6 +307,7 @@ export function nextWord() {
   // Check if we've completed all words
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
     if (state.gameMode === GAME_MODES.PLAY) {
+      state.sessionEndTime = Date.now();
       state.gameState = GAME_STATES.COMPLETE;
       // Save progress to localStorage
       saveProgress();

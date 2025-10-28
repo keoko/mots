@@ -654,24 +654,61 @@ function renderCompleteScreen() {
   const total = state.totalWon + state.totalLost;
   const percentage = total > 0 ? Math.round((state.totalWon / total) * 100) : 0;
 
+  // Calculate timing
+  const totalTimeMs = state.sessionEndTime - state.sessionStartTime;
+  const totalTimeSec = Math.round(totalTimeMs / 1000);
+  const minutes = Math.floor(totalTimeSec / 60);
+  const seconds = totalTimeSec % 60;
+  const timeDisplay = minutes > 0
+    ? `${minutes}m ${seconds}s`
+    : `${seconds}s`;
+
+  // Calculate average attempts
+  const totalAttempts = state.wordStats.reduce((sum, w) => sum + w.attempts, 0);
+  const avgAttempts = total > 0 ? (totalAttempts / total).toFixed(1) : 0;
+
   return `
     <div class="game game-complete" role="alert" aria-live="assertive">
       <div class="result-icon">🏁</div>
       <h2 class="result-title">Topic Complete!</h2>
+
+      <div class="score-highlight">
+        <div class="score-badge">
+          <div class="score-badge-value">${state.totalScore}</div>
+          <div class="score-badge-label">TOTAL SCORE</div>
+        </div>
+      </div>
+
       <div class="final-score">
         <div class="stat">
           <div class="stat-value">${state.totalWon}</div>
-          <div class="stat-label">Words Won</div>
+          <div class="stat-label">Won</div>
         </div>
         <div class="stat">
           <div class="stat-value">${state.totalLost}</div>
-          <div class="stat-label">Words Lost</div>
+          <div class="stat-label">Lost</div>
         </div>
         <div class="stat stat-highlight">
           <div class="stat-value">${percentage}%</div>
-          <div class="stat-label">Success Rate</div>
+          <div class="stat-label">Success</div>
         </div>
       </div>
+
+      <div class="final-score">
+        <div class="stat">
+          <div class="stat-value">${timeDisplay}</div>
+          <div class="stat-label">Time</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${avgAttempts}</div>
+          <div class="stat-label">Avg Attempts</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${state.currentStreak}</div>
+          <div class="stat-label">Final Streak</div>
+        </div>
+      </div>
+
       <div class="complete-buttons">
         <button class="btn btn-secondary" data-action="back-to-topics" aria-label="Choose another topic">
           ← Choose Topic

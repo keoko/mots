@@ -1,4 +1,8 @@
 #+title: Tasks
+* TODO issue: in iphone keyboard gets crazy. It loses the index of the current letter.
+* TODO push my scoring
+* IDEA sync global top ten scoring
+* DONE feat: add gamification with timing, scoring, and detailed stats
 * TODO store progress
 * TODO display metrics
 * TODO display report
@@ -55,6 +59,5 @@ it seems it was due to ES6 modules, it is not supported.
 it only works on Chrome
 * KILL gestures API
 it only works on Safari
-* KILL timing?
 * KILL multiplayer?
 * KILL deploy to fly.io

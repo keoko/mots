@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** feat: add gamification with timing, scoring, and detailed stats
+Implemented comprehensive scoring system that tracks time per word, calculates scores based on attempts/time/streaks, and displays detailed statistics on completion screen including total score, time taken, average attempts, and final streak. Score formula: 100 * attemptsBonus * timeBonus * streakBonus.
 *** fix: prevent iOS auto-zoom when focusing mobile keyboard input
 Fixed the misleading UX on iPhone where tapping the grid appeared to maximize the screen. Added maximum-scale=1.0 and user-scalable=no to viewport, plus font-size: 16px to the mobile input to prevent iOS's automatic zoom behavior when focusing on input fields.
 *** feat: improve help page with better structure and more detailed instructions

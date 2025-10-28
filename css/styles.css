@@ -277,6 +277,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Prevent pull-to-refresh on mobile */
   overscroll-behavior-y: contain;
+  /* Prevent double-tap zoom on iOS */
+  touch-action: manipulation;
 }
 
 /* Container - Mobile First */
@@ -845,6 +847,38 @@ body {
 /* Complete screen container */
 .game-complete {
   justify-content: center;
+}
+
+/* Score Highlight Badge */
+.score-highlight {
+  margin: var(--spacing-xl) 0;
+  display: flex;
+  justify-content: center;
+}
+
+.score-badge {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  min-width: 200px;
+}
+
+.score-badge-value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+  margin-bottom: var(--spacing-sm);
+}
+
+.score-badge-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
 }
 
 /* Final Score */
