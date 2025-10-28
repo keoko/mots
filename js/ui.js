@@ -558,10 +558,11 @@ function attachPlayModeListeners() {
       }
     });
 
-    // Sync input when focusing
+    // Sync input when focusing - preserve letters typed with visual keyboard
     mobileInput.addEventListener('focus', () => {
       const state = getState();
       const cleanValue = state.currentGuess.replace(/ /g, '');
+      mobileInput.value = cleanValue;
       lastProcessedValue = cleanValue;
     });
   }

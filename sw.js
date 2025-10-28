@@ -1,7 +1,7 @@
 // Service Worker for Mots - Offline-first PWA
 // IMPORTANT: Update VERSION when making changes to trigger cache update
 
-const VERSION = '1.0.34';
+const VERSION = '1.0.35';
 const CACHE_NAME = `mots-v${VERSION}`;
 
 // Error handler for unhandled errors

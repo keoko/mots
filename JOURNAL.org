@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: preserve visual keyboard input when switching to mobile keyboard
+When switching from visual keyboard to mobile keyboard, the mobile input now syncs with the current guess state, preserving any letters already typed with the visual keyboard.
 *** fix: remove auto-focus behavior on Android to allow users to see keyboard feedback
 Removed automatic keyboard focus on page load and after submitting guesses. Users now need to tap the grid to open the keyboard, which allows them to see the color-coded letter feedback (correct/present/absent) without the keyboard blocking the view.
 *** feat: display app version in footer for easier version tracking
