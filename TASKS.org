@@ -1,5 +1,4 @@
 #+title: Tasks
-* TODO mobile iphne keyboard
 * TODO store progress
 * TODO display metrics
 * TODO display report
@@ -15,6 +14,7 @@ only available in Safari
 * IDEA timing?
 * IDEA multiplayer?
 * IDEA deploy to fly.io
+* DONE fix: iOS keyboard now works by preventing global keydown handler from calling render()
 * DONE refactor: remove vibration/haptics API (Chrome-only, not widely supported)
 * DONE fix: refactor service worker to remove ES6 imports and add error handling
 * DONE refactor: replace help modal with dedicated help page for better mobile UX

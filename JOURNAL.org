@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: iOS keyboard now works by preventing global keydown handler from calling render()
+The issue was that the global keydown listener in app.js was catching mobile keyboard events and calling render(), which destroyed the input element while typing. Fixed by ignoring events from mobile-keyboard-input in the global handler.
 *** refactor: remove vibration/haptics API (Chrome-only, not widely supported)
 *** fix: refactor service worker to remove ES6 imports and add error handling
 *** refactor: replace help modal with dedicated help page for better mobile UX

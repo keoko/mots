@@ -134,3 +134,5 @@ From TASKS.org, pending improvements:
 - Hide/show word toggle in study mode
 - Store progress in localStorage
 - Potential additions: vibration API, gestures API, timing mechanics, multiplayer
+- Git commit message best practices recommend the first line
+  (subject) should be 50-72 characters max.

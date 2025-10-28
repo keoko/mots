@@ -2,7 +2,7 @@
 // This is the single source of truth for version information
 
 export const VERSION = {
-  app: '1.0.29',
+  app: '1.0.30',
   buildDate: '2025-10-28',
   gitCommit: '0066490'
 };

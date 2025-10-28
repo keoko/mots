@@ -50,6 +50,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Handle keyboard input
 function handleKeyboardInput(e) {
+  // Ignore events from the mobile keyboard input - it has its own handler
+  if (e.target && e.target.id === 'mobile-keyboard-input') {
+    return;
+  }
+
   const state = getState();
   const word = getCurrentWord();
 

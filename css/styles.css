@@ -618,55 +618,20 @@ body {
   100% { transform: rotateX(0); }
 }
 
-/* Mobile keyboard input */
-/* Android: Visible text input for native keyboard */
-/* iOS: Hidden - native keyboard is broken, use on-screen buttons only */
+/* Mobile keyboard input - hidden but functional */
 .mobile-keyboard-input {
-  width: 100%;
-  max-width: 100%;
-  height: 60px;
-  margin: 0 0 var(--spacing-md) 0;
-  padding: var(--spacing-md);
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  background: var(--color-surface);
-  border: 3px solid var(--color-primary);
-  border-radius: var(--radius-lg);
-  color: var(--color-primary);
-  box-shadow: var(--shadow-md);
-  display: block;
-  opacity: 1;
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* iOS: Hide input, show message instead */
-.mobile-keyboard-input.ios-device {
-  display: none;
-}
 
-.ios-keyboard-message {
-  display: none;
-  width: 100%;
-  padding: var(--spacing-sm);
-  margin: 0 0 var(--spacing-md) 0;
-  text-align: center;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  background: var(--color-background);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-}
-
-.ios-keyboard-message.ios-device {
-  display: block;
-}
-
-/* Desktop: hide both */
+/* Desktop: hide mobile input */
 @media (min-width: 768px) {
-  .mobile-keyboard-input,
-  .ios-keyboard-message {
+  .mobile-keyboard-input {
     display: none;
   }
 }
