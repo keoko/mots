@@ -479,15 +479,6 @@ function attachPlayModeListeners() {
   if (mobileInput) {
     let lastProcessedValue = '';
 
-    // Focus input on Android (not needed on iOS, works automatically)
-    if (!isIOS()) {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          mobileInput.focus();
-        }, 300);
-      });
-    }
-
     // Make grid cells clickable to focus input
     const clickableElements = [
       ...document.querySelectorAll('[data-grid-cell]'),
@@ -557,17 +548,13 @@ function attachPlayModeListeners() {
         submitGuess();
         render();
 
-        // Clear and refocus for next word
+        // Clear input value for next attempt
         lastProcessedValue = '';
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            const input = document.getElementById('mobile-keyboard-input');
-            if (input) {
-              input.value = '';
-              input.focus();
-            }
-          }, 150);
-        });
+        const input = document.getElementById('mobile-keyboard-input');
+        if (input) {
+          input.value = '';
+          input.blur(); // Close keyboard to show result
+        }
       }
     });
 

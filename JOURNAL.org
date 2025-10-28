@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: remove auto-focus behavior on Android to allow users to see keyboard feedback
+Removed automatic keyboard focus on page load and after submitting guesses. Users now need to tap the grid to open the keyboard, which allows them to see the color-coded letter feedback (correct/present/absent) without the keyboard blocking the view.
 *** feat: display app version in footer for easier version tracking
 Added version display to the footer on both main page and help page. This helps users verify they're not using a stale cached version.
 *** fix: limit mobile keyboard input to word length and sync with display to fix backspace behavior
