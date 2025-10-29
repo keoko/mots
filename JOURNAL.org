@@ -1,6 +1,18 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** feat: improve failed words display with card-based layout
+Redesigned failed words section in statistics for better readability:
+- Each topic is now a card with header (emoji, name, word count)
+- Words displayed in table rows (one per line) instead of grid
+- Each row shows: English word, Catalan translation, and failed count
+- Words sorted by failure count (descending) - most difficult first
+- Long words handled gracefully with word-wrap
+- Cleaner visual hierarchy with borders and proper spacing
+
+Layout: Topic card > Word rows (en/ca) > Failed count (right-aligned)
+No horizontal overflow issues with long words like "anti-cellulite cream"
+
 *** feat: add development data mode for faster iteration
 Created data.dev.js with minimal vocabulary dataset for development:
 - 4 small topics (12 words total vs 100+ in production)

@@ -1693,59 +1693,87 @@ body {
 
 /* Failed Words Section */
 .failed-words-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 
-.failed-words-topic {
-  margin-bottom: var(--spacing-lg);
+.failed-words-topic-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.failed-topic-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.failed-topic-emoji {
+  font-size: var(--font-size-xl);
 }
 
 .failed-topic-name {
   font-size: var(--font-size-base);
   font-weight: 600;
-  margin: 0 0 var(--spacing-sm) 0;
   color: var(--color-text);
+  flex: 1;
 }
 
-.failed-words-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
+.failed-topic-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
-.failed-word-card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm);
+.failed-words-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.failed-word-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--spacing-md);
+}
+
+.failed-word-row:last-child {
+  border-bottom: none;
+}
+
+.failed-word-content {
+  flex: 1;
+  min-width: 0; /* Allow text to shrink */
 }
 
 .failed-word-en {
   font-weight: 600;
   font-size: var(--font-size-base);
   color: var(--color-text);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: 2px;
+  word-wrap: break-word;
 }
 
 .failed-word-ca {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  margin-bottom: var(--spacing-xs);
+  word-wrap: break-word;
 }
 
 .failed-word-count {
   font-size: var(--font-size-xs);
   color: var(--color-danger);
   font-weight: 600;
-}
-
-.failed-words-more {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: var(--spacing-md);
-  color: var(--color-text-muted);
-  font-style: italic;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .practice-failed-btn {

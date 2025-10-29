@@ -910,18 +910,27 @@ function renderStatistics() {
             ${Object.entries(failedWords).map(([topicId, words]) => {
               if (words.length === 0) return '';
               const topic = topics.find(t => t.id === topicId);
+
+              // Sort words by failed count (descending)
+              const sortedWords = [...words].sort((a, b) => b.failedCount - a.failedCount);
+
               return `
-                <div class="failed-words-topic">
-                  <h4 class="failed-topic-name">${topic ? topic.emoji : ''} ${topic ? topic.name : topicId}</h4>
-                  <div class="failed-words-grid">
-                    ${words.slice(0, 20).map(wordObj => `
-                      <div class="failed-word-card">
-                        <div class="failed-word-en">${wordObj.en}</div>
-                        <div class="failed-word-ca">${wordObj.ca}</div>
+                <div class="failed-words-topic-card">
+                  <div class="failed-topic-header">
+                    <span class="failed-topic-emoji">${topic ? topic.emoji : ''}</span>
+                    <span class="failed-topic-name">${topic ? topic.name : topicId}</span>
+                    <span class="failed-topic-count">${words.length} word${words.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div class="failed-words-table">
+                    ${sortedWords.map(wordObj => `
+                      <div class="failed-word-row">
+                        <div class="failed-word-content">
+                          <div class="failed-word-en">${wordObj.en}</div>
+                          <div class="failed-word-ca">${wordObj.ca}</div>
+                        </div>
                         <div class="failed-word-count">Failed ${wordObj.failedCount}x</div>
                       </div>
                     `).join('')}
-                    ${words.length > 20 ? `<div class="failed-words-more">+${words.length - 20} more</div>` : ''}
                   </div>
                 </div>
               `;
