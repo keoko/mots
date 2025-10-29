@@ -1,0 +1,7 @@
+#+title: Ideas
+* Ideas
+** use IndexedDB, any benefits?
+** global scoring
+** E2E tests
+** improve desktop UI
+** touch events API
