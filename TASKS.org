@@ -1,4 +1,5 @@
 #+title: Tasks
+* DONE refactor: centralize version management in single source of truth
 * DONE fix: iPhone keyboard cursor position issue when adding/removing letters
 * TODO push my scoring
 * IDEA sync global top ten scoring

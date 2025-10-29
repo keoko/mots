@@ -1,45 +1,58 @@
 # Version Management
 
-Version is centralized in `js/version.js` as the single source of truth.
+Version is centralized in `js/version.js` as the **single source of truth**.
 
-## Updating the Version
+## Automatic Versioning (Git Hook)
 
-To bump the version, only update `js/version.js`:
+The version is automatically bumped on every commit to `main` branch via a git hook.
+The hook runs `bump-version.js` which:
+1. Increments the patch version in `js/version.js`
+2. Updates the version in `sw.js` (inlined, since SW can't use ES6 imports)
+3. Regenerates `manifest.json`
+
+## Manual Version Update
+
+If you need to manually update the version, **only edit `js/version.js`**:
 
 ```javascript
 export const VERSION = {
-  app: '1.0.5',           // <-- Change this
-  buildDate: '2025-10-25',
-  gitCommit: 'abc1234'
+  app: '1.0.5',           // <-- Edit this
+  buildDate: '2025-10-25', // <-- Edit this
+  gitCommit: 'abc1234'     // <-- Edit this
 };
 ```
 
-Then run:
+Then run to sync all files:
 
 ```bash
-node generate-manifest.js
+node bump-version.js
 ```
 
-This will automatically update `manifest.json` with the new version.
+## Files That Use VERSION
 
-## Files that use VERSION
+1. **js/version.js** - ✅ Single source of truth (EDIT THIS)
+2. **sw.js** - Auto-synced by bump-version.js (inlined, can't import)
+3. **manifest.json** - Auto-generated from version.js
+4. **index.html footer** - Dynamically displays version from version.js
+5. **help.html footer** - Dynamically displays version from version.js
 
-1. **js/version.js** - Source of truth ✅ EDIT THIS
-2. **manifest.json** - Auto-generated (run `node generate-manifest.js`)
-3. **sw.js** - Imports from version.js
-4. **index.html** - Dynamically updated by app.js
-
-## What gets updated automatically:
+## What Gets Updated:
 
 - Service worker cache name: `mots-v{version}`
-- Help modal version display
-- Console logging
-- Diagnostic info output
+- Footer version display
+- Console logging on app start
 - Manifest version field
+- Diagnostic info output
 
-## Before deploying:
+## Scripts:
 
-1. Update version in `js/version.js`
-2. Run `node generate-manifest.js`
-3. Commit both files
-4. Deploy
+- **bump-version.js** - Bumps version and syncs all files
+- **generate-manifest.js** - Regenerates manifest.json from version.js
+
+## Workflow:
+
+1. Make changes to code
+2. Commit to main branch
+3. Git hook automatically runs `bump-version.js`
+4. Version is bumped and all files are synced
+5. No manual intervention needed!

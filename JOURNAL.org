@@ -1,5 +1,8 @@
 #+title: Journal
 * 2025
+** 2025/Oct/29
+*** refactor: centralize version management in single source of truth
+Improved version management system to use js/version.js as single source of truth. Updated bump-version.js to automatically sync version across js/version.js, sw.js (inlined since SW can't use ES6 imports), and manifest.json. Updated VERSION.md documentation.
 ** 2025/Oct/28
 *** fix: iPhone keyboard cursor position issue when adding/removing letters
 Fixed iOS keyboard bug where the cursor position would get out of sync, causing backspace to delete the wrong character. Added explicit cursor position management using setSelectionRange() after programmatically modifying the input value to keep cursor at the end.
