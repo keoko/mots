@@ -1,6 +1,17 @@
 // data.js - Word collections organized by topic
 
-export const topics = [
+// Check if running in test mode via URL parameter
+const isTestMode = typeof window !== 'undefined' &&
+                   new URLSearchParams(window.location.search).get('test') === 'true';
+
+// Load test data if in test mode
+let loadedTopics;
+if (isTestMode) {
+  // Import will be resolved at runtime
+  const testData = await import('./data.test.js');
+  loadedTopics = testData.topics;
+} else {
+  loadedTopics = [
   {
     id: 'cosmetics',
     name: 'Cosmetics',
@@ -94,3 +105,6 @@ export const topics = [
     ]
   }
 ];
+}
+
+export const topics = loadedTopics;

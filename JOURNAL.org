@@ -1,6 +1,24 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** feat: add E2E testing with Playwright
+Set up Playwright for end-to-end testing with test fixture data approach:
+- Created tests/e2e/ directory with game-flow.spec.js and statistics.spec.js
+- Added data.test.js with minimal predictable test data (3 topics, 2-3 words each)
+- Modified data.js to support test mode via ?test=true URL parameter
+- Configured Playwright with both desktop (Chrome) and mobile (iPhone 13) projects
+- Added npm test scripts and .gitignore for test artifacts
+- Created tests/README.md with testing documentation
+
+Test coverage:
+- Topic/mode selection and navigation
+- Study mode word reveal and navigation
+- Play mode keyboard input
+- Statistics page navigation
+- Initial stats zero state
+
+This provides reliable, repeatable tests that won't break when real vocabulary data changes.
+
 *** feat: implement comprehensive progress tracking and statistics dashboard
 Implemented Phase 1 progress tracking system for FAR students to track their vocabulary learning. Features include:
 - Enhanced storage system to persist session results, failed words, and session history
