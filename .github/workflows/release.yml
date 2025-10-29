@@ -27,16 +27,21 @@ jobs:
           change_path: "js css index.html"  # Only version if these paths changed
           bump_each_commit: true
 
-      - name: Inject version into HTML
+      - name: Prepare deployment files
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           BUILD_DATE=$(date -u +"%Y-%m-%d")
 
-          echo "Injecting version: v$VERSION (built: $BUILD_DATE)"
+          echo "Preparing deployment with version: v$VERSION (built: $BUILD_DATE)"
 
-          # Replace version placeholder in index.html
-          sed -i "s/%%VERSION%%/$VERSION/g" index.html
-          sed -i "s/%%BUILD_DATE%%/$BUILD_DATE/g" index.html
+          # Create build directory
+          mkdir -p build
+
+          # Copy all files except .git and .github
+          rsync -av --exclude='.git' --exclude='.github' --exclude='build' --exclude='node_modules' ./ build/
+
+          # Replace version placeholder in build/index.html
+          sed -i "s/%%VERSION%%/$VERSION/g" build/index.html
 
       - name: Create GitHub Release
         if: steps.version.outputs.changed == 'true'
@@ -58,5 +63,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          exclude_assets: '.github,node_modules,.git'
+          publish_dir: ./build
