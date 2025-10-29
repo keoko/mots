@@ -1,0 +1,62 @@
+name: Release & Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full history for proper version calculation
+
+      - name: Calculate semantic version
+        id: version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          tag_prefix: "v"
+          major_pattern: "(BREAKING CHANGE:)|!:"
+          minor_pattern: "feat:"
+          version_format: "${major}.${minor}.${patch}"
+          change_path: "js css index.html"  # Only version if these paths changed
+          bump_each_commit: true
+
+      - name: Inject version into HTML
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD_DATE=$(date -u +"%Y-%m-%d")
+
+          echo "Injecting version: v$VERSION (built: $BUILD_DATE)"
+
+          # Replace version placeholder in index.html
+          sed -i "s/%%VERSION%%/$VERSION/g" index.html
+          sed -i "s/%%BUILD_DATE%%/$BUILD_DATE/g" index.html
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.changed == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.version.outputs.version_tag }}
+          name: Release ${{ steps.version.outputs.version_tag }}
+          generateReleaseNotes: true
+          skipIfReleaseExists: true
+          body: |
+            ## What's Changed
+
+            Auto-generated release notes from commits.
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.version.outputs.previous_version }}...${{ steps.version.outputs.version_tag }}
+
+      - name: Deploy to GitHub Pages
+        if: steps.version.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          exclude_assets: '.github,node_modules,.git'
