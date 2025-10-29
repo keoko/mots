@@ -1,0 +1,27 @@
+{
+  "name": "mots",
+  "version": "1.0.0",
+  "description": "``` mots/ ├── index.html           # Main HTML file ├── css/ │   └── styles.css      # All styles (use existing CSS from artifacts) ├── js/ │   ├── app.js          # Main application entry point │   ├── game.js         # Game state management │   ├── ui.js           # UI rendering functions │   └── data.js         # Topics data └── README.md           # This file ```",
+  "main": "bump-version.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/keoko/mots.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/keoko/mots/issues"
+  },
+  "homepage": "https://github.com/keoko/mots#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}

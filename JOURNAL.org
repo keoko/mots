@@ -1,0 +1,146 @@
+#+title: Journal
+* 2025
+** 2025/Oct/29
+*** feat: improve failed words display with card-based layout
+Redesigned failed words section in statistics for better readability:
+- Each topic is now a card with header (emoji, name, word count)
+- Words displayed in table rows (one per line) instead of grid
+- Each row shows: English word, Catalan translation, and failed count (just number)
+- Words sorted by failure count (descending) - most difficult first
+- Long words handled gracefully with word-wrap
+- Cleaner visual hierarchy with borders and proper spacing
+- Simplified count display: removed redundant "Failed" text and "x" suffix (just "5" instead of "Failed 5x")
+
+Layout: Topic card > Word rows (en/ca) > Count (right-aligned)
+No horizontal overflow issues with long words like "anti-cellulite cream"
+
+*** feat: add development data mode for faster iteration
+Created data.dev.js with minimal vocabulary dataset for development:
+- 4 small topics (12 words total vs 100+ in production)
+- Covers various word lengths: short (3-5 chars), medium (8-10), long (20+), and phrases
+- Activated via ?dev=true URL parameter
+- Updated data.js to support three modes: test, dev, and production
+- Fixed: Changed from dynamic imports to static imports (ES6 modules requirement)
+
+Usage:
+- http://localhost:8000 - Production (full vocabulary)
+- http://localhost:8000/?dev=true - Development (12 words)
+- http://localhost:8000/?test=true - Testing (E2E fixtures)
+
+*** feat: reduce attempts to 3 and implement multi-row grid for long words
+Improved UX for long words and multi-word phrases:
+- Reduced max attempts from 5 to 3 (better for mobile scrolling, encourages study mode)
+- Implemented multi-row grid layout that wraps words longer than 10 characters
+- Each guess attempt can span multiple rows (e.g., "anti-cellulite cream" = 2-3 rows)
+- Adjusted cell sizing to use chars-per-row instead of total word length
+- Tighter spacing for multi-row grids to save vertical space
+
+With 3 attempts × 2-3 rows per long word = 6-9 rows total (vs 10-15 with 5 attempts)
+This makes the game playable on mobile even with the longest vocabulary words.
+
+*** feat: add E2E testing with Playwright
+Set up Playwright for end-to-end testing with test fixture data approach:
+- Created tests/e2e/ directory with game-flow.spec.js and statistics.spec.js
+- Added data.test.js with minimal predictable test data (3 topics, 2-3 words each)
+- Modified data.js to support test mode via ?test=true URL parameter
+- Configured Playwright with both desktop (Chrome) and mobile (iPhone 13) projects
+- Added npm test scripts and .gitignore for test artifacts
+- Created tests/README.md with testing documentation
+
+Test coverage:
+- Topic/mode selection and navigation
+- Study mode word reveal and navigation
+- Play mode keyboard input
+- Statistics page navigation
+- Initial stats zero state
+
+This provides reliable, repeatable tests that won't break when real vocabulary data changes.
+
+*** feat: implement comprehensive progress tracking and statistics dashboard
+Implemented Phase 1 progress tracking system for FAR students to track their vocabulary learning. Features include:
+- Enhanced storage system to persist session results, failed words, and session history
+- Topic selection cards now show mastery levels (Not Started, Learning, Proficient, Mastered) with visual badges
+- Comprehensive statistics dashboard showing overall progress, recent sessions, failed words list, and per-topic breakdown
+- Failed words review mode that shuffles all failed words from all topics for targeted practice
+- Words successfully completed in practice mode are automatically removed from failed words list
+- Session history tracking (last 100 sessions) with timing and success rates
+- Word-level statistics aggregation across multiple play sessions
+
+Storage structure includes:
+- Topic progress: totalWon, totalLost, totalScore, totalTime, sessions, wordStats
+- Failed words: tracked per topic with failure counts and timestamps
+- Session history: complete record of each practice session with scores and timing
+
+UI additions:
+- Stats button on topic selection screen
+- Full statistics dashboard with multiple sections (overall stats, failed words, recent sessions, topic breakdown)
+- Mastery badges on topic cards (color-coded by success rate)
+- Practice Failed Words button to start targeted review mode
+
+*** refactor: centralize version management in single source of truth
+Improved version management system to use js/version.js as single source of truth. Updated bump-version.js to automatically sync version across js/version.js, sw.js (inlined since SW can't use ES6 imports), and manifest.json. Updated VERSION.md documentation.
+** 2025/Oct/28
+*** fix: iPhone keyboard cursor position issue when adding/removing letters
+Fixed iOS keyboard bug where the cursor position would get out of sync, causing backspace to delete the wrong character. Added explicit cursor position management using setSelectionRange() after programmatically modifying the input value to keep cursor at the end.
+*** feat: add gamification with timing, scoring, and detailed stats
+Implemented comprehensive scoring system that tracks time per word, calculates scores based on attempts/time/streaks, and displays detailed statistics on completion screen including total score, time taken, average attempts, and final streak. Score formula: 100 * attemptsBonus * timeBonus * streakBonus.
+*** fix: prevent iOS auto-zoom when focusing mobile keyboard input
+Fixed the misleading UX on iPhone where tapping the grid appeared to maximize the screen. Added maximum-scale=1.0 and user-scalable=no to viewport, plus font-size: 16px to the mobile input to prevent iOS's automatic zoom behavior when focusing on input fields.
+*** feat: improve help page with better structure and more detailed instructions
+Enhanced the help page with better visual organization, separate sections for each topic, improved examples, mobile-specific instructions, and a more comprehensive tips section. Added mode comparison, example boxes, and better styling.
+*** feat: allow closing mobile keyboard by tapping grid on Android
+Changed grid/word tap behavior to toggle the keyboard instead of only opening it. Now tapping these areas when the keyboard is open will close it, solving the issue where Android users couldn't dismiss the keyboard.
+*** fix: preserve visual keyboard input when switching to mobile keyboard
+When switching from visual keyboard to mobile keyboard, the mobile input now syncs with the current guess state, preserving any letters already typed with the visual keyboard.
+*** fix: remove auto-focus behavior on Android to allow users to see keyboard feedback
+Removed automatic keyboard focus on page load and after submitting guesses. Users now need to tap the grid to open the keyboard, which allows them to see the color-coded letter feedback (correct/present/absent) without the keyboard blocking the view.
+*** feat: display app version in footer for easier version tracking
+Added version display to the footer on both main page and help page. This helps users verify they're not using a stale cached version.
+*** fix: limit mobile keyboard input to word length and sync with display to fix backspace behavior
+The mobile keyboard allowed typing more letters than the word length, causing backspace to delete invisible characters instead of visible ones. Fixed by syncing the input field value to match the trimmed/displayed value.
+*** refactor: remove diagnostic console.log statements and hide mobile keyboard input placeholder
+Cleaned up all verbose console.log statements added during iOS keyboard debugging. Removed the "Type here..." placeholder and added aria-hidden to the mobile keyboard input for better UX.
+*** fix: iOS keyboard now works by preventing global keydown handler from calling render()
+The issue was that the global keydown listener in app.js was catching mobile keyboard events and calling render(), which destroyed the input element while typing. Fixed by ignoring events from mobile-keyboard-input in the global handler.
+*** refactor: remove vibration/haptics API (Chrome-only, not widely supported)
+*** fix: refactor service worker to remove ES6 imports and add error handling
+*** refactor: replace help modal with dedicated help page for better mobile UX
+*** refactor: remove welcome modal and simplify help modal for better mobile UX
+** 2025/Oct/25
+*** waste a lot of time troubleshooting why iphone keyboard does not work, still no clear answer
+*** improve UX to understand the game
+*** improve offline mode
+it seems it crashes the service worker after refreshing the mage on mobile (airplane mode)
+*** feat: add version tracking, enhanced keyboard, help modal, and offline-first PWA
+*** feat: implement dynamic grid cell sizing
+*** feat: add support for multi-word phrases with auto-spacing and visual separators
+*** refactor: use ISO 639-1 language codes (ca/en) instead of full names (catalan/english)
+*** feat: add native mobile keyboard support with clickable grid cells
+** 2025/Oct/24
+*** changed game UI like wordle
+*** started looking into local first apps: local persistence
+*** minor improvements
+- favicon
+** 2025/Oct/23
+*** changed my mind and we will implement this game with vanilla JS. Why?
+- no need of backend, I wanted to play with Erlang/Gleam but new there is no need.
+- LLMs make a lot of mistakes with Gleam and Lustre (e.g. list.at, FFIs in Lustre, etc)
+- prefer to explore more local first apps (e.g. web APIs, state sync, etc)
+*** difficulties to improve UI with Claude Code
+- wanted to fix some gaps, but it required several iterations and it didn't quite work
+** 2025/Oct/22
+*** word collections
+*** word collections moved to JSON files
+*** used FFI to fetch JSON files in JS
+had some issues to understand where to place the FFI file, and also the mapping of function names
+the FFI should be placed on src/ folder, and when building the app it is moved to the assets folder
+** 2025/Oct/21
+*** deploy with GH actions
+Looks like there are some mistakes on the documentation.
+https://hexdocs.pm/lustre/guide/04-spa-deployments.html
+
+** 2025/Oct/19
+*** chatgpt/claude makes mistakes when writing Gleam code like using list.at
+list.at function does not exist in Erlang
+*** erlang.get_line does not work
+I used another package called input, but maybe it could work using external function erlang.get_line, not sure how it works
