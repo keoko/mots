@@ -1,7 +1,7 @@
 {
   "name": "Mots - FAR Vocabulary Trainer",
   "short_name": "Mots",
-  "version": "1.0.59",
+  "version": "1.0.60",
   "description": "Learn English vocabulary for FAR students with an interactive word game",
   "start_url": "/",
   "display": "standalone",
