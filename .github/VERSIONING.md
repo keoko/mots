@@ -2,6 +2,8 @@
 
 This project uses automated semantic versioning through GitHub Actions. No more manual version bumps!
 
+**Current Version:** The version is displayed in the app footer and automatically updated on each deployment.
+
 ## How It Works
 
 ### 1. Conventional Commits
