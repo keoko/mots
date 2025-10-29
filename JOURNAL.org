@@ -1,6 +1,17 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** feat: reduce attempts to 3 and implement multi-row grid for long words
+Improved UX for long words and multi-word phrases:
+- Reduced max attempts from 5 to 3 (better for mobile scrolling, encourages study mode)
+- Implemented multi-row grid layout that wraps words longer than 10 characters
+- Each guess attempt can span multiple rows (e.g., "anti-cellulite cream" = 2-3 rows)
+- Adjusted cell sizing to use chars-per-row instead of total word length
+- Tighter spacing for multi-row grids to save vertical space
+
+With 3 attempts × 2-3 rows per long word = 6-9 rows total (vs 10-15 with 5 attempts)
+This makes the game playable on mobile even with the longest vocabulary words.
+
 *** feat: add E2E testing with Playwright
 Set up Playwright for end-to-end testing with test fixture data approach:
 - Created tests/e2e/ directory with game-flow.spec.js and statistics.spec.js

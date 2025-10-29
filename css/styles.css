@@ -535,8 +535,16 @@ body {
 .grid-container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm) 0;
+  align-items: center;
+}
+
+/* Grid attempt - contains one or more rows for a single guess */
+.grid-attempt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   align-items: center;
 }
 
@@ -546,10 +554,9 @@ body {
 }
 
 .grid-cell {
-  /* Dynamic sizing based on word length */
-  /* Mobile: Max 2.5rem, but shrink for words longer than 6 letters */
-  /* Formula: min(2.5rem, (viewport-width - padding - gaps) / word-length) */
-  --cell-size: min(2.5rem, calc((100vw - 4rem) / var(--word-length)));
+  /* Dynamic sizing based on chars per row (not total word length) */
+  /* For multi-row: use chars-per-row, for single row: use word-length */
+  --cell-size: min(2.5rem, calc((100vw - 4rem) / var(--chars-per-row, var(--word-length))));
   width: var(--cell-size);
   height: var(--cell-size);
   border: 2px solid var(--color-border);
@@ -563,9 +570,18 @@ body {
   transition: all var(--transition-base);
 }
 
+/* Multi-row grid gets slightly tighter spacing */
+.grid-multi-row .grid-attempt {
+  gap: 2px;
+}
+
+.grid-multi-row .grid-row {
+  gap: 4px;
+}
+
 @media (min-width: 640px) {
   .grid-cell {
-    --cell-size: min(3.5rem, calc((min(42rem, 100vw) - 6rem) / var(--word-length)));
+    --cell-size: min(3.5rem, calc((min(42rem, 100vw) - 6rem) / var(--chars-per-row, var(--word-length))));
     font-size: clamp(1rem, calc(var(--cell-size) * 0.55), var(--font-size-2xl));
   }
 }

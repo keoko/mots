@@ -374,42 +374,74 @@ function renderPlayMode() {
 }
 
 // Render the Wordle-style grid
+// Helper function to split long words into multiple rows
+function splitWordIntoRows(word, charsPerRow = 10) {
+  const chars = word.split('');
+  const rows = [];
+
+  let currentRow = [];
+  for (let i = 0; i < chars.length; i++) {
+    currentRow.push(chars[i]);
+
+    // Break at row limit or at spaces (word boundaries)
+    if (currentRow.length >= charsPerRow || i === chars.length - 1) {
+      rows.push(currentRow);
+      currentRow = [];
+    }
+  }
+
+  return rows;
+}
+
 function renderGrid() {
   const state = getState();
   const word = getCurrentWord();
   const wordLength = word.en.length;
   const targetWord = word.en;
 
+  // Split word into rows if longer than 10 characters
+  const charsPerRow = 10;
+  const wordRows = splitWordIntoRows(targetWord, charsPerRow);
+  const useMultiRow = wordLength > charsPerRow;
+
   return `
-    <div class="grid-container" data-word-length="${wordLength}" style="--word-length: ${wordLength};">
-      ${Array.from({ length: state.maxAttempts }).map((_, rowIndex) => {
-        const guess = state.guesses[rowIndex];
-        const isCurrentRow = rowIndex === state.guesses.length && state.guesses.length < state.maxAttempts;
+    <div class="grid-container ${useMultiRow ? 'grid-multi-row' : ''}" data-word-length="${wordLength}" style="--word-length: ${wordLength}; --chars-per-row: ${charsPerRow};">
+      ${Array.from({ length: state.maxAttempts }).map((_, attemptIndex) => {
+        const guess = state.guesses[attemptIndex];
+        const isCurrentRow = attemptIndex === state.guesses.length && state.guesses.length < state.maxAttempts;
 
         return `
-          <div class="grid-row">
-            ${Array.from({ length: wordLength }).map((_, colIndex) => {
-              const targetChar = targetWord[colIndex];
+          <div class="grid-attempt" data-attempt="${attemptIndex}">
+            ${wordRows.map((rowChars, rowIndex) => {
+              const startIdx = rowIndex * charsPerRow;
 
-              // Check if this position is a space in the target word
-              if (targetChar === ' ') {
-                return `<div class="grid-space"></div>`;
-              }
+              return `
+                <div class="grid-row">
+                  ${rowChars.map((targetChar, colIndex) => {
+                    const globalIdx = startIdx + colIndex;
 
-              let letter = '';
-              let cellClass = 'grid-cell';
+                    // Check if this position is a space in the target word
+                    if (targetChar === ' ') {
+                      return `<div class="grid-space"></div>`;
+                    }
 
-              if (guess) {
-                // Completed guess
-                letter = guess.word[colIndex].toUpperCase();
-                cellClass += ` grid-cell-${guess.feedback[colIndex]}`;
-              } else if (isCurrentRow && state.currentGuess[colIndex]) {
-                // Current guess being typed
-                letter = state.currentGuess[colIndex].toUpperCase();
-                cellClass += ' grid-cell-filled';
-              }
+                    let letter = '';
+                    let cellClass = 'grid-cell';
 
-              return `<div class="${cellClass}">${letter}</div>`;
+                    if (guess) {
+                      // Completed guess
+                      letter = guess.word[globalIdx].toUpperCase();
+                      cellClass += ` grid-cell-${guess.feedback[globalIdx]}`;
+                    } else if (isCurrentRow && state.currentGuess[globalIdx]) {
+                      // Current guess being typed
+                      letter = state.currentGuess[globalIdx].toUpperCase();
+                      cellClass += ' grid-cell-filled';
+                    }
+
+                    return `<div class="${cellClass}">${letter}</div>`;
+                  }).join('')}
+                </div>
+              `;
             }).join('')}
           </div>
         `;

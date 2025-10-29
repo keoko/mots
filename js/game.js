@@ -35,8 +35,8 @@ const state = {
   currentWordIndex: 0,
   guesses: [], // Array of guess objects: [{word: 'house', feedback: ['correct', 'absent', ...]}]
   currentGuess: '', // Current word being typed
-  attemptsLeft: 5,
-  maxAttempts: 5,
+  attemptsLeft: 3,
+  maxAttempts: 3,
   totalWon: 0,
   totalLost: 0,
   currentStreak: 0,
