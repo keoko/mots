@@ -1,6 +1,8 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/28
+*** fix: iPhone keyboard cursor position issue when adding/removing letters
+Fixed iOS keyboard bug where the cursor position would get out of sync, causing backspace to delete the wrong character. Added explicit cursor position management using setSelectionRange() after programmatically modifying the input value to keep cursor at the end.
 *** feat: add gamification with timing, scoring, and detailed stats
 Implemented comprehensive scoring system that tracks time per word, calculates scores based on attempts/time/streaks, and displays detailed statistics on completion screen including total score, time taken, average attempts, and final streak. Score formula: 100 * attemptsBonus * timeBonus * streakBonus.
 *** fix: prevent iOS auto-zoom when focusing mobile keyboard input

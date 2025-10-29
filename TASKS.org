@@ -1,5 +1,5 @@
 #+title: Tasks
-* TODO issue: in iphone keyboard gets crazy. It loses the index of the current letter.
+* DONE fix: iPhone keyboard cursor position issue when adding/removing letters
 * TODO push my scoring
 * IDEA sync global top ten scoring
 * DONE feat: add gamification with timing, scoring, and detailed stats

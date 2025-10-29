@@ -510,8 +510,12 @@ function attachPlayModeListeners() {
       const trimmedValue = filteredValue.substring(0, maxLength);
 
       // Sync the input value back to prevent extra characters
+      // Keep cursor at the end to prevent iOS cursor position bugs
       if (e.target.value !== trimmedValue) {
+        const cursorPos = trimmedValue.length;
         e.target.value = trimmedValue;
+        // Set cursor position explicitly to avoid iOS cursor jump issues
+        e.target.setSelectionRange(cursorPos, cursorPos);
       }
 
       // Build new guess with auto-inserted spaces
@@ -564,6 +568,9 @@ function attachPlayModeListeners() {
       const cleanValue = state.currentGuess.replace(/ /g, '');
       mobileInput.value = cleanValue;
       lastProcessedValue = cleanValue;
+      // Set cursor at the end to prevent iOS cursor position issues
+      const cursorPos = cleanValue.length;
+      mobileInput.setSelectionRange(cursorPos, cursorPos);
     });
   }
 }
