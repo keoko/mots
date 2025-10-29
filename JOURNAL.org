@@ -5,12 +5,13 @@
 Redesigned failed words section in statistics for better readability:
 - Each topic is now a card with header (emoji, name, word count)
 - Words displayed in table rows (one per line) instead of grid
-- Each row shows: English word, Catalan translation, and failed count
+- Each row shows: English word, Catalan translation, and failed count (just number)
 - Words sorted by failure count (descending) - most difficult first
 - Long words handled gracefully with word-wrap
 - Cleaner visual hierarchy with borders and proper spacing
+- Simplified count display: removed redundant "Failed" text and "x" suffix (just "5" instead of "Failed 5x")
 
-Layout: Topic card > Word rows (en/ca) > Failed count (right-aligned)
+Layout: Topic card > Word rows (en/ca) > Count (right-aligned)
 No horizontal overflow issues with long words like "anti-cellulite cream"
 
 *** feat: add development data mode for faster iteration

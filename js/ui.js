@@ -928,7 +928,7 @@ function renderStatistics() {
                           <div class="failed-word-en">${wordObj.en}</div>
                           <div class="failed-word-ca">${wordObj.ca}</div>
                         </div>
-                        <div class="failed-word-count">Failed ${wordObj.failedCount}x</div>
+                        <div class="failed-word-count">${wordObj.failedCount}</div>
                       </div>
                     `).join('')}
                   </div>
