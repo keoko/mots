@@ -2,9 +2,9 @@
 // This is the single source of truth for version information
 
 export const VERSION = {
-  app: '1.0.45',
+  app: '1.0.46',
   buildDate: '2025-10-29',
-  gitCommit: '556b97f'
+  gitCommit: '5b3b475'
 };
 
 // Generate cache name for service worker
