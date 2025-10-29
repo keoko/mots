@@ -1,6 +1,27 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** feat: implement comprehensive progress tracking and statistics dashboard
+Implemented Phase 1 progress tracking system for FAR students to track their vocabulary learning. Features include:
+- Enhanced storage system to persist session results, failed words, and session history
+- Topic selection cards now show mastery levels (Not Started, Learning, Proficient, Mastered) with visual badges
+- Comprehensive statistics dashboard showing overall progress, recent sessions, failed words list, and per-topic breakdown
+- Failed words review mode that shuffles all failed words from all topics for targeted practice
+- Words successfully completed in practice mode are automatically removed from failed words list
+- Session history tracking (last 100 sessions) with timing and success rates
+- Word-level statistics aggregation across multiple play sessions
+
+Storage structure includes:
+- Topic progress: totalWon, totalLost, totalScore, totalTime, sessions, wordStats
+- Failed words: tracked per topic with failure counts and timestamps
+- Session history: complete record of each practice session with scores and timing
+
+UI additions:
+- Stats button on topic selection screen
+- Full statistics dashboard with multiple sections (overall stats, failed words, recent sessions, topic breakdown)
+- Mastery badges on topic cards (color-coded by success rate)
+- Practice Failed Words button to start targeted review mode
+
 *** refactor: centralize version management in single source of truth
 Improved version management system to use js/version.js as single source of truth. Updated bump-version.js to automatically sync version across js/version.js, sw.js (inlined since SW can't use ES6 imports), and manifest.json. Updated VERSION.md documentation.
 ** 2025/Oct/28

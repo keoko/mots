@@ -20,8 +20,17 @@ import {
   startPlaying,
   restartGame,
   toggleWordReveal,
-  setCurrentGuess
+  setCurrentGuess,
+  goToStatistics,
+  startPracticingFailed
 } from './game.js';
+
+import {
+  getOverallStats,
+  getSessions,
+  getFailedWords,
+  getTopicProgress
+} from './storage.js';
 
 // iOS detection
 function isIOS() {
@@ -84,6 +93,10 @@ export function render() {
       mainContent.innerHTML = renderCompleteScreen();
       attachCompleteListeners();
       break;
+    case GAME_STATES.STATISTICS:
+      mainContent.innerHTML = renderStatistics();
+      attachStatisticsListeners();
+      break;
   }
 }
 
@@ -93,24 +106,52 @@ function renderTopicSelection() {
 
   return `
     <div class="topic-selection">
-      <h2 class="section-title">Choose a Topic</h2>
+      <div class="topic-header">
+        <h2 class="section-title">Choose a Topic</h2>
+        <button class="btn-statistics" aria-label="View statistics">
+          📊 Stats
+        </button>
+      </div>
       <div class="topic-grid" role="list">
         ${topics.map(topic => {
-          const hasProgress = topic.progress.totalPlayed > 0;
-          const winRate = topic.progress.totalPlayed > 0
-            ? Math.round((topic.progress.totalWon / (topic.progress.totalWon + topic.progress.totalLost)) * 100)
+          const hasProgress = topic.progress.totalAttempts > 0;
+          const totalWords = topic.words.length;
+          const wordsAttempted = topic.progress.totalAttempts || 0;
+          const completionRate = Math.round((wordsAttempted / totalWords) * 100);
+          const winRate = hasProgress
+            ? Math.round((topic.progress.totalWon / topic.progress.totalAttempts) * 100)
             : 0;
+
+          // Determine mastery level
+          let masteryClass = '';
+          let masteryLabel = '';
+          if (completionRate === 0) {
+            masteryClass = 'not-started';
+            masteryLabel = 'Not Started';
+          } else if (winRate < 70) {
+            masteryClass = 'learning';
+            masteryLabel = 'Learning';
+          } else if (winRate < 90) {
+            masteryClass = 'proficient';
+            masteryLabel = 'Proficient';
+          } else {
+            masteryClass = 'mastered';
+            masteryLabel = 'Mastered';
+          }
 
           return `
           <button
-            class="topic-card ${hasProgress ? 'has-progress' : ''}"
+            class="topic-card ${hasProgress ? 'has-progress' : ''} mastery-${masteryClass}"
             data-topic-id="${topic.id}"
             role="listitem"
-            aria-label="Select topic: ${topic.name}, ${topic.words.length} words${hasProgress ? `, ${winRate}% success rate` : ''}">
+            aria-label="Select topic: ${topic.name}, ${topic.words.length} words${hasProgress ? `, ${masteryLabel}, ${winRate}% success rate` : ''}">
             <div class="topic-emoji">${topic.emoji}</div>
             <div class="topic-name">${topic.name}</div>
             <div class="topic-count">${topic.words.length} words</div>
             ${hasProgress ? `
+              <div class="topic-mastery ${masteryClass}">
+                ${masteryLabel}
+              </div>
               <div class="topic-progress">
                 <span class="progress-stat">✓ ${topic.progress.totalWon}</span>
                 <span class="progress-stat">✗ ${topic.progress.totalLost}</span>
@@ -133,6 +174,14 @@ function attachTopicSelectionListeners() {
       render();
     });
   });
+
+  const statsButton = document.querySelector('.btn-statistics');
+  if (statsButton) {
+    statsButton.addEventListener('click', () => {
+      goToStatistics();
+      render();
+    });
+  }
 }
 
 // Render mode selection
@@ -738,4 +787,215 @@ function attachCompleteListeners() {
     backToModeSelection();
     render();
   });
+}
+
+// Render statistics dashboard
+function renderStatistics() {
+  const overallStats = getOverallStats();
+  const sessions = getSessions().slice(0, 10); // Show last 10 sessions
+  const failedWords = getFailedWords();
+  const topics = getTopics();
+
+  // Calculate aggregate failed words count
+  const totalFailedWords = Object.values(failedWords).reduce((sum, words) => sum + words.length, 0);
+
+  // Format time (milliseconds to minutes and seconds)
+  const formatTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds}s`;
+  };
+
+  // Format date
+  const formatDate = (isoString) => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  return `
+    <div class="statistics-page">
+      <div class="stats-header">
+        <button class="btn-back" aria-label="Back to topics">
+          ← Back
+        </button>
+        <h2 class="section-title">📊 Statistics</h2>
+      </div>
+
+      <!-- Overall Stats Section -->
+      <div class="stats-section">
+        <h3 class="stats-section-title">Overall Progress</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalTopics}</div>
+            <div class="stat-label">Topics Played</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalWords}</div>
+            <div class="stat-label">Total Words</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalWon}</div>
+            <div class="stat-label">Words Won</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalLost}</div>
+            <div class="stat-label">Words Lost</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.averageSuccessRate}%</div>
+            <div class="stat-label">Success Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalScore.toLocaleString()}</div>
+            <div class="stat-label">Total Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${formatTime(overallStats.totalTime)}</div>
+            <div class="stat-label">Time Played</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${overallStats.totalSessions}</div>
+            <div class="stat-label">Sessions</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Failed Words Section -->
+      ${totalFailedWords > 0 ? `
+        <div class="stats-section">
+          <h3 class="stats-section-title">Failed Words (${totalFailedWords})</h3>
+          <div class="failed-words-list">
+            ${Object.entries(failedWords).map(([topicId, words]) => {
+              if (words.length === 0) return '';
+              const topic = topics.find(t => t.id === topicId);
+              return `
+                <div class="failed-words-topic">
+                  <h4 class="failed-topic-name">${topic ? topic.emoji : ''} ${topic ? topic.name : topicId}</h4>
+                  <div class="failed-words-grid">
+                    ${words.slice(0, 20).map(wordObj => `
+                      <div class="failed-word-card">
+                        <div class="failed-word-en">${wordObj.en}</div>
+                        <div class="failed-word-ca">${wordObj.ca}</div>
+                        <div class="failed-word-count">Failed ${wordObj.failedCount}x</div>
+                      </div>
+                    `).join('')}
+                    ${words.length > 20 ? `<div class="failed-words-more">+${words.length - 20} more</div>` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+          <button class="btn btn-primary practice-failed-btn" data-action="practice-failed">
+            🎯 Practice Failed Words
+          </button>
+        </div>
+      ` : `
+        <div class="stats-section">
+          <div class="empty-state">
+            <div class="empty-icon">🎉</div>
+            <div class="empty-message">No failed words yet!</div>
+            <div class="empty-submessage">Keep up the great work!</div>
+          </div>
+        </div>
+      `}
+
+      <!-- Recent Sessions Section -->
+      ${sessions.length > 0 ? `
+        <div class="stats-section">
+          <h3 class="stats-section-title">Recent Sessions</h3>
+          <div class="sessions-list">
+            ${sessions.map(session => `
+              <div class="session-card">
+                <div class="session-header">
+                  <div class="session-topic">${session.topicName}</div>
+                  <div class="session-time">${formatDate(session.date)}</div>
+                </div>
+                <div class="session-stats">
+                  <span class="session-stat">Score: ${session.score}</span>
+                  <span class="session-stat">Time: ${formatTime(session.time)}</span>
+                  <span class="session-stat">✓ ${session.wordsWon}</span>
+                  <span class="session-stat">✗ ${session.wordsLost}</span>
+                  <span class="session-stat success-rate">${session.successRate}%</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Topic Breakdown Section -->
+      <div class="stats-section">
+        <h3 class="stats-section-title">Topic Breakdown</h3>
+        <div class="topic-breakdown">
+          ${topics.map(topic => {
+            const progress = getTopicProgress(topic.id);
+            const hasProgress = progress.totalAttempts > 0;
+            if (!hasProgress) return '';
+
+            const successRate = Math.round((progress.totalWon / progress.totalAttempts) * 100);
+            const avgTime = progress.sessions > 0 ? Math.round(progress.totalTime / progress.sessions) : 0;
+
+            return `
+              <div class="topic-breakdown-card">
+                <div class="topic-breakdown-header">
+                  <span class="topic-breakdown-emoji">${topic.emoji}</span>
+                  <span class="topic-breakdown-name">${topic.name}</span>
+                </div>
+                <div class="topic-breakdown-stats">
+                  <div class="breakdown-stat">
+                    <span class="breakdown-label">Success Rate</span>
+                    <span class="breakdown-value">${successRate}%</span>
+                  </div>
+                  <div class="breakdown-stat">
+                    <span class="breakdown-label">Won/Lost</span>
+                    <span class="breakdown-value">${progress.totalWon}/${progress.totalLost}</span>
+                  </div>
+                  <div class="breakdown-stat">
+                    <span class="breakdown-label">Sessions</span>
+                    <span class="breakdown-value">${progress.sessions}</span>
+                  </div>
+                  <div class="breakdown-stat">
+                    <span class="breakdown-label">Total Score</span>
+                    <span class="breakdown-value">${progress.totalScore.toLocaleString()}</span>
+                  </div>
+                  <div class="breakdown-stat">
+                    <span class="breakdown-label">Avg Time</span>
+                    <span class="breakdown-value">${formatTime(avgTime)}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function attachStatisticsListeners() {
+  const backButton = document.querySelector('.btn-back');
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      backToTopics();
+      render();
+    });
+  }
+
+  const practiceFailedButton = document.querySelector('[data-action="practice-failed"]');
+  if (practiceFailedButton) {
+    practiceFailedButton.addEventListener('click', () => {
+      startPracticingFailed();
+      render();
+    });
+  }
 }

@@ -1,7 +1,14 @@
 // game.js - Game state management
 
 import { topics } from './data.js';
-import { saveTopicProgress, getTopicProgress } from './storage.js';
+import {
+  saveTopicProgress,
+  getTopicProgress,
+  saveFailedWords,
+  saveSession,
+  getFailedWords,
+  removeFailedWord
+} from './storage.js';
 
 export const GAME_STATES = {
   TOPIC_SELECTION: 'topic_selection',
@@ -10,12 +17,14 @@ export const GAME_STATES = {
   PLAYING: 'playing',
   WON: 'won',
   LOST: 'lost',
-  COMPLETE: 'complete'
+  COMPLETE: 'complete',
+  STATISTICS: 'statistics'
 };
 
 export const GAME_MODES = {
   STUDY: 'study',
-  PLAY: 'play'
+  PLAY: 'play',
+  PRACTICE_FAILED: 'practice_failed'
 };
 
 // Game state
@@ -38,7 +47,10 @@ const state = {
   sessionStartTime: null,
   sessionEndTime: null,
   wordStats: [], // Track stats per word: [{word, attempts, won, timeMs}]
-  totalScore: 0
+  totalScore: 0,
+  // Practice failed words mode
+  practiceWords: null, // Array of failed words to practice
+  isPracticingFailed: false
 };
 
 // Alphabet for keyboard
@@ -111,6 +123,9 @@ export function selectMode(mode) {
 
 // Get current word
 export function getCurrentWord() {
+  if (state.isPracticingFailed && state.practiceWords) {
+    return state.practiceWords[state.currentWordIndex];
+  }
   if (!state.selectedTopic) return null;
   return state.selectedTopic.words[state.currentWordIndex];
 }
@@ -276,13 +291,26 @@ export function nextWord() {
   const wordEndTime = Date.now();
   const timeTaken = wordEndTime - wordStartTime;
 
-  // Update score and stats if in play mode
-  if (state.gameMode === GAME_MODES.PLAY) {
+  // Update score and stats if in play mode or practice failed mode
+  if (state.gameMode === GAME_MODES.PLAY || state.gameMode === GAME_MODES.PRACTICE_FAILED) {
     const won = state.gameState === GAME_STATES.WON;
     const attemptsUsed = state.guesses.length;
 
     if (won) {
       state.totalWon++;
+
+      // If practicing failed words and won, remove from failed list
+      if (state.isPracticingFailed && word) {
+        // Find the original topic for this word
+        const failedWords = getFailedWords();
+        for (const [topicId, words] of Object.entries(failedWords)) {
+          const foundWord = words.find(w => w.en === word.en && w.ca === word.ca);
+          if (foundWord) {
+            removeFailedWord(topicId, word.en);
+            break;
+          }
+        }
+      }
     } else if (state.gameState === GAME_STATES.LOST) {
       state.totalLost++;
     }
@@ -306,11 +334,13 @@ export function nextWord() {
 
   // Check if we've completed all words
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
-    if (state.gameMode === GAME_MODES.PLAY) {
+    if (state.gameMode === GAME_MODES.PLAY || state.gameMode === GAME_MODES.PRACTICE_FAILED) {
       state.sessionEndTime = Date.now();
       state.gameState = GAME_STATES.COMPLETE;
-      // Save progress to localStorage
-      saveProgress();
+      // Save progress to localStorage (but not for practice mode)
+      if (state.gameMode === GAME_MODES.PLAY) {
+        saveProgress();
+      }
     } else {
       // In study mode, stay on last word
       state.currentWordIndex = state.selectedTopic.words.length - 1;
@@ -350,6 +380,8 @@ export function backToTopics() {
   state.totalWon = 0;
   state.totalLost = 0;
   state.currentStreak = 0;
+  state.isPracticingFailed = false;
+  state.practiceWords = null;
   state.gameState = GAME_STATES.TOPIC_SELECTION;
 }
 
@@ -391,15 +423,99 @@ export function toggleWordReveal() {
   }
 }
 
+// Go to statistics page
+export function goToStatistics() {
+  state.gameState = GAME_STATES.STATISTICS;
+}
+
+// Start practicing failed words
+export function startPracticingFailed() {
+  const failedWords = getFailedWords();
+
+  // Collect all failed words from all topics
+  const allFailedWords = [];
+  Object.entries(failedWords).forEach(([topicId, words]) => {
+    const topic = state.topics.find(t => t.id === topicId);
+    if (topic && words.length > 0) {
+      allFailedWords.push(...words);
+    }
+  });
+
+  if (allFailedWords.length === 0) {
+    // No failed words to practice
+    return;
+  }
+
+  // Shuffle the failed words for variety
+  const shuffled = allFailedWords.sort(() => Math.random() - 0.5);
+
+  // Set up practice mode
+  state.practiceWords = shuffled;
+  state.isPracticingFailed = true;
+  state.gameMode = GAME_MODES.PRACTICE_FAILED;
+  state.currentWordIndex = 0;
+  state.guesses = [];
+  state.currentGuess = '';
+  state.attemptsLeft = state.maxAttempts;
+  state.currentStreak = 0;
+  state.isWordRevealed = false;
+  state.letterStates = {};
+  state.sessionStartTime = Date.now();
+  state.wordStats = [];
+  state.totalScore = 0;
+  state.totalWon = 0;
+  state.totalLost = 0;
+  state.gameState = GAME_STATES.PLAYING;
+
+  // Create a virtual topic for UI display
+  state.selectedTopic = {
+    id: 'failed-words-practice',
+    name: 'Failed Words Practice',
+    emoji: '🎯',
+    words: shuffled
+  };
+}
+
 // Save current game progress to localStorage
 function saveProgress() {
   if (!state.selectedTopic) return;
 
-  const currentProgress = getTopicProgress(state.selectedTopic.id);
+  // Calculate total time
+  const totalTime = state.sessionEndTime - state.sessionStartTime;
 
+  // Convert wordStats array to object for storage
+  const wordStatsObj = {};
+  state.wordStats.forEach(stat => {
+    wordStatsObj[stat.word] = stat;
+  });
+
+  // Save topic progress with detailed stats
   saveTopicProgress(state.selectedTopic.id, {
-    totalWon: currentProgress.totalWon + state.totalWon,
-    totalLost: currentProgress.totalLost + state.totalLost,
-    totalPlayed: currentProgress.totalPlayed + 1
+    totalWon: state.totalWon,
+    totalLost: state.totalLost,
+    totalScore: state.totalScore,
+    totalTime: totalTime,
+    wordStats: wordStatsObj
+  });
+
+  // Save failed words
+  const failedWords = state.selectedTopic.words.filter((word, index) => {
+    const stat = state.wordStats[index];
+    return stat && !stat.won;
+  });
+
+  if (failedWords.length > 0) {
+    saveFailedWords(state.selectedTopic.id, failedWords);
+  }
+
+  // Save session history
+  saveSession({
+    topicId: state.selectedTopic.id,
+    topicName: state.selectedTopic.name,
+    score: state.totalScore,
+    time: totalTime,
+    wordsWon: state.totalWon,
+    wordsLost: state.totalLost,
+    successRate: Math.round((state.totalWon / (state.totalWon + state.totalLost)) * 100)
   });
 }
