@@ -1,16 +1,22 @@
 // data.js - Word collections organized by topic
 
-// Check if running in test mode via URL parameter
-const isTestMode = typeof window !== 'undefined' &&
-                   new URLSearchParams(window.location.search).get('test') === 'true';
+// Check URL parameters for different data modes
+const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const isTestMode = urlParams?.get('test') === 'true';
+const isDevMode = urlParams?.get('dev') === 'true';
 
-// Load test data if in test mode
+// Load appropriate data based on mode
 let loadedTopics;
 if (isTestMode) {
-  // Import will be resolved at runtime
+  // Test mode: minimal predictable data for E2E tests
   const testData = await import('./data.test.js');
   loadedTopics = testData.topics;
+} else if (isDevMode) {
+  // Dev mode: small dataset with various word lengths for development
+  const devData = await import('./data.dev.js');
+  loadedTopics = devData.topics;
 } else {
+  // Production mode: full vocabulary dataset
   loadedTopics = [
   {
     id: 'cosmetics',

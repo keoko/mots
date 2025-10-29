@@ -1,6 +1,18 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** feat: add development data mode for faster iteration
+Created data.dev.js with minimal vocabulary dataset for development:
+- 4 small topics (12 words total vs 100+ in production)
+- Covers various word lengths: short (3-5 chars), medium (8-10), long (20+), and phrases
+- Activated via ?dev=true URL parameter
+- Updated data.js to support three modes: test, dev, and production
+
+Usage:
+- http://localhost:8000 - Production (full vocabulary)
+- http://localhost:8000/?dev=true - Development (12 words)
+- http://localhost:8000/?test=true - Testing (E2E fixtures)
+
 *** feat: reduce attempts to 3 and implement multi-row grid for long words
 Improved UX for long words and multi-word phrases:
 - Reduced max attempts from 5 to 3 (better for mobile scrolling, encourages study mode)
