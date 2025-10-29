@@ -7,6 +7,7 @@ Created data.dev.js with minimal vocabulary dataset for development:
 - Covers various word lengths: short (3-5 chars), medium (8-10), long (20+), and phrases
 - Activated via ?dev=true URL parameter
 - Updated data.js to support three modes: test, dev, and production
+- Fixed: Changed from dynamic imports to static imports (ES6 modules requirement)
 
 Usage:
 - http://localhost:8000 - Production (full vocabulary)

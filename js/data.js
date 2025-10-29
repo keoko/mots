@@ -1,20 +1,22 @@
 // data.js - Word collections organized by topic
 
+// Note: Import data files at the top - conditional imports don't work with ES6 modules
+import { topics as testTopics } from './data.test.js';
+import { topics as devTopics } from './data.dev.js';
+
 // Check URL parameters for different data modes
 const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
 const isTestMode = urlParams?.get('test') === 'true';
 const isDevMode = urlParams?.get('dev') === 'true';
 
-// Load appropriate data based on mode
+// Select appropriate data based on mode
 let loadedTopics;
 if (isTestMode) {
   // Test mode: minimal predictable data for E2E tests
-  const testData = await import('./data.test.js');
-  loadedTopics = testData.topics;
+  loadedTopics = testTopics;
 } else if (isDevMode) {
   // Dev mode: small dataset with various word lengths for development
-  const devData = await import('./data.dev.js');
-  loadedTopics = devData.topics;
+  loadedTopics = devTopics;
 } else {
   // Production mode: full vocabulary dataset
   loadedTopics = [
