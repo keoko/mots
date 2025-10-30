@@ -1,6 +1,10 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/29
+*** CLAUDE: issues creating github workflow to tag, release, and publish pages
+it has been impossible to create a github workflow to create a version, release, add a file with the new version and publish the pages
+*** CLAUDE: issues with service worker
+still having issues to create a service worker to refresh the app
 *** feat: improve failed words display with card-based layout
 Redesigned failed words section in statistics for better readability:
 - Each topic is now a card with header (emoji, name, word count)
