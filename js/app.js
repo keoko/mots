@@ -2,17 +2,26 @@
 
 import { render } from './ui.js';
 import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics, nextWord, GAME_STATES } from './game.js';
-import { version } from '../package.json' assert { type: 'json' };
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎮 Mots - Starting game...');
-  console.log(`📦 Version: ${version}`);
 
-  // Display version in footer
-  const versionElement = document.getElementById('app-version');
-  if (versionElement) {
-    versionElement.textContent = `v${version}`;
+  // Fetch version from package.json
+  try {
+    const response = await fetch('/package.json');
+    const pkg = await response.json();
+    const version = pkg.version;
+
+    console.log(`📦 Version: ${version}`);
+
+    // Display version in footer
+    const versionElement = document.getElementById('app-version');
+    if (versionElement) {
+      versionElement.textContent = `v${version}`;
+    }
+  } catch (error) {
+    console.error('Failed to load version:', error);
   }
 
   // Initial render
