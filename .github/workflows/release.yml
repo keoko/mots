@@ -170,6 +170,15 @@ jobs:
           }
           EOF
 
+      - name: Create release archive
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd build
+          zip -r "../mots-v${VERSION}.zip" .
+          cd ..
+          echo "Created mots-v${VERSION}.zip"
+
       - name: Create GitHub Release
         if: steps.version.outputs.changed == 'true'
         uses: ncipollo/release-action@v1
@@ -178,10 +187,21 @@ jobs:
           name: Release ${{ steps.version.outputs.version_tag }}
           generateReleaseNotes: true
           skipIfReleaseExists: true
+          artifacts: "mots-v${{ steps.version.outputs.version }}.zip"
+          artifactContentType: application/zip
           body: |
             ## What's Changed
 
             Auto-generated release notes from commits.
+
+            ### Download
+
+            Download `mots-v${{ steps.version.outputs.version }}.zip` below to run the app locally.
+
+            To use:
+            1. Download and extract the zip file
+            2. Serve the directory with any HTTP server (e.g., `npx http-server` or `python3 -m http.server`)
+            3. Open in your browser
 
             **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.version.outputs.previous_version }}...${{ steps.version.outputs.version_tag }}
 
