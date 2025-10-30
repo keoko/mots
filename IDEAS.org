@@ -1,7 +1,9 @@
 #+title: Ideas
-* Ideas
-** use IndexedDB, any benefits?
-** global scoring
-** E2E tests
-** improve desktop UI
-** touch events API
+* fix hard refresh issues
+* fix service worker
+* use IndexedDB, any benefits?
+* global scoring
+* E2E tests
+* improve desktop UI
+* touch events API
+* claude setup-install does not work on bash?

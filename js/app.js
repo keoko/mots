@@ -106,7 +106,7 @@ async function registerServiceWorker() {
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register('./sw.js');
 
     // Check for updates on page load
     registration.update();
