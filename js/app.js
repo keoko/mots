@@ -106,7 +106,7 @@ async function registerServiceWorker() {
   }
 
   try {
-      const registration = await navigator.serviceWorker.register('sw.js', {scope: '/mots/'});
+      const registration = await navigator.serviceWorker.register('/mots/sw.js', {scope: '/mots/'});
 
     // Check for updates on page load
     registration.update();

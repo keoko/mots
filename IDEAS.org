@@ -1,9 +1,14 @@
 #+title: Ideas
-* fix hard refresh issues
-* fix service worker
-* use IndexedDB, any benefits?
-* global scoring
-* E2E tests
-* improve desktop UI
-* touch events API
-* claude setup-install does not work on bash?
+* Ideas
+** fix hard refresh issues
+** in bump version add tag
+** fix service worker
+** use IndexedDB, any benefits?
+** global scoring bb
+** E2E tests
+** improve desktop UI
+** touch events API
+** claude setup-install does not work on bash?
+
+* Explore
+** what is AppCache
