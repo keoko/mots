@@ -1,5 +1,8 @@
 #+title: Journal
 * 2025
+** 2025/Oct/30
+*** CLAUDE: leaves a lot of stale files
+when making several changes over the same topic, it loses track of files and do not update all of them (e.g. copy the same version all over)
 ** 2025/Oct/29
 *** CLAUDE: issues creating github workflow to tag, release, and publish pages
 it has been impossible to create a github workflow to create a version, release, add a file with the new version and publish the pages
