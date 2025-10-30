@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Fetch version from package.json
   try {
-    const response = await fetch('/package.json');
+    const response = await fetch('../package.json');
     const pkg = await response.json();
     const version = pkg.version;
 
