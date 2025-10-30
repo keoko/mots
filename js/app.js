@@ -2,17 +2,17 @@
 
 import { render } from './ui.js';
 import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics, nextWord, GAME_STATES } from './game.js';
-import { VERSION } from './version.js';
+import { version } from '../package.json' assert { type: 'json' };
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🎮 Mots - Starting game...');
-  console.log(`📦 Version: ${VERSION.app} (${VERSION.gitCommit})`);
+  console.log(`📦 Version: ${version}`);
 
   // Display version in footer
   const versionElement = document.getElementById('app-version');
   if (versionElement) {
-    versionElement.textContent = `v${VERSION.app}`;
+    versionElement.textContent = `v${version}`;
   }
 
   // Initial render
