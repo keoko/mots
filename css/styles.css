@@ -862,7 +862,7 @@ body {
 
 /* Complete screen container */
 .game-complete {
-  justify-content: center;
+  justify-content: safe center;
 }
 
 /* Score Highlight Badge */
