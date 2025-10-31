@@ -5,10 +5,10 @@
 ** fix service worker
 ** use IndexedDB, any benefits?
 ** global scoring bb
-** E2E tests
-** improve desktop UI
+** E2E tests, playwright issues on arch linux
 ** touch events API
 ** claude setup-install does not work on bash?
+** improve desktop UI
 
 * Explore
 ** what is AppCache

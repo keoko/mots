@@ -1,7 +1,7 @@
 // Service Worker for Mots - Offline-first PWA
 // Version is automatically read from package.json
 
-const VERSION = '0.0.68';
+const VERSION = '0.0.69';
 const CACHE_NAME = `mots-v${VERSION}`;
 
 // Error handler for unhandled errors
