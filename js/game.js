@@ -138,10 +138,10 @@ export function addLetter(letter) {
   if (state.currentGuess.length < word.en.length) {
     state.currentGuess += letter.toLowerCase();
 
-    // Auto-insert spaces if the next character in the target word is a space
+    // Auto-insert spaces and hyphens if the next character in the target word is a space or hyphen
     while (state.currentGuess.length < word.en.length &&
-           word.en[state.currentGuess.length] === ' ') {
-      state.currentGuess += ' ';
+           (word.en[state.currentGuess.length] === ' ' || word.en[state.currentGuess.length] === '-')) {
+      state.currentGuess += word.en[state.currentGuess.length];
     }
   }
 }
@@ -150,9 +150,10 @@ export function addLetter(letter) {
 export function removeLetter() {
   state.currentGuess = state.currentGuess.slice(0, -1);
 
-  // Remove any trailing spaces that were auto-inserted
+  // Remove any trailing spaces or hyphens that were auto-inserted
   while (state.currentGuess.length > 0 &&
-         state.currentGuess[state.currentGuess.length - 1] === ' ') {
+         (state.currentGuess[state.currentGuess.length - 1] === ' ' ||
+          state.currentGuess[state.currentGuess.length - 1] === '-')) {
     state.currentGuess = state.currentGuess.slice(0, -1);
   }
 }

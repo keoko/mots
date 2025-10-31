@@ -374,20 +374,41 @@ function renderPlayMode() {
 }
 
 // Render the Wordle-style grid
-// Helper function to split long words into multiple rows
+// Helper function to split words into rows with centering metadata
+// Returns array of {chars: array, centered: boolean}
+// Spaces split into separate words (centered), hyphens stay together (not centered)
 function splitWordIntoRows(word, charsPerRow = 10) {
+  // If word contains spaces, split at spaces first
+  if (word.includes(' ')) {
+    const words = word.split(' ');
+    const rows = [];
+
+    words.forEach(w => {
+      // If this word part (which might contain hyphens) is longer than charsPerRow, split it
+      if (w.length > charsPerRow) {
+        const chars = w.split('');
+        for (let i = 0; i < chars.length; i += charsPerRow) {
+          const chunk = chars.slice(i, i + charsPerRow);
+          // First chunk of a space-separated word is centered, continuation rows are not
+          rows.push({ chars: chunk, centered: i === 0 });
+        }
+      } else {
+        // Whole word fits in one row, center it
+        rows.push({ chars: w.split(''), centered: true });
+      }
+    });
+
+    return rows;
+  }
+
+  // Otherwise, split long words by character count (never centered)
+  // This includes hyphenated words like "anti-cellulite"
   const chars = word.split('');
   const rows = [];
 
-  let currentRow = [];
-  for (let i = 0; i < chars.length; i++) {
-    currentRow.push(chars[i]);
-
-    // Break at row limit or at spaces (word boundaries)
-    if (currentRow.length >= charsPerRow || i === chars.length - 1) {
-      rows.push(currentRow);
-      currentRow = [];
-    }
+  for (let i = 0; i < chars.length; i += charsPerRow) {
+    const chunk = chars.slice(i, i + charsPerRow);
+    rows.push({ chars: chunk, centered: false });
   }
 
   return rows;
@@ -412,17 +433,47 @@ function renderGrid() {
 
         return `
           <div class="grid-attempt" data-attempt="${attemptIndex}">
-            ${wordRows.map((rowChars, rowIndex) => {
-              const startIdx = rowIndex * charsPerRow;
+            ${wordRows.map((rowData, rowIndex) => {
+              // For compound words, track which word we're in and add spaces
+              let startIdx = 0;
+
+              if (targetWord.includes(' ')) {
+                // Split original word by spaces to know where boundaries are
+                const originalWords = targetWord.split(' ');
+                let wordIndex = 0;
+                let charsInCurrentWord = 0;
+
+                for (let i = 0; i < rowIndex; i++) {
+                  startIdx += wordRows[i].chars.length;
+
+                  // Track when we finish a word and need to add a space
+                  charsInCurrentWord += wordRows[i].chars.length;
+                  if (charsInCurrentWord >= originalWords[wordIndex].length) {
+                    startIdx += 1; // Add space
+                    wordIndex++;
+                    charsInCurrentWord = 0;
+                  }
+                }
+              } else {
+                // Simple: just sum row lengths
+                for (let i = 0; i < rowIndex; i++) {
+                  startIdx += wordRows[i].chars.length;
+                }
+              }
 
               return `
-                <div class="grid-row">
-                  ${rowChars.map((targetChar, colIndex) => {
+                <div class="grid-row ${rowData.centered ? 'grid-row-centered' : ''}">
+                  ${rowData.chars.map((targetChar, colIndex) => {
                     const globalIdx = startIdx + colIndex;
 
                     // Check if this position is a space in the target word
                     if (targetChar === ' ') {
                       return `<div class="grid-space"></div>`;
+                    }
+
+                    // Check if this position is a hyphen - show it but don't make it guessable
+                    if (targetChar === '-') {
+                      return `<div class="grid-cell grid-cell-hyphen">-</div>`;
                     }
 
                     let letter = '';

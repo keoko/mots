@@ -535,7 +535,7 @@ body {
 .grid-container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   padding: var(--spacing-sm) 0;
   align-items: center;
 }
@@ -551,6 +551,11 @@ body {
 .grid-row {
   display: flex;
   gap: var(--spacing-xs);
+}
+
+/* Center only rows marked as centered (compound word parts) */
+.grid-row-centered {
+  justify-content: center;
 }
 
 .grid-cell {
@@ -596,6 +601,14 @@ body {
   .grid-space {
     width: 0.75rem;
   }
+}
+
+/* Hyphen cell - visible but not guessable */
+.grid-cell-hyphen {
+  background: var(--color-border);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  cursor: default;
 }
 
 .grid-cell-filled {
@@ -845,6 +858,18 @@ body {
   font-size: var(--font-size-lg);
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-xl);
+}
+
+/* Compound word styling - display parts on separate lines, centered */
+.compound-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.compound-word-part {
+  display: block;
 }
 
 .result-word strong {
