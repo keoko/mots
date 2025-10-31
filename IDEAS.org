@@ -1,4 +1,7 @@
 #+title: Ideas
+
+* Issues
+** keyboard with splitted words does not work
 * Ideas
 ** fix hard refresh issues
 ** in bump version add tag
