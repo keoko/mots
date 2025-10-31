@@ -22,32 +22,41 @@ const ASSETS_TO_CACHE = [
   './js/game.js',
   './js/data.js',
   './js/storage.js',
-  './js/version.js',
   './favicon.svg',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];
 
+const addResourcesToCache = async (resources) => {
+  const cache = await caches.open(CACHE_NAME);
+  await cache.addAll(resources);
+};
+
 // Install event - cache all static assets
 self.addEventListener('install', (event) => {
   console.log(`[SW] Installing service worker v${VERSION}...`);
 
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('[SW] Opened cache, adding assets...');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .then(() => {
-        console.log('[SW] ✅ All assets cached successfully');
-        return self.skipWaiting(); // Activate immediately
-      })
-      .catch((error) => {
-        console.error('[SW] ❌ Failed to cache assets:', error);
-        throw error;
-      })
-  );
+event.waitUntil(
+    addResourcesToCache(ASSETS_TO_CACHE));
+
+
+
+  // event.waitUntil(
+  //   caches.open(CACHE_NAME)
+  //     .then((cache) => {
+  //       console.log('[SW] Opened cache, adding assets...');
+  //       return cache.addAll(ASSETS_TO_CACHE);
+  //     })
+  //     .then(() => {
+  //       console.log('[SW] ✅ All assets cached successfully');
+  //       return self.skipWaiting(); // Activate immediately
+  //     })
+  //     .catch((error) => {
+  //       console.error('[SW] ❌ Failed to cache assets:', error);
+  //       throw error;
+  //     })
+  // );
 });
 
 // Activate event - clean up old caches
