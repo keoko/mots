@@ -32,6 +32,12 @@ import {
   getTopicProgress
 } from './storage.js';
 
+import {
+  splitWordIntoRows,
+  buildGuessWithSpaces,
+  extractTypeableLetters
+} from './keyboard-layout.js';
+
 // iOS detection
 function isIOS() {
   // Method 1: User Agent
@@ -374,46 +380,6 @@ function renderPlayMode() {
 }
 
 // Render the Wordle-style grid
-// Helper function to split words into rows with centering metadata
-// Returns array of {chars: array, centered: boolean}
-// Spaces split into separate words (centered), hyphens stay together (not centered)
-function splitWordIntoRows(word, charsPerRow = 10) {
-  // If word contains spaces, split at spaces first
-  if (word.includes(' ')) {
-    const words = word.split(' ');
-    const rows = [];
-
-    words.forEach(w => {
-      // If this word part (which might contain hyphens) is longer than charsPerRow, split it
-      if (w.length > charsPerRow) {
-        const chars = w.split('');
-        for (let i = 0; i < chars.length; i += charsPerRow) {
-          const chunk = chars.slice(i, i + charsPerRow);
-          // First chunk of a space-separated word is centered, continuation rows are not
-          rows.push({ chars: chunk, centered: i === 0 });
-        }
-      } else {
-        // Whole word fits in one row, center it
-        rows.push({ chars: w.split(''), centered: true });
-      }
-    });
-
-    return rows;
-  }
-
-  // Otherwise, split long words by character count (never centered)
-  // This includes hyphenated words like "anti-cellulite"
-  const chars = word.split('');
-  const rows = [];
-
-  for (let i = 0; i < chars.length; i += charsPerRow) {
-    const chunk = chars.slice(i, i + charsPerRow);
-    rows.push({ chars: chunk, centered: false });
-  }
-
-  return rows;
-}
-
 function renderGrid() {
   const state = getState();
   const word = getCurrentWord();
@@ -510,25 +476,29 @@ function updateGridDisplay() {
     return;
   }
 
-  // Find the current row (the one being typed)
-  const currentRowIndex = state.guesses.length;
-  const gridRows = document.querySelectorAll('.grid-row');
+  // Find the current attempt (the one being typed)
+  const currentAttemptIndex = state.guesses.length;
+  const currentAttempt = document.querySelector(`[data-attempt="${currentAttemptIndex}"]`);
 
-  if (!gridRows[currentRowIndex]) {
+  if (!currentAttempt) {
     return;
   }
 
-  const currentRow = gridRows[currentRowIndex];
+  // Get all grid rows within this attempt
+  const gridRows = currentAttempt.querySelectorAll('.grid-row');
 
-  // Get ALL children (including .grid-space divs)
-  const allChildren = Array.from(currentRow.children);
+  // Collect all grid-cell elements across all rows in this attempt
+  const cells = [];
+  gridRows.forEach(row => {
+    const rowCells = Array.from(row.children).filter(child =>
+      child.classList.contains('grid-cell') &&
+      !child.classList.contains('grid-cell-hyphen')
+    );
+    cells.push(...rowCells);
+  });
 
-  // Filter to only grid-cell elements
-  const cells = allChildren.filter(child => child.classList.contains('grid-cell'));
-
-  // Map each position in the target word to actual letters (excluding spaces)
-  const targetLetters = word.en.split('').filter(char => char !== ' ');
-  const guessLetters = state.currentGuess.split('').filter(char => char !== ' ');
+  // Extract only typeable letters from guess (no spaces or hyphens)
+  const guessLetters = extractTypeableLetters(state.currentGuess);
 
   // Update each cell
   cells.forEach((cell, index) => {
@@ -638,7 +608,7 @@ function attachPlayModeListeners() {
 
       // Filter out non-letter characters
       const filteredValue = currentValue.replace(/[^a-z]/g, '');
-      const maxLength = word.en.replace(/ /g, '').length;
+      const maxLength = extractTypeableLetters(word.en).length;
       const trimmedValue = filteredValue.substring(0, maxLength);
 
       // Sync the input value back to prevent extra characters
@@ -650,18 +620,8 @@ function attachPlayModeListeners() {
         e.target.setSelectionRange(cursorPos, cursorPos);
       }
 
-      // Build new guess with auto-inserted spaces
-      let newGuess = '';
-      let letterIndex = 0;
-
-      for (let i = 0; i < word.en.length && letterIndex < trimmedValue.length; i++) {
-        if (word.en[i] === ' ') {
-          newGuess += ' ';
-        } else {
-          newGuess += trimmedValue[letterIndex];
-          letterIndex++;
-        }
-      }
+      // Build new guess with auto-inserted spaces and hyphens
+      const newGuess = buildGuessWithSpaces(trimmedValue, word.en);
 
       // Update state and grid
       setCurrentGuess(newGuess);
@@ -697,7 +657,8 @@ function attachPlayModeListeners() {
     // Sync input when focusing - preserve letters typed with visual keyboard
     mobileInput.addEventListener('focus', () => {
       const state = getState();
-      const cleanValue = state.currentGuess.replace(/ /g, '');
+      const word = getCurrentWord();
+      const cleanValue = extractTypeableLetters(state.currentGuess);
       mobileInput.value = cleanValue;
       lastProcessedValue = cleanValue;
       // Set cursor at the end to prevent iOS cursor position issues

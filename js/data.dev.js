@@ -17,17 +17,17 @@ export const topics = [
     name: 'Medium Words',
     emoji: '📝',
     words: [
-      { ca: 'ordinador', en: 'computer' },
-      { ca: 'telèfon', en: 'telephone' }
+      { ca: 'raspall de dents', en: 'toothbrush' },
+      { ca: 'ombra d\'ulls', en: 'eyeshadow' },
+      { ca: 'llapis d\'ulls', en: 'eyeliner' }
     ]
   },
   {
     id: 'dev-long',
-    name: 'Long Words',
+    name: 'Theee Long Words',
     emoji: '📏',
     words: [
-      { ca: 'crema anticel·lulítica', en: 'anti-cellulite cream' },
-      { ca: 'rentadora de plats', en: 'dishwasher' }
+      { ca: 'conjuntivitis', en: 'conjunctivitis' }
     ]
   },
   {
@@ -35,8 +35,25 @@ export const topics = [
     name: 'Multi-word Phrases',
     emoji: '💬',
     words: [
-      { ca: 'bon dia', en: 'good morning' },
-      { ca: 'moltes gràcies', en: 'thank you very much' }
+      { ca: 'fil dental', en: 'dental floss' },
+      { ca: 'crema antiestriès', en: 'stretch mark cream' }
+    ]
+  },
+  {
+    id: 'dev-hyphenated-multi-long',
+    name: 'Hyphenated Multi Words',
+    emoji: '📏',
+    words: [
+      { ca: 'crema anticel·lulítica', en: 'anti-cellulite cream' },
+      { ca: 'xampú anticaspa', en: 'anti-dandruff shampoo' },
+    ]
+  },
+  {
+    id: 'dev-multi-long',
+    name: 'Multi long words',
+    emoji: '📏',
+    words: [
+      { ca: 'píndola anticonceptiva', en: 'oral contraceptive pill' },
     ]
   }
 ];

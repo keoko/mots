@@ -3,6 +3,9 @@
 * Issues
 ** keyboard with splitted words does not work
 * Ideas
+** improve score page
+** display delete key with a different color
+** topics page and score pages display an scrollbar on desktop UI
 ** fix hard refresh issues
 ** in bump version add tag
 ** fix service worker
@@ -12,6 +15,5 @@
 ** touch events API
 ** claude setup-install does not work on bash?
 ** improve desktop UI
-
 * Explore
 ** what is AppCache

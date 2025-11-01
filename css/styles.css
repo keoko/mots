@@ -284,7 +284,6 @@ body {
 /* Container - Mobile First */
 .container {
   min-height: 100vh;
-  height: 100vh;
   max-width: 100%;
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -545,17 +544,18 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  align-items: center;
 }
 
 .grid-row {
   display: flex;
   gap: var(--spacing-xs);
+  justify-content: flex-start; /* Align left by default for long words */
 }
 
-/* Center only rows marked as centered (compound word parts) */
+/* Center only rows marked as centered (compound word parts & short words) */
 .grid-row-centered {
   justify-content: center;
+  align-items: center;
 }
 
 .grid-cell {
