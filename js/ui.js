@@ -628,6 +628,11 @@ function attachPlayModeListeners() {
       updateGridDisplay();
 
       lastProcessedValue = trimmedValue;
+
+      // XXX: This fixes an issue with android mobile in chrome
+      // when typing ABC it rendered CBA
+      const cursorPos = e.target.value.length;
+      mobileInput.setSelectionRange(cursorPos, cursorPos);
     });
 
     // Handle Enter key from mobile keyboard
