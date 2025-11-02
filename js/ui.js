@@ -29,7 +29,8 @@ import {
   getOverallStats,
   getSessions,
   getFailedWords,
-  getTopicProgress
+  getTopicProgress,
+  getTopScores
 } from './storage.js';
 
 import {
@@ -772,51 +773,117 @@ function renderCompleteScreen() {
   const totalAttempts = state.wordStats.reduce((sum, w) => sum + w.attempts, 0);
   const avgAttempts = total > 0 ? (totalAttempts / total).toFixed(1) : 0;
 
+  // Get top 10 scores
+  const topScores = getTopScores(state.selectedTopic.id);
+  const currentScoreRank = topScores.findIndex(s =>
+    s.score === state.totalScore &&
+    Math.abs(new Date(s.date) - new Date()) < 5000
+  ) + 1;
+
+  // Find actual rank if not in top 10
+  let actualRank = currentScoreRank;
+  if (currentScoreRank === 0) {
+    // User not in top 10, calculate actual rank
+    const allSessions = getSessions();
+    const topicSessions = allSessions.filter(s => s.topicId === state.selectedTopic.id);
+    const sorted = topicSessions.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.time - b.time;
+    });
+    actualRank = sorted.findIndex(s =>
+      s.score === state.totalScore &&
+      Math.abs(new Date(s.date) - new Date()) < 5000
+    ) + 1;
+  }
+
   return `
     <div class="game game-complete" role="alert" aria-live="assertive">
-      <div class="result-icon">🏁</div>
-      <h2 class="result-title">Topic Complete!</h2>
+      <!-- Top 10 Leaderboard -->
+      ${topScores.length > 0 ? `
+        <div class="leaderboard-section">
+          <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
+          <div class="leaderboard-grid">
+            ${topScores.map((score, index) => {
+              const isCurrentScore = score.score === state.totalScore &&
+                                     Math.abs(new Date(score.date) - new Date()) < 5000;
+              const formatTime = (ms) => {
+                const secs = Math.floor(ms / 1000);
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+              };
 
-      <div class="score-highlight">
-        <div class="score-badge">
-          <div class="score-badge-value">${state.totalScore}</div>
-          <div class="score-badge-label">TOTAL SCORE</div>
-        </div>
-      </div>
+              return `
+                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''}">
+                  <div class="rank-number">
+                    ${index + 1}
+                  </div>
+                  <div class="score-value">${score.score.toLocaleString()}</div>
+                  <div class="score-meta">
+                    <span>${score.successRate}%</span>
+                    <span>${formatTime(score.time)}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
 
-      <div class="final-score">
-        <div class="stat">
-          <div class="stat-value">${state.totalWon}</div>
-          <div class="stat-label">Won</div>
+          ${currentScoreRank === 0 && actualRank > 0 ? `
+            <!-- User's rank outside top 10 -->
+            <div class="rank-separator">...</div>
+            <div class="leaderboard-row current-rank user-rank-outside">
+              <div class="rank-number">${actualRank}</div>
+              <div class="score-value">${state.totalScore.toLocaleString()}</div>
+              <div class="score-meta">
+                <span>${percentage}%</span>
+                <span>${timeDisplay}</span>
+              </div>
+            </div>
+          ` : ''}
         </div>
-        <div class="stat">
-          <div class="stat-value">${state.totalLost}</div>
-          <div class="stat-label">Lost</div>
-        </div>
-        <div class="stat stat-highlight">
-          <div class="stat-value">${percentage}%</div>
-          <div class="stat-label">Success</div>
-        </div>
-      </div>
+      ` : ''}
 
-      <div class="final-score">
-        <div class="stat">
-          <div class="stat-value">${timeDisplay}</div>
-          <div class="stat-label">Time</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">${avgAttempts}</div>
-          <div class="stat-label">Avg Attempts</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">${state.currentStreak}</div>
-          <div class="stat-label">Final Streak</div>
+      <!-- Collapsible Game Details -->
+      <div class="game-details-section">
+        <button class="details-toggle" data-action="toggle-details" aria-expanded="false">
+          <span class="toggle-icon">▶</span>
+          <span>View Game Details</span>
+        </button>
+        <div class="game-details-content hidden">
+          <div class="details-stats">
+            <div class="detail-row">
+              <span class="detail-label">Won</span>
+              <span class="detail-value">${state.totalWon}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Lost</span>
+              <span class="detail-value">${state.totalLost}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Success Rate</span>
+              <span class="detail-value">${percentage}%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time</span>
+              <span class="detail-value">${timeDisplay}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Avg Attempts</span>
+              <span class="detail-value">${avgAttempts}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Final Streak</span>
+              <span class="detail-value">${state.currentStreak}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div class="complete-buttons">
         <button class="btn btn-secondary" data-action="back-to-topics" aria-label="Choose another topic">
-          ← Choose Topic
+          ← Topics
         </button>
         <button class="btn btn-primary" data-action="back-to-modes" aria-label="Play this topic again">
           🔄 Play Again
@@ -836,6 +903,26 @@ function attachCompleteListeners() {
     backToModeSelection();
     render();
   });
+
+  // Toggle game details section
+  document.querySelector('[data-action="toggle-details"]')?.addEventListener('click', (e) => {
+    const content = document.querySelector('.game-details-content');
+    const icon = document.querySelector('.toggle-icon');
+    const isExpanded = e.currentTarget.getAttribute('aria-expanded') === 'true';
+
+    content.classList.toggle('hidden');
+    icon.textContent = isExpanded ? '▶' : '▼';
+    e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+  });
+
+  // Scroll to current rank position
+  const currentRankRow = document.querySelector('.leaderboard-row.current-rank');
+  if (currentRankRow) {
+    // Small delay to ensure DOM is fully rendered
+    setTimeout(() => {
+      currentRankRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
 }
 
 // Render statistics dashboard

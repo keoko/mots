@@ -177,6 +177,30 @@ export function getSessions() {
   }
 }
 
+// Get top 10 scores for a specific topic
+export function getTopScores(topicId) {
+  try {
+    const sessions = getSessions();
+
+    // Filter by topic
+    const topicSessions = sessions.filter(s => s.topicId === topicId);
+
+    // Sort by score (descending), then by time (ascending for tie-breaker)
+    const sorted = topicSessions.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.time - b.time; // Faster time wins on tie
+    });
+
+    // Return top 10
+    return sorted.slice(0, 10);
+  } catch (error) {
+    console.error('Error getting top scores:', error);
+    return [];
+  }
+}
+
 // Get overall statistics across all topics
 export function getOverallStats() {
   const progress = getProgress();
