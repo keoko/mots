@@ -1,6 +1,6 @@
 {
   "name": "mots",
-  "version": "0.0.70",
+  "version": "0.0.71",
   "description": "Learn English words from Catalan - an interactive word-guessing game",
   "scripts": {
     "test": "playwright test",
