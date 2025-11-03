@@ -816,38 +816,34 @@ function renderCompleteScreen() {
                 return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
               };
 
-              // Check if this is the current score and needs name entry
-              const needsNameEntry = isCurrentScore && !score.playerName;
               const playerName = score.playerName || '';
+              const needsNameEntry = isCurrentScore && !playerName;
 
+              // If needs name entry, show only the input (no rank/score)
+              if (needsNameEntry) {
+                return `
+                  <div class="leaderboard-row name-entry-only">
+                    <input
+                      type="text"
+                      class="name-input-fullwidth"
+                      maxlength="8"
+                      placeholder="ENTER YOUR NAME"
+                      data-session-id="${score.id}"
+                      autocomplete="off"
+                      autocapitalize="characters"
+                      spellcheck="false"
+                    />
+                  </div>
+                `;
+              }
+
+              // Normal row with rank, name, and score
               return `
-                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''} ${needsNameEntry ? 'name-entry-row' : ''}">
+                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''}">
                   <div class="rank-number">
                     ${index + 1}
                   </div>
-
-                  ${needsNameEntry ? `
-                    <!-- Name Entry Grid (Wordle-style) -->
-                    <div class="name-entry-section">
-                      <div class="name-entry-grid" data-session-id="${score.id}">
-                        ${Array.from({ length: 10 }).map((_, i) => `
-                          <div class="name-cell" data-index="${i}"></div>
-                        `).join('')}
-                      </div>
-                      <input
-                        type="text"
-                        class="name-entry-input"
-                        maxlength="10"
-                        placeholder="ENTER NAME"
-                        data-session-id="${score.id}"
-                        autocomplete="off"
-                        spellcheck="false"
-                      />
-                    </div>
-                  ` : `
-                    <div class="player-name">${playerName || '---'}</div>
-                  `}
-
+                  <div class="player-name">${playerName || '---'}</div>
                   <div class="score-info">
                     <div class="score-value">${score.score.toLocaleString()}</div>
                     <div class="score-meta">
@@ -954,52 +950,40 @@ function attachCompleteListeners() {
     }, 100);
   }
 
-  // Attach name entry listeners
-  const nameInputs = document.querySelectorAll('.name-entry-input');
-  nameInputs.forEach(input => {
-    const sessionId = input.dataset.sessionId;
-    const grid = document.querySelector(`.name-entry-grid[data-session-id="${sessionId}"]`);
+  // Handle full-width name entry for top 10
+  const nameInputFullwidth = document.querySelector('.name-input-fullwidth');
+  if (nameInputFullwidth) {
+    const sessionId = nameInputFullwidth.dataset.sessionId;
 
-    if (!grid) return;
-
-    // Update grid cells as user types
-    input.addEventListener('input', (e) => {
-      const value = e.target.value.toUpperCase();
-      const cells = grid.querySelectorAll('.name-cell');
-
-      cells.forEach((cell, index) => {
-        if (index < value.length) {
-          cell.textContent = value[index];
-          cell.classList.add('filled');
-        } else {
-          cell.textContent = '';
-          cell.classList.remove('filled');
-        }
-      });
-    });
-
-    // Save name on blur or Enter key
+    // Save name on blur or Enter
     const saveName = () => {
-      const name = input.value.toUpperCase().trim();
-      if (name.length > 0) {
+      const name = nameInputFullwidth.value.toUpperCase().trim();
+      if (name.length > 0 && sessionId) {
         updateSessionName(sessionId, name);
-        render(); // Re-render to show the saved name
+        render();
       }
     };
 
-    input.addEventListener('blur', saveName);
-    input.addEventListener('keydown', (e) => {
+    nameInputFullwidth.addEventListener('blur', saveName);
+    nameInputFullwidth.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        input.blur();
+        nameInputFullwidth.blur();
       }
     });
 
-    // Auto-focus on the name input if it exists
+    // Auto-uppercase as they type
+    nameInputFullwidth.addEventListener('input', (e) => {
+      e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Auto-focus the input
     setTimeout(() => {
-      input.focus();
-    }, 200);
-  });
+      nameInputFullwidth.focus();
+      nameInputFullwidth.select();
+    }, 300);
+  }
+
 }
 
 // Render statistics dashboard
