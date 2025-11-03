@@ -268,3 +268,20 @@ export function importData(data) {
     console.error('Error importing data:', error);
   }
 }
+
+// Update session with player name
+export function updateSessionName(sessionId, playerName) {
+  try {
+    const sessions = getSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+    if (sessionIndex !== -1) {
+      sessions[sessionIndex].playerName = playerName.toUpperCase().trim();
+      localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error updating session name:', error);
+    return false;
+  }
+}

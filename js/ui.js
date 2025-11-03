@@ -30,7 +30,8 @@ import {
   getSessions,
   getFailedWords,
   getTopicProgress,
-  getTopScores
+  getTopScores,
+  updateSessionName
 } from './storage.js';
 
 import {
@@ -815,15 +816,44 @@ function renderCompleteScreen() {
                 return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
               };
 
+              // Check if this is the current score and needs name entry
+              const needsNameEntry = isCurrentScore && !score.playerName;
+              const playerName = score.playerName || '';
+
               return `
-                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''}">
+                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''} ${needsNameEntry ? 'name-entry-row' : ''}">
                   <div class="rank-number">
                     ${index + 1}
                   </div>
-                  <div class="score-value">${score.score.toLocaleString()}</div>
-                  <div class="score-meta">
-                    <span>${score.successRate}%</span>
-                    <span>${formatTime(score.time)}</span>
+
+                  ${needsNameEntry ? `
+                    <!-- Name Entry Grid (Wordle-style) -->
+                    <div class="name-entry-section">
+                      <div class="name-entry-grid" data-session-id="${score.id}">
+                        ${Array.from({ length: 10 }).map((_, i) => `
+                          <div class="name-cell" data-index="${i}"></div>
+                        `).join('')}
+                      </div>
+                      <input
+                        type="text"
+                        class="name-entry-input"
+                        maxlength="10"
+                        placeholder="ENTER NAME"
+                        data-session-id="${score.id}"
+                        autocomplete="off"
+                        spellcheck="false"
+                      />
+                    </div>
+                  ` : `
+                    <div class="player-name">${playerName || '---'}</div>
+                  `}
+
+                  <div class="score-info">
+                    <div class="score-value">${score.score.toLocaleString()}</div>
+                    <div class="score-meta">
+                      <span>${score.successRate}%</span>
+                      <span>${formatTime(score.time)}</span>
+                    </div>
                   </div>
                 </div>
               `;
@@ -923,6 +953,53 @@ function attachCompleteListeners() {
       currentRankRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
   }
+
+  // Attach name entry listeners
+  const nameInputs = document.querySelectorAll('.name-entry-input');
+  nameInputs.forEach(input => {
+    const sessionId = input.dataset.sessionId;
+    const grid = document.querySelector(`.name-entry-grid[data-session-id="${sessionId}"]`);
+
+    if (!grid) return;
+
+    // Update grid cells as user types
+    input.addEventListener('input', (e) => {
+      const value = e.target.value.toUpperCase();
+      const cells = grid.querySelectorAll('.name-cell');
+
+      cells.forEach((cell, index) => {
+        if (index < value.length) {
+          cell.textContent = value[index];
+          cell.classList.add('filled');
+        } else {
+          cell.textContent = '';
+          cell.classList.remove('filled');
+        }
+      });
+    });
+
+    // Save name on blur or Enter key
+    const saveName = () => {
+      const name = input.value.toUpperCase().trim();
+      if (name.length > 0) {
+        updateSessionName(sessionId, name);
+        render(); // Re-render to show the saved name
+      }
+    };
+
+    input.addEventListener('blur', saveName);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        input.blur();
+      }
+    });
+
+    // Auto-focus on the name input if it exists
+    setTimeout(() => {
+      input.focus();
+    }, 200);
+  });
 }
 
 // Render statistics dashboard

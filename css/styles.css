@@ -2069,6 +2069,11 @@ body {
   transition: all var(--transition-base);
 }
 
+.leaderboard-row.name-entry-row {
+  padding: var(--spacing-md);
+  min-height: 100px;
+}
+
 .leaderboard-row:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(99, 102, 241, 0.5);
@@ -2128,6 +2133,89 @@ body {
 
 .score-meta span {
   white-space: nowrap;
+}
+
+/* Name Entry Section - Wordle Style */
+.name-entry-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.name-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.name-cell {
+  aspect-ratio: 1;
+  border: 2px solid rgba(99, 102, 241, 0.4);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+}
+
+.name-cell.filled {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: #6366f1;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.name-entry-input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  border-radius: var(--radius-md);
+  color: #e2e8f0;
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: all var(--transition-base);
+}
+
+.name-entry-input::placeholder {
+  color: rgba(148, 163, 184, 0.5);
+}
+
+.name-entry-input:focus {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+}
+
+.player-name {
+  font-family: 'Courier New', monospace;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  letter-spacing: 0.15em;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.score-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
 }
 
 .details-toggle {
@@ -2235,5 +2323,25 @@ body {
 
   .details-stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .name-entry-grid {
+    gap: 2px;
+  }
+
+  .name-cell {
+    font-size: var(--font-size-base);
+  }
+
+  .name-entry-input {
+    font-size: var(--font-size-sm);
+  }
+
+  .player-name {
+    font-size: var(--font-size-lg);
+  }
+
+  .leaderboard-row.name-entry-row {
+    padding: var(--spacing-sm);
   }
 }
