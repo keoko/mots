@@ -1,6 +1,7 @@
 #+title: Journal
 * 2025
 ** 2025/Oct/30
+*** fix: service worker infinite reload loop caused by unregistering on every page load
 *** CLAUDE: leaves a lot of stale files
 when making several changes over the same topic, it loses track of files and do not update all of them (e.g. copy the same version all over)
 ** 2025/Oct/29

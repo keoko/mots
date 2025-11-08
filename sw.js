@@ -1,5 +1,8 @@
 // Service Worker for Mots - Offline-first PWA
-// Version is automatically read from package.json
+//
+// IMPORTANT: When bumping the version in package.json, also update VERSION below
+// This ensures the service worker cache is properly invalidated
+// The app.js registration uses ?v=X.X.X query parameter to force browser to check for updates
 
 const VERSION = '0.0.73';
 const CACHE_NAME = `mots-v${VERSION}`;
@@ -37,48 +40,51 @@ const addResourcesToCache = async (resources) => {
 self.addEventListener('install', (event) => {
   console.log(`[SW] Installing service worker v${VERSION}...`);
 
-event.waitUntil(
-    addResourcesToCache(ASSETS_TO_CACHE));
-
-
-
-  // event.waitUntil(
-  //   caches.open(CACHE_NAME)
-  //     .then((cache) => {
-  //       console.log('[SW] Opened cache, adding assets...');
-  //       return cache.addAll(ASSETS_TO_CACHE);
-  //     })
-  //     .then(() => {
-  //       console.log('[SW] ✅ All assets cached successfully');
-  //       return self.skipWaiting(); // Activate immediately
-  //     })
-  //     .catch((error) => {
-  //       console.error('[SW] ❌ Failed to cache assets:', error);
-  //       throw error;
-  //     })
-  // );
+  event.waitUntil(
+    (async () => {
+      try {
+        await addResourcesToCache(ASSETS_TO_CACHE);
+        console.log(`[SW] All assets cached successfully for v${VERSION}`);
+        // Skip waiting to activate immediately (will be controlled by message handler)
+        // Don't auto-skip - let the app control when to update
+      } catch (error) {
+        console.error('[SW] Failed to cache assets:', error);
+        throw error;
+      }
+    })()
+  );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log(`[SW] Activating service worker v${VERSION}...`);
 
   event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Deleting old cache:', cacheName);
-              return caches.delete(cacheName);
-            }
-          })
-        );
-      })
-      .then(() => {
-        console.log('[SW] Service worker activated');
-        return self.clients.claim(); // Take control immediately
-      })
+    (async () => {
+      try {
+        // Delete all caches that don't match current version
+        const cacheNames = await caches.keys();
+        const deletionPromises = cacheNames
+          .filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => {
+            console.log(`[SW] Deleting old cache: ${cacheName}`);
+            return caches.delete(cacheName);
+          });
+
+        await Promise.all(deletionPromises);
+
+        if (deletionPromises.length > 0) {
+          console.log(`[SW] Cleaned up ${deletionPromises.length} old cache(s)`);
+        }
+
+        // Take control of all clients immediately
+        await self.clients.claim();
+        console.log(`[SW] Service worker v${VERSION} activated and claimed clients`);
+      } catch (error) {
+        console.error('[SW] Activation error:', error);
+        throw error;
+      }
+    })()
   );
 });
 
@@ -137,6 +143,7 @@ self.addEventListener('fetch', (event) => {
 // Handle messages from the app
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log(`[SW] Received SKIP_WAITING message, activating v${VERSION}...`);
     self.skipWaiting();
   }
 });
