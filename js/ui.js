@@ -1,4 +1,4 @@
-// ui.js - UI rendering functions
+// ui.js - Simplified UI rendering
 
 import {
   getState,
@@ -7,20 +7,17 @@ import {
   getCurrentWord,
   GAME_STATES,
   GAME_MODES,
-  ALPHABET,
   selectTopic,
   selectMode,
-  addLetter,
-  removeLetter,
-  submitGuess,
+  setUserInput,
+  submitAnswer,
+  toggleWordReveal,
+  markDifficulty,
   nextWord,
   previousWord,
   backToTopics,
   backToModeSelection,
-  startPlaying,
   restartGame,
-  toggleWordReveal,
-  setCurrentGuess,
   goToStatistics,
   startPracticingFailed
 } from './game.js';
@@ -33,39 +30,6 @@ import {
   getTopScores,
   updateSessionName
 } from './storage.js';
-
-import {
-  splitWordIntoRows,
-  buildGuessWithSpaces,
-  extractTypeableLetters
-} from './keyboard-layout.js';
-
-// iOS detection
-function isIOS() {
-  // Method 1: User Agent
-  const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/i.test(ua)) {
-    return true;
-  }
-
-  // Method 2: Platform (older method)
-  if (/iPhone|iPad|iPod/.test(navigator.platform)) {
-    return true;
-  }
-
-  // Method 3: iOS 13+ detection (iPad reports as desktop)
-  if (navigator.maxTouchPoints > 1 && /MacIntel/.test(navigator.platform)) {
-    return true;
-  }
-
-  // Method 4: Check for Safari-specific features
-  if (navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
-      navigator.maxTouchPoints && navigator.maxTouchPoints > 1) {
-    return true;
-  }
-
-  return false;
-}
 
 // Main render function
 export function render() {
@@ -89,12 +53,8 @@ export function render() {
       mainContent.innerHTML = renderPlayMode();
       attachPlayModeListeners();
       break;
-    case GAME_STATES.WON:
-      mainContent.innerHTML = renderWonScreen();
-      attachResultListeners();
-      break;
-    case GAME_STATES.LOST:
-      mainContent.innerHTML = renderLostScreen();
+    case GAME_STATES.RESULT:
+      mainContent.innerHTML = renderResult();
       attachResultListeners();
       break;
     case GAME_STATES.COMPLETE:
@@ -105,10 +65,11 @@ export function render() {
       mainContent.innerHTML = renderStatistics();
       attachStatisticsListeners();
       break;
+    default:
+      mainContent.innerHTML = '<p>Unknown state</p>';
   }
 }
 
-// Render topic selection
 function renderTopicSelection() {
   const topics = getTopicsWithProgress();
 
@@ -191,8 +152,6 @@ function attachTopicSelectionListeners() {
     });
   }
 }
-
-// Render mode selection
 function renderModeSelection() {
   const state = getState();
 
@@ -235,93 +194,55 @@ function attachModeSelectionListeners() {
   });
 }
 
-// Render study mode
+// NEW: Simplified Study Mode - Flashcard style
 function renderStudyMode() {
   const state = getState();
   const word = getCurrentWord();
-  const wordNumber = state.currentWordIndex + 1;
-  const totalWords = state.selectedTopic.words.length;
-  const hasNext = state.currentWordIndex < totalWords - 1;
-  const hasPrevious = state.currentWordIndex > 0;
-  const isRevealed = state.isWordRevealed;
+  const progress = `${state.currentWordIndex + 1}/${state.selectedTopic.words.length}`;
 
   return `
-    <div>
-      <div class="topic-header">
-        <button class="back-button" data-action="back-to-modes" aria-label="Back to mode selection">
-          ← Modes
-        </button>
-        <div class="current-topic">
-          <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
-          <span class="topic-name-small">${state.selectedTopic.name} - Study</span>
-        </div>
+    <div class="game study-mode">
+      <div class="game-header">
+        <button class="back-button" data-action="back-to-topics">← Topics</button>
+        <div class="progress-indicator">${progress}</div>
       </div>
 
-      <div class="study-progress">Word ${wordNumber} of ${totalWords}</div>
-
-      <div class="game">
-        <div class="word-section">
-          <div class="catalan-word">
-            <div class="word" lang="ca">${word.ca}</div>
+      <div class="flashcard-container">
+        <div class="flashcard ${state.isWordRevealed ? 'revealed' : ''}" data-action="toggle-reveal">
+          <div class="flashcard-front">
+            <div class="flashcard-lang-label">Catalan</div>
+            <div class="flashcard-word">${word.ca}</div>
+            <div class="flashcard-hint">Tap to reveal</div>
           </div>
-        </div>
 
-        <div class="study-grid-wrapper" data-action="toggle-reveal">
-          <div class="grid-container" data-word-length="${word.en.length}" style="--word-length: ${word.en.length};">
-            <div class="grid-row">
-              ${Array.from({ length: word.en.length }).map((_, i) => {
-                const letter = isRevealed ? word.en[i].toUpperCase() : '';
-                const cellClass = isRevealed ? 'grid-cell grid-cell-correct' : 'grid-cell';
-                return `<div class="${cellClass}">${letter}</div>`;
-              }).join('')}
+          ${state.isWordRevealed ? `
+            <div class="flashcard-back">
+              <div class="flashcard-lang-label">Catalan → English</div>
+              <div class="flashcard-word-pair">
+                <div class="flashcard-ca">${word.ca}</div>
+                <div class="flashcard-arrow">↓</div>
+                <div class="flashcard-en">${word.en}</div>
+              </div>
+
+              <div class="difficulty-buttons">
+                <button class="btn btn-difficulty btn-hard" data-action="mark-hard">
+                  😓 Hard
+                </button>
+                <button class="btn btn-difficulty btn-easy" data-action="mark-easy">
+                  ✓ Easy
+                </button>
+              </div>
             </div>
-          </div>
-          <div class="reveal-hint">${isRevealed ? '👁️ Tap to hide' : '👁️ Tap to reveal'}</div>
+          ` : ''}
         </div>
-
-        <div class="study-navigation">
-          <button
-            class="btn btn-secondary"
-            data-action="previous-word"
-            ${!hasPrevious ? 'disabled' : ''}
-            aria-label="Previous word">
-            ← Previous
-          </button>
-          <button
-            class="btn btn-secondary"
-            data-action="next-word"
-            ${!hasNext ? 'disabled' : ''}
-            aria-label="Next word">
-            Next →
-          </button>
-        </div>
-
-        <button class="btn btn-primary btn-start-playing" data-action="start-playing" aria-label="Start playing">
-          🎮 Start Playing
-        </button>
       </div>
     </div>
   `;
 }
 
 function attachStudyModeListeners() {
-  document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
-    backToModeSelection();
-    render();
-  });
-
-  document.querySelector('[data-action="previous-word"]')?.addEventListener('click', () => {
-    previousWord();
-    render();
-  });
-
-  document.querySelector('[data-action="next-word"]')?.addEventListener('click', () => {
-    nextWord();
-    render();
-  });
-
-  document.querySelector('[data-action="start-playing"]')?.addEventListener('click', () => {
-    startPlaying();
+  document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
+    backToTopics();
     render();
   });
 
@@ -329,433 +250,147 @@ function attachStudyModeListeners() {
     toggleWordReveal();
     render();
   });
+
+  document.querySelector('[data-action="mark-hard"]')?.addEventListener('click', () => {
+    markDifficulty(true);
+    render();
+  });
+
+  document.querySelector('[data-action="mark-easy"]')?.addEventListener('click', () => {
+    markDifficulty(false);
+    render();
+  });
 }
 
-// Render play mode
+// NEW: Simplified Play Mode - Type the translation
 function renderPlayMode() {
   const state = getState();
   const word = getCurrentWord();
-  const wordNumber = state.currentWordIndex + 1;
-  const totalWords = state.selectedTopic.words.length;
-  const hasStreak = state.currentStreak > 0;
+  const progress = `${state.currentWordIndex + 1}/${state.selectedTopic.words.length}`;
 
   return `
-    <div>
-      <div class="topic-header">
-        <button class="back-button" data-action="back-to-modes" aria-label="Back to mode selection">
-          ← Modes
+    <div class="game play-mode">
+      <div class="game-header">
+        <button class="back-button" data-action="back-to-topics">← Topics</button>
+        <div class="game-stats">
+          <span class="stat-item">Score: ${state.totalScore}</span>
+          <span class="stat-item">Streak: ${state.currentStreak}🔥</span>
+        </div>
+      </div>
+
+      <div class="play-container">
+        <div class="progress-indicator">${progress}</div>
+
+        <div class="word-prompt">
+          <div class="prompt-label">Translate to English:</div>
+          <div class="prompt-word">${word.ca}</div>
+        </div>
+
+        <div class="answer-input-container">
+          <input
+            type="text"
+            id="answer-input"
+            class="answer-input"
+            placeholder="Type your answer..."
+            value="${state.userInput}"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <button class="btn btn-primary btn-submit" data-action="submit-answer">
+          Submit
         </button>
-        <div class="current-topic">
-          <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
-          <span class="topic-name-small">${state.selectedTopic.name}</span>
-          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
-          ${hasStreak ? `<span class="streak-indicator">🔥 ${state.currentStreak}</span>` : ''}
-        </div>
       </div>
-
-      <div class="game" aria-labelledby="game-title">
-        <div class="word-section">
-          <div class="catalan-word">
-            <div class="word" lang="ca">${word.ca}</div>
-          </div>
-        </div>
-
-        ${renderGrid()}
-        ${renderKeyboard()}
-
-        <!-- Mobile keyboard input (hidden but functional) -->
-        <input
-          type="text"
-          id="mobile-keyboard-input"
-          class="mobile-keyboard-input"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="none"
-          spellcheck="false"
-          inputmode="text"
-          enterkeyhint="go"
-          aria-hidden="true"
-        />
-      </div>
-    </div>
-  `;
-}
-
-// Render the Wordle-style grid
-function renderGrid() {
-  const state = getState();
-  const word = getCurrentWord();
-  const wordLength = word.en.length;
-  const targetWord = word.en;
-
-  // Split word into rows if longer than 10 characters
-  const charsPerRow = 10;
-  const wordRows = splitWordIntoRows(targetWord, charsPerRow);
-  const useMultiRow = wordLength > charsPerRow;
-
-  return `
-    <div class="grid-container ${useMultiRow ? 'grid-multi-row' : ''}" data-word-length="${wordLength}" style="--word-length: ${wordLength}; --chars-per-row: ${charsPerRow};">
-      ${Array.from({ length: state.maxAttempts }).map((_, attemptIndex) => {
-        const guess = state.guesses[attemptIndex];
-        const isCurrentRow = attemptIndex === state.guesses.length && state.guesses.length < state.maxAttempts;
-
-        return `
-          <div class="grid-attempt" data-attempt="${attemptIndex}">
-            ${wordRows.map((rowData, rowIndex) => {
-              // For compound words, track which word we're in and add spaces
-              let startIdx = 0;
-
-              if (targetWord.includes(' ')) {
-                // Split original word by spaces to know where boundaries are
-                const originalWords = targetWord.split(' ');
-                let wordIndex = 0;
-                let charsInCurrentWord = 0;
-
-                for (let i = 0; i < rowIndex; i++) {
-                  startIdx += wordRows[i].chars.length;
-
-                  // Track when we finish a word and need to add a space
-                  charsInCurrentWord += wordRows[i].chars.length;
-                  if (charsInCurrentWord >= originalWords[wordIndex].length) {
-                    startIdx += 1; // Add space
-                    wordIndex++;
-                    charsInCurrentWord = 0;
-                  }
-                }
-              } else {
-                // Simple: just sum row lengths
-                for (let i = 0; i < rowIndex; i++) {
-                  startIdx += wordRows[i].chars.length;
-                }
-              }
-
-              return `
-                <div class="grid-row ${rowData.centered ? 'grid-row-centered' : ''}">
-                  ${rowData.chars.map((targetChar, colIndex) => {
-                    const globalIdx = startIdx + colIndex;
-
-                    // Check if this position is a space in the target word
-                    if (targetChar === ' ') {
-                      return `<div class="grid-space"></div>`;
-                    }
-
-                    // Check if this position is a hyphen - show it but don't make it guessable
-                    if (targetChar === '-') {
-                      return `<div class="grid-cell grid-cell-hyphen">-</div>`;
-                    }
-
-                    let letter = '';
-                    let cellClass = 'grid-cell';
-
-                    if (guess) {
-                      // Completed guess
-                      letter = guess.word[globalIdx].toUpperCase();
-                      cellClass += ` grid-cell-${guess.feedback[globalIdx]}`;
-                    } else if (isCurrentRow && state.currentGuess[globalIdx]) {
-                      // Current guess being typed
-                      letter = state.currentGuess[globalIdx].toUpperCase();
-                      cellClass += ' grid-cell-filled';
-                    }
-
-                    return `<div class="${cellClass}">${letter}</div>`;
-                  }).join('')}
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-}
-
-// Update grid display without full re-render (for mobile keyboard)
-function updateGridDisplay() {
-  const state = getState();
-  const word = getCurrentWord();
-
-  if (!word) {
-    return;
-  }
-
-  // Find the current attempt (the one being typed)
-  const currentAttemptIndex = state.guesses.length;
-  const currentAttempt = document.querySelector(`[data-attempt="${currentAttemptIndex}"]`);
-
-  if (!currentAttempt) {
-    return;
-  }
-
-  // Get all grid rows within this attempt
-  const gridRows = currentAttempt.querySelectorAll('.grid-row');
-
-  // Collect all grid-cell elements across all rows in this attempt
-  const cells = [];
-  gridRows.forEach(row => {
-    const rowCells = Array.from(row.children).filter(child =>
-      child.classList.contains('grid-cell') &&
-      !child.classList.contains('grid-cell-hyphen')
-    );
-    cells.push(...rowCells);
-  });
-
-  // Extract only typeable letters from guess (no spaces or hyphens)
-  const guessLetters = extractTypeableLetters(state.currentGuess);
-
-  // Update each cell
-  cells.forEach((cell, index) => {
-    const letter = guessLetters[index] || '';
-
-    if (letter) {
-      const upperLetter = letter.toUpperCase();
-      cell.textContent = upperLetter;
-      cell.classList.add('grid-cell-filled');
-    } else {
-      cell.textContent = '';
-      cell.classList.remove('grid-cell-filled');
-    }
-  });
-}
-
-// Render keyboard
-function renderKeyboard() {
-  const state = getState();
-  const letterStates = state.letterStates || {};
-
-  return `
-    <div class="keyboard" role="group" aria-label="Letter keyboard">
-      ${ALPHABET.map(letter => {
-        const letterState = letterStates[letter];
-        const stateClass = letterState ? `key-${letterState}` : '';
-
-        return `
-          <button
-            class="key ${stateClass}"
-            data-letter="${letter}"
-            aria-label="Letter ${letter.toUpperCase()}${letterState ? ` - ${letterState}` : ''}">
-            ${letter.toUpperCase()}
-          </button>
-        `;
-      }).join('')}
-      <button class="key key-wide" data-action="backspace" aria-label="Backspace">
-        ⌫
-      </button>
-      <button class="key key-wide key-enter" data-action="enter" aria-label="Submit guess">
-        ENTER
-      </button>
     </div>
   `;
 }
 
 function attachPlayModeListeners() {
-  document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
-    backToModeSelection();
+  document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
+    backToTopics();
     render();
   });
 
-  // Letter buttons
-  document.querySelectorAll('[data-letter]').forEach(button => {
-    button.addEventListener('click', (e) => {
-      const letter = e.currentTarget.dataset.letter;
-      addLetter(letter);
-      render();
-    });
-  });
+  const input = document.getElementById('answer-input');
+  if (input) {
+    input.focus();
 
-  // Backspace button
-  document.querySelector('[data-action="backspace"]')?.addEventListener('click', () => {
-    removeLetter();
-    render();
-  });
-
-  // Enter button
-  document.querySelector('[data-action="enter"]')?.addEventListener('click', () => {
-    submitGuess();
-    render();
-  });
-
-  // Mobile keyboard support
-  const mobileInput = document.getElementById('mobile-keyboard-input');
-
-  if (mobileInput) {
-    let lastProcessedValue = '';
-
-    // Make grid cells and areas clickable to toggle keyboard
-    const clickableElements = [
-      ...document.querySelectorAll('[data-grid-cell]'),
-      document.querySelector('.catalan-word'),
-      document.querySelector('.grid-container')
-    ].filter(Boolean);
-
-    clickableElements.forEach((element) => {
-      const handleToggle = (e) => {
-        e.preventDefault();
-        // Toggle keyboard: if input is focused, blur it; otherwise focus it
-        if (document.activeElement === mobileInput) {
-          mobileInput.blur();
-        } else {
-          mobileInput.focus();
-        }
-      };
-
-      element.addEventListener('click', handleToggle);
-      element.addEventListener('touchend', handleToggle);
+    input.addEventListener('input', (e) => {
+      setUserInput(e.target.value);
     });
 
-    // Handle input from mobile keyboard
-    mobileInput.addEventListener('input', (e) => {
-      const currentValue = e.target.value.toLowerCase();
-      const state = getState();
-      const word = getCurrentWord();
-
-      // Filter out non-letter characters
-      const filteredValue = currentValue.replace(/[^a-z]/g, '');
-      const maxLength = extractTypeableLetters(word.en).length;
-      const trimmedValue = filteredValue.substring(0, maxLength);
-
-      // Sync the input value back to prevent extra characters
-      // Keep cursor at the end to prevent iOS cursor position bugs
-      if (e.target.value !== trimmedValue) {
-        const cursorPos = trimmedValue.length;
-        e.target.value = trimmedValue;
-        // Set cursor position explicitly to avoid iOS cursor jump issues
-        e.target.setSelectionRange(cursorPos, cursorPos);
-      }
-
-      // Build new guess with auto-inserted spaces and hyphens
-      const newGuess = buildGuessWithSpaces(trimmedValue, word.en);
-
-      // Update state and grid
-      setCurrentGuess(newGuess);
-      updateGridDisplay();
-
-      lastProcessedValue = trimmedValue;
-
-      // XXX: This fixes an issue with android mobile in chrome
-      // when typing ABC it rendered CBA
-      const cursorPos = e.target.value.length;
-      mobileInput.setSelectionRange(cursorPos, cursorPos);
-    });
-
-    // Handle Enter key from mobile keyboard
-    mobileInput.addEventListener('keydown', (e) => {
+    input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        const state = getState();
-        const word = getCurrentWord();
-
-        if (state.currentGuess.length !== word.en.length) {
-          return;
-        }
-
-        submitGuess();
+        submitAnswer();
         render();
-
-        // Clear input value for next attempt
-        lastProcessedValue = '';
-        const input = document.getElementById('mobile-keyboard-input');
-        if (input) {
-          input.value = '';
-          input.blur(); // Close keyboard to show result
-        }
       }
     });
-
-    // Sync input when focusing - preserve letters typed with visual keyboard
-    mobileInput.addEventListener('focus', () => {
-      const state = getState();
-      const word = getCurrentWord();
-      const cleanValue = extractTypeableLetters(state.currentGuess);
-      mobileInput.value = cleanValue;
-      lastProcessedValue = cleanValue;
-      // Set cursor at the end to prevent iOS cursor position issues
-      const cursorPos = cleanValue.length;
-      mobileInput.setSelectionRange(cursorPos, cursorPos);
-    });
   }
+
+  document.querySelector('[data-action="submit-answer"]')?.addEventListener('click', () => {
+    submitAnswer();
+    render();
+  });
 }
 
-// Render won screen
-function renderWonScreen() {
-  const word = getCurrentWord();
+// NEW: Result screen (shows after answering in play mode)
+function renderResult() {
   const state = getState();
-  const hasMore = state.currentWordIndex + 1 < state.selectedTopic.words.length;
-  const wordNumber = state.currentWordIndex + 1;
-  const totalWords = state.selectedTopic.words.length;
-  const hasStreak = state.currentStreak > 0;
+  const word = getCurrentWord();
 
   return `
-    <div>
-      <div class="topic-header">
-        <button class="back-button" data-action="back-to-modes" aria-label="Back to mode selection">
-          ← Modes
-        </button>
-        <div class="current-topic">
-          <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
-          <span class="topic-name-small">${state.selectedTopic.name}</span>
-          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
-          ${hasStreak ? `<span class="streak-indicator">🔥 ${state.currentStreak}</span>` : ''}
+    <div class="game result-screen">
+      <div class="result-container ${state.isCorrect ? 'correct' : 'incorrect'}">
+        <div class="result-icon">${state.isCorrect ? '✓' : '✗'}</div>
+        <div class="result-message">
+          ${state.isCorrect ? 'Correct!' : 'Incorrect'}
         </div>
-      </div>
 
-      <div class="game result result-won" role="alert" aria-live="assertive">
-        <div class="result-icon">🎉</div>
-        <h2 class="result-title">Correct!</h2>
-        <p class="result-word">The word is: <strong>${word.en}</strong></p>
-        <button class="btn btn-primary" data-action="next-word" aria-label="${hasMore ? 'Next Word' : 'See Results'}">
-          ${hasMore ? 'Next Word →' : 'See Results →'}
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-// Render lost screen
-function renderLostScreen() {
-  const word = getCurrentWord();
-  const state = getState();
-  const hasMore = state.currentWordIndex + 1 < state.selectedTopic.words.length;
-  const wordNumber = state.currentWordIndex + 1;
-  const totalWords = state.selectedTopic.words.length;
-
-  return `
-    <div>
-      <div class="topic-header">
-        <button class="back-button" data-action="back-to-modes" aria-label="Back to mode selection">
-          ← Modes
-        </button>
-        <div class="current-topic">
-          <span class="topic-emoji-small">${state.selectedTopic.emoji}</span>
-          <span class="topic-name-small">${state.selectedTopic.name}</span>
-          <span class="progress-indicator">Word ${wordNumber}/${totalWords}</span>
+        <div class="result-words">
+          <div class="result-catalan">${word.ca}</div>
+          <div class="result-arrow">→</div>
+          <div class="result-english">${word.en}</div>
         </div>
+
+        ${!state.isCorrect ? `
+          <div class="result-your-answer">
+            <span class="result-label">Your answer:</span>
+            <span class="result-value">${state.userInput}</span>
+          </div>
+        ` : ''}
+
+        ${state.isCorrect ? `
+          <div class="result-streak">
+            Streak: ${state.currentStreak}🔥
+          </div>
+        ` : ''}
       </div>
 
-      <div class="game result result-lost" role="alert" aria-live="assertive">
-        <div class="result-icon">💔</div>
-        <h2 class="result-title">Out of attempts!</h2>
-        <p class="result-word">The word was: <strong>${word.en}</strong></p>
-        <button class="btn btn-primary" data-action="next-word" aria-label="${hasMore ? 'Next Word' : 'See Results'}">
-          ${hasMore ? 'Next Word →' : 'See Results →'}
-        </button>
-      </div>
+      <button class="btn btn-primary btn-continue" data-action="next-word">
+        Continue
+      </button>
     </div>
   `;
 }
 
 function attachResultListeners() {
-  document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
-    backToModeSelection();
+  // Auto-advance after 2 seconds
+  setTimeout(() => {
+    nextWord();
     render();
-  });
+  }, 2000);
 
+  // Or allow manual advance
   document.querySelector('[data-action="next-word"]')?.addEventListener('click', () => {
     nextWord();
     render();
   });
 }
 
-// Render complete screen
+// Complete Screen and Statistics from original
 function renderCompleteScreen() {
   const state = getState();
   const total = state.totalWon + state.totalLost;

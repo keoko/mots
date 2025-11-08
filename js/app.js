@@ -1,7 +1,7 @@
 // app.js - Main application entry point
 
 import { render } from './ui.js';
-import { addLetter, removeLetter, submitGuess, getState, getCurrentWord, backToTopics, nextWord, GAME_STATES } from './game.js';
+import { backToTopics } from './game.js';
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -28,9 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initial render
   render();
 
-  // Add keyboard support for play mode
-  document.addEventListener('keydown', handleKeyboardInput);
-
   // Make title clickable to go home
   const gameTitle = document.getElementById('game-title');
   if (gameTitle) {
@@ -51,48 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Register service worker for offline support with version query parameter
   registerServiceWorker(version);
 });
-
-// Handle keyboard input
-function handleKeyboardInput(e) {
-  // Ignore events from the mobile keyboard input - it has its own handler
-  if (e.target && e.target.id === 'mobile-keyboard-input') {
-    return;
-  }
-
-  const state = getState();
-  const word = getCurrentWord();
-
-  // Handle Enter key for different game states
-  if (e.key === 'Enter') {
-    // On won/lost screens, advance to next word
-    if (state.gameState === GAME_STATES.WON || state.gameState === GAME_STATES.LOST) {
-      e.preventDefault();
-      nextWord();
-      render();
-      return;
-    }
-
-    // During play mode, submit guess
-    if (state.gameState === GAME_STATES.PLAYING) {
-      submitGuess();
-      render();
-      return;
-    }
-  }
-
-  // Only handle letter keys (a-z) during play mode
-  if (state.gameState === GAME_STATES.PLAYING && e.key.length === 1 && /[a-z]/i.test(e.key)) {
-    const letter = e.key.toLowerCase();
-    addLetter(letter);
-    render();
-  }
-  // Handle backspace during play mode
-  else if (state.gameState === GAME_STATES.PLAYING && e.key === 'Backspace') {
-    e.preventDefault();
-    removeLetter();
-    render();
-  }
-}
 
 // Handle title click to go home
 function handleTitleClick() {
