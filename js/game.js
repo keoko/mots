@@ -91,10 +91,11 @@ export function selectMode(mode) {
   state.currentStreak = 0;
   state.isWordRevealed = false;
 
-  // Start timing when entering play mode
+  // Start timing for both modes
+  state.sessionStartTime = Date.now();
+  state.wordStats = [];
+
   if (mode === GAME_MODES.PLAY) {
-    state.sessionStartTime = Date.now();
-    state.wordStats = [];
     state.totalScore = 0;
     state.totalWon = 0;
     state.totalLost = 0;
@@ -150,36 +151,6 @@ export function toggleWordReveal() {
   }
 }
 
-// Mark word difficulty in study mode (hard = true, easy = false)
-export function markDifficulty(isHard) {
-  if (state.gameMode !== GAME_MODES.STUDY) return;
-
-  const word = getCurrentWord();
-  const wordEndTime = Date.now();
-  const wordStartTime = state.sessionStartTime || wordEndTime;
-  const timeTaken = wordEndTime - wordStartTime;
-
-  // Track word stats for study mode
-  state.wordStats.push({
-    word: word.en,
-    won: !isHard, // Easy = won, Hard = lost
-    timeMs: timeTaken,
-    difficulty: isHard ? 'hard' : 'easy'
-  });
-
-  if (isHard) {
-    state.totalLost++;
-  } else {
-    state.totalWon++;
-  }
-
-  // Reset timer for next word
-  state.sessionStartTime = Date.now();
-
-  // Move to next word
-  nextWordInStudyMode();
-}
-
 // Calculate score for a word (play mode only)
 function calculateWordScore(won, timeTaken) {
   if (!won) return 0;
@@ -196,7 +167,7 @@ function calculateWordScore(won, timeTaken) {
   return Math.round(BASE_SCORE * timeBonus * streakBonus);
 }
 
-// Move to next word (called after result screen in play mode)
+// Move to next word (called after result screen in play mode, or after viewing flashcard in study mode)
 export function nextWord() {
   const word = getCurrentWord();
   const wordEndTime = Date.now();
@@ -245,39 +216,19 @@ export function nextWord() {
 
   // Check if we've completed all words
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
-    if (state.gameMode === GAME_MODES.PLAY || state.gameMode === GAME_MODES.PRACTICE_FAILED) {
-      state.sessionEndTime = Date.now();
-      state.gameState = GAME_STATES.COMPLETE;
-      // Save progress to localStorage (but not for practice mode)
-      if (state.gameMode === GAME_MODES.PLAY) {
-        saveProgress();
-      }
-    } else {
-      // In study mode, stay on last word
-      state.currentWordIndex = state.selectedTopic.words.length - 1;
-    }
+    state.sessionEndTime = Date.now();
+    state.gameState = GAME_STATES.COMPLETE;
+    // Note: Study mode doesn't save progress (no tracking)
   } else {
     // Reset for next word
     state.userInput = '';
     state.isWordRevealed = false;
-    state.gameState = GAME_STATES.PLAYING;
-  }
-}
 
-// Move to next word in study mode (after marking difficulty)
-function nextWordInStudyMode() {
-  state.currentWordIndex++;
-
-  // Check if we've completed all words
-  if (state.currentWordIndex >= state.selectedTopic.words.length) {
-    state.sessionEndTime = Date.now();
-    state.gameState = GAME_STATES.COMPLETE;
-    // Save study mode progress
-    saveProgress();
-  } else {
-    // Reset for next word
-    state.isWordRevealed = false;
-    state.gameState = GAME_STATES.STUDYING;
+    if (state.gameMode === GAME_MODES.STUDY) {
+      state.gameState = GAME_STATES.STUDYING;
+    } else {
+      state.gameState = GAME_STATES.PLAYING;
+    }
   }
 }
 

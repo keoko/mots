@@ -12,7 +12,6 @@ import {
   setUserInput,
   submitAnswer,
   toggleWordReveal,
-  markDifficulty,
   nextWord,
   previousWord,
   backToTopics,
@@ -191,7 +190,7 @@ function attachModeSelectionListeners() {
   });
 }
 
-// NEW: Simplified Study Mode - Flashcard style
+// NEW: Simplified Study Mode - Flashcard style (pure passive review)
 function renderStudyMode() {
   const state = getState();
   const word = getCurrentWord();
@@ -205,7 +204,7 @@ function renderStudyMode() {
       </div>
 
       <div class="flashcard-container">
-        <div class="flashcard ${state.isWordRevealed ? 'revealed' : ''}" data-action="toggle-reveal">
+        <div class="flashcard ${state.isWordRevealed ? 'revealed' : ''}" data-action="flashcard-tap">
           <div class="flashcard-front">
             <div class="flashcard-lang-label">Catalan</div>
             <div class="flashcard-word">${word.ca}</div>
@@ -220,15 +219,7 @@ function renderStudyMode() {
                 <div class="flashcard-arrow">↓</div>
                 <div class="flashcard-en">${word.en}</div>
               </div>
-
-              <div class="difficulty-buttons">
-                <button class="btn btn-difficulty btn-hard" data-action="mark-hard">
-                  😓 Hard
-                </button>
-                <button class="btn btn-difficulty btn-easy" data-action="mark-easy">
-                  ✓ Easy
-                </button>
-              </div>
+              <div class="flashcard-hint">Tap to continue</div>
             </div>
           ` : ''}
         </div>
@@ -238,24 +229,23 @@ function renderStudyMode() {
 }
 
 function attachStudyModeListeners() {
+  const state = getState();
+
   document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
     backToTopics();
     render();
   });
 
-  document.querySelector('[data-action="toggle-reveal"]')?.addEventListener('click', () => {
-    toggleWordReveal();
-    render();
-  });
-
-  document.querySelector('[data-action="mark-hard"]')?.addEventListener('click', () => {
-    markDifficulty(true);
-    render();
-  });
-
-  document.querySelector('[data-action="mark-easy"]')?.addEventListener('click', () => {
-    markDifficulty(false);
-    render();
+  document.querySelector('[data-action="flashcard-tap"]')?.addEventListener('click', () => {
+    if (!state.isWordRevealed) {
+      // First tap: reveal the word
+      toggleWordReveal();
+      render();
+    } else {
+      // Second tap: go to next word
+      nextWord();
+      render();
+    }
   });
 }
 
@@ -370,6 +360,7 @@ function renderCompleteScreen() {
   const state = getState();
   const total = state.totalWon + state.totalLost;
   const percentage = total > 0 ? Math.round((state.totalWon / total) * 100) : 0;
+  const isPlayMode = state.gameMode === GAME_MODES.PLAY || state.gameMode === GAME_MODES.PRACTICE_FAILED;
 
   // Calculate timing
   const totalTimeMs = state.sessionEndTime - state.sessionStartTime;
@@ -380,35 +371,41 @@ function renderCompleteScreen() {
     ? `${minutes}m ${seconds}s`
     : `${seconds}s`;
 
-  // Get top 10 scores
-  const topScores = getTopScores(state.selectedTopic.id);
-  const currentScoreRank = topScores.findIndex(s =>
-    s.score === state.totalScore &&
-    Math.abs(new Date(s.date) - new Date()) < 5000
-  ) + 1;
+  // Get top 10 scores (only for play mode)
+  let topScores = [];
+  let currentScoreRank = 0;
+  let actualRank = 0;
 
-  // Find actual rank if not in top 10
-  let actualRank = currentScoreRank;
-  if (currentScoreRank === 0) {
-    // User not in top 10, calculate actual rank
-    const allSessions = getSessions();
-    const topicSessions = allSessions.filter(s => s.topicId === state.selectedTopic.id);
-    const sorted = topicSessions.sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-      return a.time - b.time;
-    });
-    actualRank = sorted.findIndex(s =>
+  if (isPlayMode) {
+    topScores = getTopScores(state.selectedTopic.id);
+    currentScoreRank = topScores.findIndex(s =>
       s.score === state.totalScore &&
       Math.abs(new Date(s.date) - new Date()) < 5000
     ) + 1;
+
+    // Find actual rank if not in top 10
+    actualRank = currentScoreRank;
+    if (currentScoreRank === 0) {
+      // User not in top 10, calculate actual rank
+      const allSessions = getSessions();
+      const topicSessions = allSessions.filter(s => s.topicId === state.selectedTopic.id);
+      const sorted = topicSessions.sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        return a.time - b.time;
+      });
+      actualRank = sorted.findIndex(s =>
+        s.score === state.totalScore &&
+        Math.abs(new Date(s.date) - new Date()) < 5000
+      ) + 1;
+    }
   }
 
   return `
     <div class="game game-complete" role="alert" aria-live="assertive">
-      <!-- Top 10 Leaderboard -->
-      ${topScores.length > 0 ? `
+      <!-- Top 10 Leaderboard (Play mode only) -->
+      ${isPlayMode && topScores.length > 0 ? `
         <div class="leaderboard-section">
           <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
           <div class="leaderboard-grid">
@@ -477,37 +474,45 @@ function renderCompleteScreen() {
         </div>
       ` : ''}
 
-      <!-- Collapsible Game Details -->
-      <div class="game-details-section">
-        <button class="details-toggle" data-action="toggle-details" aria-expanded="false">
-          <span class="toggle-icon">▶</span>
-          <span>View Game Details</span>
-        </button>
-        <div class="game-details-content hidden">
-          <div class="details-stats">
-            <div class="detail-row">
-              <span class="detail-label">Won</span>
-              <span class="detail-value">${state.totalWon}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Lost</span>
-              <span class="detail-value">${state.totalLost}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Success Rate</span>
-              <span class="detail-value">${percentage}%</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Time</span>
-              <span class="detail-value">${timeDisplay}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Final Streak</span>
-              <span class="detail-value">${state.currentStreak}</span>
+      <!-- Session Details -->
+      ${isPlayMode ? `
+        <div class="game-details-section">
+          <button class="details-toggle" data-action="toggle-details" aria-expanded="false">
+            <span class="toggle-icon">▶</span>
+            <span>View Session Details</span>
+          </button>
+          <div class="game-details-content hidden">
+            <div class="details-stats">
+              <div class="detail-row">
+                <span class="detail-label">Won</span>
+                <span class="detail-value">${state.totalWon}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Lost</span>
+                <span class="detail-value">${state.totalLost}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Success Rate</span>
+                <span class="detail-value">${percentage}%</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Time</span>
+                <span class="detail-value">${timeDisplay}</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Final Streak</span>
+                <span class="detail-value">${state.currentStreak}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ` : `
+        <!-- Study Mode Complete -->
+        <div class="study-complete-message">
+          <p class="study-complete-text">You reviewed <strong>${state.selectedTopic.words.length} words</strong> in ${timeDisplay}</p>
+          <p class="study-complete-hint">Ready to test yourself?</p>
+        </div>
+      `}
 
       <div class="complete-buttons">
         <button class="btn btn-secondary" data-action="back-to-topics" aria-label="Choose another topic">
