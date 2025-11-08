@@ -1,9 +1,10 @@
 {
   "name": "mots",
-  "version": "0.0.73",
+  "version": "0.0.74",
   "description": "Learn English words from Catalan - an interactive word-guessing game",
   "scripts": {
     "start": "npx http-server",
+    "release": "node bump-version",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
