@@ -50,12 +50,9 @@ export function render() {
       attachStudyModeListeners();
       break;
     case GAME_STATES.PLAYING:
+    case GAME_STATES.RESULT:
       mainContent.innerHTML = renderPlayMode();
       attachPlayModeListeners();
-      break;
-    case GAME_STATES.RESULT:
-      mainContent.innerHTML = renderResult();
-      attachResultListeners();
       break;
     case GAME_STATES.COMPLETE:
       mainContent.innerHTML = renderCompleteScreen();
@@ -267,9 +264,10 @@ function renderPlayMode() {
   const state = getState();
   const word = getCurrentWord();
   const progress = `${state.currentWordIndex + 1}/${state.selectedTopic.words.length}`;
+  const showingFeedback = state.gameState === GAME_STATES.RESULT;
 
   return `
-    <div class="game play-mode">
+    <div class="game play-mode ${showingFeedback ? (state.isCorrect ? 'feedback-correct' : 'feedback-wrong') : ''}">
       <div class="game-header">
         <button class="back-button" data-action="back-to-topics">← Topics</button>
         <div class="game-stats">
@@ -281,38 +279,69 @@ function renderPlayMode() {
       <div class="play-container">
         <div class="progress-indicator">${progress}</div>
 
-        <div class="word-prompt">
-          <div class="prompt-label">Translate to English:</div>
-          <div class="prompt-word">${word.ca}</div>
-        </div>
+        ${showingFeedback ? `
+          <!-- Inline Feedback -->
+          <div class="inline-feedback ${state.isCorrect ? 'correct' : 'incorrect'}">
+            <div class="feedback-icon">${state.isCorrect ? '✓' : '✗'}</div>
+            <div class="feedback-word-pair">
+              <div class="feedback-catalan">${word.ca}</div>
+              <div class="feedback-arrow">→</div>
+              <div class="feedback-english">${word.en}</div>
+            </div>
+            ${!state.isCorrect ? `
+              <div class="feedback-your-answer">
+                Your answer: <strong>${state.userInput}</strong>
+              </div>
+            ` : ''}
+          </div>
+        ` : `
+          <!-- Answer Input -->
+          <div class="word-prompt">
+            <div class="prompt-label">Translate to English:</div>
+            <div class="prompt-word">${word.ca}</div>
+          </div>
 
-        <div class="answer-input-container">
-          <input
-            type="text"
-            id="answer-input"
-            class="answer-input"
-            placeholder="Type your answer..."
-            value="${state.userInput}"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-          />
-        </div>
+          <div class="answer-input-container">
+            <input
+              type="text"
+              id="answer-input"
+              class="answer-input"
+              placeholder="Type your answer..."
+              value="${state.userInput}"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          </div>
 
-        <button class="btn btn-primary btn-submit" data-action="submit-answer">
-          Submit
-        </button>
+          <button class="btn btn-primary btn-submit" data-action="submit-answer">
+            Submit
+          </button>
+        `}
       </div>
     </div>
   `;
 }
 
 function attachPlayModeListeners() {
+  const state = getState();
+
   document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
     backToTopics();
     render();
   });
 
+  // Auto-advance when showing feedback
+  if (state.gameState === GAME_STATES.RESULT) {
+    const delay = state.isCorrect ? 500 : 2000; // 0.5s for correct, 2s for wrong
+    setTimeout(() => {
+      nextWord();
+      render();
+    }, delay);
+    return; // Don't attach input listeners when showing feedback
+  }
+
+  // Input handling (only when not showing feedback)
   const input = document.getElementById('answer-input');
   if (input) {
     input.focus();
@@ -336,60 +365,6 @@ function attachPlayModeListeners() {
   });
 }
 
-// NEW: Result screen (shows after answering in play mode)
-function renderResult() {
-  const state = getState();
-  const word = getCurrentWord();
-
-  return `
-    <div class="game result-screen">
-      <div class="result-container ${state.isCorrect ? 'correct' : 'incorrect'}">
-        <div class="result-icon">${state.isCorrect ? '✓' : '✗'}</div>
-        <div class="result-message">
-          ${state.isCorrect ? 'Correct!' : 'Incorrect'}
-        </div>
-
-        <div class="result-words">
-          <div class="result-catalan">${word.ca}</div>
-          <div class="result-arrow">→</div>
-          <div class="result-english">${word.en}</div>
-        </div>
-
-        ${!state.isCorrect ? `
-          <div class="result-your-answer">
-            <span class="result-label">Your answer:</span>
-            <span class="result-value">${state.userInput}</span>
-          </div>
-        ` : ''}
-
-        ${state.isCorrect ? `
-          <div class="result-streak">
-            Streak: ${state.currentStreak}🔥
-          </div>
-        ` : ''}
-      </div>
-
-      <button class="btn btn-primary btn-continue" data-action="next-word">
-        Continue
-      </button>
-    </div>
-  `;
-}
-
-function attachResultListeners() {
-  // Auto-advance after 2 seconds
-  setTimeout(() => {
-    nextWord();
-    render();
-  }, 2000);
-
-  // Or allow manual advance
-  document.querySelector('[data-action="next-word"]')?.addEventListener('click', () => {
-    nextWord();
-    render();
-  });
-}
-
 // Complete Screen and Statistics from original
 function renderCompleteScreen() {
   const state = getState();
@@ -404,10 +379,6 @@ function renderCompleteScreen() {
   const timeDisplay = minutes > 0
     ? `${minutes}m ${seconds}s`
     : `${seconds}s`;
-
-  // Calculate average attempts
-  const totalAttempts = state.wordStats.reduce((sum, w) => sum + w.attempts, 0);
-  const avgAttempts = total > 0 ? (totalAttempts / total).toFixed(1) : 0;
 
   // Get top 10 scores
   const topScores = getTopScores(state.selectedTopic.id);
@@ -529,10 +500,6 @@ function renderCompleteScreen() {
             <div class="detail-row">
               <span class="detail-label">Time</span>
               <span class="detail-value">${timeDisplay}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Avg Attempts</span>
-              <span class="detail-value">${avgAttempts}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Final Streak</span>
