@@ -12,6 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -75,6 +76,28 @@ function updateServiceWorker(newVersion) {
   console.log(`✓ Updated sw.js to ${newVersion}`);
 }
 
+function gitCommitAndPush(newVersion) {
+  try {
+    console.log('\n📝 Committing changes...');
+
+    // Git add files
+    execSync(`git add ${FILES_TO_UPDATE.join(' ')}`, { stdio: 'inherit' });
+    console.log(`✓ Added files to git`);
+
+    // Git commit
+    execSync(`git commit -m "release: ${newVersion}"`, { stdio: 'inherit' });
+    console.log(`✓ Committed with message: "release: ${newVersion}"`);
+
+    // Git push
+    execSync('git push', { stdio: 'inherit' });
+    console.log(`✓ Pushed to remote`);
+
+  } catch (error) {
+    console.error('❌ Git operation failed:', error.message);
+    process.exit(1);
+  }
+}
+
 function main() {
   const bumpType = process.argv[2] || 'patch';
 
@@ -95,11 +118,10 @@ function main() {
   updateManifestJson(newVersion);
   updateServiceWorker(newVersion);
 
-  console.log(`\n✅ Version bumped successfully!`);
-  console.log(`\nNext steps:`);
-  console.log(`  git add ${FILES_TO_UPDATE.join(' ')}`);
-  console.log(`  git commit -m "chore: bump version to ${newVersion}"`);
-  console.log(`  git push\n`);
+  // Commit and push changes
+  gitCommitAndPush(newVersion);
+
+  console.log(`\n✅ Version ${newVersion} released successfully!\n`);
 }
 
 main();
