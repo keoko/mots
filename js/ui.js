@@ -205,23 +205,16 @@ function renderStudyMode() {
 
       <div class="flashcard-container">
         <div class="flashcard ${state.isWordRevealed ? 'revealed' : ''}" data-action="flashcard-tap">
-          <div class="flashcard-front">
-            <div class="flashcard-lang-label">Catalan</div>
-            <div class="flashcard-word">${word.ca}</div>
-            <div class="flashcard-hint">Tap to reveal</div>
+          <div class="flashcard-word">${word.ca}</div>
+          <div class="flashcard-translation">
+            ${state.isWordRevealed
+              ? `<span class="flashcard-word-en">${word.en}</span>`
+              : `<span class="flashcard-placeholder">${'_ '.repeat(word.en.length).trim()}</span>`
+            }
           </div>
-
-          ${state.isWordRevealed ? `
-            <div class="flashcard-back">
-              <div class="flashcard-lang-label">Catalan → English</div>
-              <div class="flashcard-word-pair">
-                <div class="flashcard-ca">${word.ca}</div>
-                <div class="flashcard-arrow">↓</div>
-                <div class="flashcard-en">${word.en}</div>
-              </div>
-              <div class="flashcard-hint">Tap to continue</div>
-            </div>
-          ` : ''}
+          <div class="flashcard-hint">
+            ${state.isWordRevealed ? 'Tap to continue' : 'Tap to reveal'}
+          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,8 @@
 #+title: Ideas
 
 * Issues
-** header aligned to the left
-** update help page
 ** study mode: simplify page to reveal word
+** header aligned to the left
 ** top tep page
 ** success/failed word tap to continue
 ** removed unused JS files

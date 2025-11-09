@@ -577,14 +577,6 @@ body {
   gap: var(--spacing-md);
 }
 
-.flashcard-lang-label {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-
 .flashcard-word {
   font-size: var(--font-size-3xl);
   font-weight: 700;
@@ -598,40 +590,36 @@ body {
   }
 }
 
-.flashcard-hint {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: var(--spacing-md);
+.flashcard-translation {
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  min-height: 3rem;
 }
 
-.flashcard-word-pair {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--spacing-sm);
-  width: 100%;
-}
-
-.flashcard-ca {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-secondary);
-}
-
-.flashcard-arrow {
+.flashcard-placeholder {
   font-size: var(--font-size-2xl);
+  font-weight: 700;
   color: var(--color-text-secondary);
+  letter-spacing: 0.2em;
 }
 
-.flashcard-en {
-  font-size: var(--font-size-3xl);
+.flashcard-word-en {
+  font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--color-success);
 }
 
 @media (min-width: 640px) {
-  .flashcard-en {
-    font-size: var(--font-size-4xl);
+  .flashcard-placeholder,
+  .flashcard-word-en {
+    font-size: var(--font-size-3xl);
   }
+}
+
+.flashcard-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-md);
 }
 
 /* ============================================
