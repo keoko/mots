@@ -254,21 +254,19 @@ function renderPlayMode() {
       <div class="game-header">
         <button class="back-button" data-action="back-to-topics">← Topics</button>
         <div class="game-stats">
+          <span class="stat-item">${progress}</span>
           <span class="stat-item">Score: ${state.totalScore}</span>
           <span class="stat-item">Streak: ${state.currentStreak}🔥</span>
         </div>
       </div>
 
       <div class="play-container">
-        <div class="progress-indicator">${progress}</div>
-
         ${showingFeedback ? `
           <!-- Inline Feedback -->
-          <div class="inline-feedback ${state.isCorrect ? 'correct' : 'incorrect'}">
+          <div class="inline-feedback ${state.isCorrect ? 'correct' : 'incorrect'}" data-action="feedback-continue">
             <div class="feedback-icon">${state.isCorrect ? '✓' : '✗'}</div>
             <div class="feedback-word-pair">
               <div class="feedback-catalan">${word.ca}</div>
-              <div class="feedback-arrow">→</div>
               <div class="feedback-english">${word.en}</div>
             </div>
             ${!state.isCorrect ? `
@@ -276,11 +274,11 @@ function renderPlayMode() {
                 Your answer: <strong>${state.userInput}</strong>
               </div>
             ` : ''}
+            <div class="feedback-hint">Tap to continue</div>
           </div>
         ` : `
           <!-- Answer Input -->
           <div class="word-prompt">
-            <div class="prompt-label">Translate to English:</div>
             <div class="prompt-word">${word.ca}</div>
           </div>
 
@@ -314,13 +312,12 @@ function attachPlayModeListeners() {
     render();
   });
 
-  // Auto-advance when showing feedback
+  // Tap to continue when showing feedback
   if (state.gameState === GAME_STATES.RESULT) {
-    const delay = state.isCorrect ? 500 : 2000; // 0.5s for correct, 2s for wrong
-    setTimeout(() => {
+    document.querySelector('[data-action="feedback-continue"]')?.addEventListener('click', () => {
       nextWord();
       render();
-    }, delay);
+    });
     return; // Don't attach input listeners when showing feedback
   }
 

@@ -1,7 +1,6 @@
 #+title: Ideas
 
 * Issues
-** study mode: simplify page to reveal word
 ** header aligned to the left
 ** top tep page
 ** success/failed word tap to continue

@@ -810,11 +810,6 @@ body {
   color: var(--color-text-secondary);
 }
 
-.feedback-arrow {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-secondary);
-}
-
 .feedback-english {
   font-size: var(--font-size-2xl);
   font-weight: 700;
@@ -835,6 +830,12 @@ body {
 
 .feedback-your-answer strong {
   color: var(--color-error);
+}
+
+.feedback-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--spacing-md);
 }
 
 /* ============================================
