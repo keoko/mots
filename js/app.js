@@ -110,6 +110,12 @@ async function registerServiceWorker(version) {
 
 // Show update notification to user
 function showUpdateNotification() {
+  // Don't show notification if it already exists
+  if (document.getElementById('update-notification')) {
+    console.log('[App] Update notification already shown');
+    return;
+  }
+
   const notification = document.createElement('div');
   notification.id = 'update-notification';
   notification.style.cssText = `
