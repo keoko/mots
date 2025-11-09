@@ -205,7 +205,16 @@
     </ol>
 
     <div class="example-box">
-      <strong>Scoring:</strong> Points are based on speed and streak. The faster and longer your streak, the more points you earn!
+      <strong>Scoring System:</strong>
+      <ul style="margin-top: var(--spacing-sm); line-height: 1.7;">
+        <li><strong>Base:</strong> 100 points per correct answer</li>
+        <li><strong>Time Bonus:</strong> Answer in under 10 seconds for full points (100%). Slower answers get 50-100% based on speed</li>
+        <li><strong>Streak Bonus:</strong> +10% per word in your streak (capped at +50% for 5+ streak)</li>
+        <li><strong>Wrong answers:</strong> 0 points and streak resets</li>
+      </ul>
+      <div style="margin-top: var(--spacing-sm); padding: var(--spacing-sm); background: var(--color-background); border-radius: var(--radius-md);">
+        <strong>Example:</strong> Answer in 5 seconds with a 3-word streak = 100 × 100% × 130% = <strong>130 points</strong>
+      </div>
     </div>
   </div>
 
