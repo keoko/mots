@@ -218,7 +218,11 @@ export function nextWord() {
   if (state.currentWordIndex >= state.selectedTopic.words.length) {
     state.sessionEndTime = Date.now();
     state.gameState = GAME_STATES.COMPLETE;
-    // Note: Study mode doesn't save progress (no tracking)
+
+    // Save progress for play mode
+    if (state.gameMode === GAME_MODES.PLAY || state.gameMode === GAME_MODES.PRACTICE_FAILED) {
+      saveProgress();
+    }
   } else {
     // Reset for next word
     state.userInput = '';
@@ -229,14 +233,6 @@ export function nextWord() {
     } else {
       state.gameState = GAME_STATES.PLAYING;
     }
-  }
-}
-
-// Move to previous word (study mode only)
-export function previousWord() {
-  if (state.currentWordIndex > 0) {
-    state.currentWordIndex--;
-    state.isWordRevealed = false;
   }
 }
 
@@ -263,11 +259,6 @@ export function backToModeSelection() {
   state.totalLost = 0;
   state.currentStreak = 0;
   state.gameState = GAME_STATES.MODE_SELECTION;
-}
-
-// Restart game
-export function restartGame() {
-  backToTopics();
 }
 
 // Go to statistics page

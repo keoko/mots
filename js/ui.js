@@ -13,10 +13,8 @@ import {
   submitAnswer,
   toggleWordReveal,
   nextWord,
-  previousWord,
   backToTopics,
   backToModeSelection,
-  restartGame,
   goToStatistics,
   startPracticingFailed
 } from './game.js';
