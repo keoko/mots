@@ -1210,8 +1210,10 @@ export function checkAndShowSubmissionModal() {
     const pending = getPendingSubmissions();
     const alreadyQueued = pending.some(p => p.id === state.lastSession.id);
 
-    // Check if already submitted to global (has globalRank or globalSubmitted flag)
-    const alreadySubmittedGlobal = state.lastSession.globalRank || state.lastSession.globalSubmitted;
+    // Check localStorage sessions to see if this specific session has been handled
+    const sessions = getSessions();
+    const sessionInStorage = sessions.find(s => s.id === state.lastSession.id);
+    const alreadySubmittedGlobal = sessionInStorage && (sessionInStorage.globalSubmitted || sessionInStorage.globalRank);
 
     // Show modal if not already queued/submitted to global
     // We show it even if they have a local name, because modal is for GLOBAL submission
