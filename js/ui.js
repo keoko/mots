@@ -1132,17 +1132,8 @@ async function handleModalSubmission() {
         localStorage.setItem('mots_sessions', JSON.stringify(sessions));
       }
 
-      // Show success message
+      // Show success message (user will click continue)
       showSubmissionResult(true, result.rank, result.madeTopTen);
-
-      // Reload global leaderboard
-      await loadGlobalLeaderboard(session.topicId);
-
-      // Close modal after delay
-      setTimeout(() => {
-        hideGlobalSubmissionModal();
-        render();
-      }, 2000);
     } else {
       // Failed, offer to queue
       const queued = queueForLater(session, playerName);
@@ -1151,10 +1142,6 @@ async function handleModalSubmission() {
       } else {
         showSubmissionResult(false, null, false, 'Failed to submit or queue');
       }
-
-      setTimeout(() => {
-        hideGlobalSubmissionModal();
-      }, 2000);
     }
   } else {
     // Queue for later
@@ -1165,10 +1152,6 @@ async function handleModalSubmission() {
     } else {
       showSubmissionResult(false, null, false, 'Failed to queue');
     }
-
-    setTimeout(() => {
-      hideGlobalSubmissionModal();
-    }, 2000);
   }
 }
 
@@ -1177,7 +1160,8 @@ function showSubmissionResult(success, rank, madeTopTen, message) {
   if (!modal) return;
 
   const body = modal.querySelector('.modal-body');
-  if (!body) return;
+  const footer = modal.querySelector('.modal-footer');
+  if (!body || !footer) return;
 
   if (success) {
     body.innerHTML = `
@@ -1197,6 +1181,29 @@ function showSubmissionResult(success, rank, madeTopTen, message) {
         <p class="queued-message">${message}</p>
       </div>
     `;
+  }
+
+  // Replace footer with a continue button
+  footer.innerHTML = `
+    <button class="btn btn-primary" data-action="close-result" style="width: 100%;">
+      Continue
+    </button>
+  `;
+
+  // Attach close handler
+  const closeBtn = footer.querySelector('[data-action="close-result"]');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', async () => {
+      hideGlobalSubmissionModal();
+      if (success) {
+        // Reload global leaderboard before closing
+        const { session } = submissionModalState;
+        if (session) {
+          await loadGlobalLeaderboard(session.topicId);
+        }
+      }
+      render();
+    });
   }
 }
 

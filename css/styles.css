@@ -1601,3 +1601,12 @@ body {
   color: var(--color-text);
   margin-top: var(--spacing-md);
 }
+
+/* Continue hint in modal */
+.continue-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: var(--spacing-lg);
+  font-style: italic;
+}
