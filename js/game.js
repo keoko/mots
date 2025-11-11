@@ -345,7 +345,7 @@ function saveProgress() {
 
   // Save session history (only for play mode, not study)
   if (state.gameMode === GAME_MODES.PLAY) {
-    saveSession({
+    const session = saveSession({
       topicId: state.selectedTopic.id,
       topicName: state.selectedTopic.name,
       score: state.totalScore,
@@ -354,5 +354,8 @@ function saveProgress() {
       wordsLost: state.totalLost,
       successRate: Math.round((state.totalWon / (state.totalWon + state.totalLost)) * 100)
     });
+
+    // Store last session for potential global submission
+    state.lastSession = session;
   }
 }

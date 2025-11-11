@@ -152,17 +152,22 @@ export function removeFailedWord(topicId, word) {
 export function saveSession(sessionData) {
   try {
     const sessions = getSessions();
-    sessions.unshift({
+    const newSession = {
       ...sessionData,
       id: Date.now().toString(),
       date: new Date().toISOString()
-    });
+    };
+    sessions.unshift(newSession);
 
     // Keep only last 100 sessions
     const trimmed = sessions.slice(0, 100);
     localStorage.setItem(SESSIONS_KEY, JSON.stringify(trimmed));
+
+    // Return the newly created session
+    return newSession;
   } catch (error) {
     console.error('Error saving session:', error);
+    return null;
   }
 }
 
@@ -283,5 +288,88 @@ export function updateSessionName(sessionId, playerName) {
   } catch (error) {
     console.error('Error updating session name:', error);
     return false;
+  }
+}
+
+// Queue management for global leaderboard submissions
+const SYNC_QUEUE_KEY = 'mots_sync_queue';
+const PLAYER_NAME_KEY = 'mots_player_name';
+
+// Queue a score for global submission (when offline or user wants to submit later)
+export function queueGlobalSubmission(sessionData) {
+  try {
+    const queue = getPendingSubmissions();
+    queue.push({
+      ...sessionData,
+      queuedAt: new Date().toISOString(),
+      attempts: 0
+    });
+    localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+    return true;
+  } catch (error) {
+    console.error('Error queuing submission:', error);
+    return false;
+  }
+}
+
+// Get all pending submissions
+export function getPendingSubmissions() {
+  try {
+    const data = localStorage.getItem(SYNC_QUEUE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (error) {
+    console.error('Error loading pending submissions:', error);
+    return [];
+  }
+}
+
+// Remove a submission from the queue (after successful sync)
+export function clearQueuedSubmission(sessionId) {
+  try {
+    const queue = getPendingSubmissions();
+    const filtered = queue.filter(s => s.id !== sessionId);
+    localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(filtered));
+    return true;
+  } catch (error) {
+    console.error('Error clearing queued submission:', error);
+    return false;
+  }
+}
+
+// Increment attempt counter for a queued submission
+export function incrementQueueAttempts(sessionId) {
+  try {
+    const queue = getPendingSubmissions();
+    const submission = queue.find(s => s.id === sessionId);
+    if (submission) {
+      submission.attempts = (submission.attempts || 0) + 1;
+      submission.lastAttempt = new Date().toISOString();
+      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+    }
+    return true;
+  } catch (error) {
+    console.error('Error incrementing attempts:', error);
+    return false;
+  }
+}
+
+// Get/set remembered player name
+export function getPlayerName() {
+  try {
+    return localStorage.getItem(PLAYER_NAME_KEY) || '';
+  } catch (error) {
+    console.error('Error loading player name:', error);
+    return '';
+  }
+}
+
+export function setPlayerName(name) {
+  try {
+    const trimmed = name.toUpperCase().trim().slice(0, 8);
+    localStorage.setItem(PLAYER_NAME_KEY, trimmed);
+    return trimmed;
+  } catch (error) {
+    console.error('Error saving player name:', error);
+    return name;
   }
 }

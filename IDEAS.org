@@ -1,27 +1,23 @@
 #+title: Ideas
 
 * Issues
-** header aligned to the left
-** top tep page
-** update new version message, 2 times
 ** global leaderboard
+** do not allow more than 10 scores per topic
+** list of topics limited
+** enter does not work to move to the next work, only tapping.
+** on flashcard the pointer is lost
+** add rules to avoid exploiting sqlite DB
+** investigate cheaper ways to have free storage persistance
+** check we do not push tokens/resources that could exploit fly account
+** update new version message, 2 times
+** header aligned to the left
 ** DONE keyboard with splitted words does not work
-** Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
-Element with focus: <input.mobile-keyboard-input#mobile-keyboard-input>
-Ancestor with aria-hidden: <input.mobile-keyboard-input#mobile-keyboard-input> <input type=​"text" id=​"mobile-keyboard-input" class=​"mobile-keyboard-input" autocomplete=​"off" autocorrect=​"off" autocapitalize=​"none" spellcheck=​"false" inputmode=​"text" enterkeyhint=​"go" aria-hidden=​"true">​
 ** DONE topics page and score pages display an scrollbar on desktop UI
 * Ideas
-** improve score page
-show top ten like a wordle game
-** display delete key with a different color
-** fix hard refresh issues
 ** in bump version add tag
-** fix service worker
 ** use IndexedDB, any benefits?
-** global scoring
 ** E2E tests, playwright issues on arch linux
 ** touch events API
 ** claude setup-install does not work on bash?
-** improve desktop UI
 * Explore
 ** what is AppCache

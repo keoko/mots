@@ -1,6 +1,6 @@
 // app.js - Main application entry point
 
-import { render } from './ui.js';
+import { render, initializeSync } from './ui.js';
 import { backToTopics } from './game.js';
 
 // Initialize app when DOM is ready
@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.error('Failed to load version:', error);
   }
+
+  // Initialize sync for global leaderboard
+  initializeSync();
 
   // Initial render
   render();
