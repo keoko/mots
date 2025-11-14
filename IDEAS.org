@@ -4,6 +4,7 @@
 ** global leaderboard
 ** do not allow more than 10 scores per topic
 ** list of topics limited
+** replace worldwide text by class members
 ** enter does not work to move to the next work, only tapping.
 ** on flashcard the pointer is lost
 ** add rules to avoid exploiting sqlite DB

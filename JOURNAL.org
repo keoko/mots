@@ -1,5 +1,7 @@
 #+title: Journal
 * 2025
+** 2025/Nov/14
+*** feat: add global leaderboard API with offline sync and modal submission UI
 ** 2025/Oct/30
 *** fix: service worker infinite reload loop caused by unregistering on every page load
 *** CLAUDE: leaves a lot of stale files

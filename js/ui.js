@@ -202,6 +202,7 @@ function attachTopicSelectionListeners() {
 }
 function renderModeSelection() {
   const state = getState();
+  const topScores = getTopScores(state.selectedTopic.id);
 
   return `
     <div class="mode-selection">
@@ -209,6 +210,11 @@ function renderModeSelection() {
         <button class="back-button" data-action="back-to-topics" aria-label="Back to topic selection">
           ← Topics
         </button>
+        ${topScores.length > 0 ? `
+          <button class="btn-leaderboard-header" data-action="view-leaderboard" aria-label="View leaderboard">
+            🏆 Leaderboard
+          </button>
+        ` : ''}
       </div>
       <h2 class="section-title">Choose Mode</h2>
       <div class="mode-grid">
@@ -239,6 +245,135 @@ function attachModeSelectionListeners() {
   document.querySelector('[data-action="back-to-topics"]')?.addEventListener('click', () => {
     backToTopics();
     render();
+  });
+
+  document.querySelector('[data-action="view-leaderboard"]')?.addEventListener('click', () => {
+    showLeaderboardView();
+  });
+}
+
+// Show standalone leaderboard view
+function showLeaderboardView() {
+  const mainContent = document.getElementById('main-content');
+  const state = getState();
+
+  mainContent.innerHTML = renderStandaloneLeaderboard();
+  attachStandaloneLeaderboardListeners();
+}
+
+function renderStandaloneLeaderboard() {
+  const state = getState();
+  const topScores = getTopScores(state.selectedTopic.id);
+
+  return `
+    <div class="game game-complete">
+      <div class="leaderboard-section">
+        <div class="leaderboard-header">
+          <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
+          <div class="leaderboard-toggle">
+            <button
+              class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
+              data-action="toggle-leaderboard"
+              data-mode="local"
+            >Local</button>
+            <button
+              class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
+              data-action="toggle-leaderboard"
+              data-mode="global"
+            >Global</button>
+          </div>
+        </div>
+
+        ${leaderboardState.loading ? `
+          <div class="leaderboard-loading">
+            <p>Loading global leaderboard...</p>
+          </div>
+        ` : leaderboardState.error && leaderboardState.viewMode === 'global' ? `
+          <div class="leaderboard-error">
+            <p>⚠️ Unable to load global leaderboard</p>
+            <p class="error-detail">${leaderboardState.error}</p>
+            <button class="btn btn-secondary" data-action="retry-global">Retry</button>
+          </div>
+        ` : ''}
+
+        ${renderLeaderboardScores(state.selectedTopic.id)}
+      </div>
+
+      <div class="complete-buttons">
+        <button class="btn btn-secondary" data-action="back-to-modes" aria-label="Back to mode selection">
+          ← Back
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderLeaderboardScores(topicId) {
+  const topScores = getTopScores(topicId);
+  const displayScores = leaderboardState.viewMode === 'global' && leaderboardState.globalScores
+    ? leaderboardState.globalScores
+    : topScores;
+
+  if (leaderboardState.loading || (leaderboardState.error && leaderboardState.viewMode === 'global')) {
+    return '';
+  }
+
+  if (displayScores.length === 0) {
+    return `
+      <div class="leaderboard-empty">
+        <p>No scores yet. Be the first to play!</p>
+      </div>
+    `;
+  }
+
+  const formatTime = (ms) => {
+    const secs = Math.floor(ms / 1000);
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+  };
+
+  return `
+    <div class="leaderboard-grid">
+      ${displayScores.map((score, index) => {
+        return `
+          <div class="leaderboard-row">
+            <span class="leaderboard-rank">#${index + 1}</span>
+            <span class="leaderboard-name">${score.playerName || '—'}</span>
+            <span class="leaderboard-score">${score.score}</span>
+            <span class="leaderboard-time">${formatTime(score.time)}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function attachStandaloneLeaderboardListeners() {
+  document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
+    render();
+  });
+
+  // Toggle between global and local leaderboard
+  document.querySelectorAll('[data-action="toggle-leaderboard"]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const mode = e.currentTarget.dataset.mode;
+      leaderboardState.viewMode = mode;
+
+      // Fetch global leaderboard if switching to global and not loaded yet
+      if (mode === 'global' && !leaderboardState.globalScores && !leaderboardState.loading) {
+        const state = getState();
+        await loadGlobalLeaderboard(state.selectedTopic.id);
+      }
+
+      showLeaderboardView();
+    });
+  });
+
+  // Retry loading global leaderboard
+  document.querySelector('[data-action="retry-global"]')?.addEventListener('click', async () => {
+    const state = getState();
+    await loadGlobalLeaderboard(state.selectedTopic.id);
   });
 }
 
