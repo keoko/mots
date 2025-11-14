@@ -291,6 +291,36 @@ export function updateSessionName(sessionId, playerName) {
   }
 }
 
+// Update global sync status for a session
+// status: 'none' | 'pending' | 'synced' | 'failed'
+export function updateSessionSyncStatus(sessionId, status, options = {}) {
+  try {
+    const sessions = getSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === sessionId);
+    if (sessionIndex !== -1) {
+      sessions[sessionIndex].globalSyncStatus = status;
+
+      if (status === 'synced') {
+        sessions[sessionIndex].globalRank = options.rank;
+        sessions[sessionIndex].globalSyncedAt = new Date().toISOString();
+        sessions[sessionIndex].globalSyncError = null;
+      } else if (status === 'failed') {
+        sessions[sessionIndex].globalSyncError = options.error || 'Unknown error';
+        sessions[sessionIndex].globalSyncFailedAt = new Date().toISOString();
+      } else if (status === 'pending') {
+        sessions[sessionIndex].globalSyncError = null;
+      }
+
+      localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Error updating session sync status:', error);
+    return false;
+  }
+}
+
 // Queue management for global leaderboard submissions
 const SYNC_QUEUE_KEY = 'mots_sync_queue';
 const PLAYER_NAME_KEY = 'mots_player_name';

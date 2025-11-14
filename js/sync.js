@@ -12,12 +12,16 @@ import {
   incrementQueueAttempts,
   getPlayerName,
   setPlayerName,
-  updateSessionName
+  updateSessionName,
+  updateSessionSyncStatus
 } from './storage.js';
 
 // Try to submit a score to the global leaderboard
 export async function submitToGlobal(session, playerName) {
   try {
+    // Mark as pending
+    updateSessionSyncStatus(session.id, 'pending');
+
     // Format data for API
     const scoreData = {
       playerName: playerName.toUpperCase().trim().slice(0, 8),
@@ -38,6 +42,9 @@ export async function submitToGlobal(session, playerName) {
       // Save player name for future use
       setPlayerName(scoreData.playerName);
 
+      // Mark as synced with rank
+      updateSessionSyncStatus(session.id, 'synced', { rank: result.rank });
+
       return {
         success: true,
         rank: result.rank,
@@ -46,10 +53,12 @@ export async function submitToGlobal(session, playerName) {
       };
     } else {
       // API call failed
+      updateSessionSyncStatus(session.id, 'failed', { error: 'Failed to submit score' });
       return { success: false, error: 'Failed to submit score' };
     }
   } catch (error) {
     console.error('Error submitting to global leaderboard:', error);
+    updateSessionSyncStatus(session.id, 'failed', { error: error.message });
     return { success: false, error: error.message };
   }
 }
@@ -69,6 +78,9 @@ export function queueForLater(session, playerName) {
 
     // Save player name for future use
     setPlayerName(sessionWithName.playerName);
+
+    // Mark as pending
+    updateSessionSyncStatus(session.id, 'pending');
   }
 
   return queued;
@@ -99,25 +111,19 @@ export async function syncPendingScores() {
       const result = await submitToGlobal(submission, submission.playerName);
 
       if (result.success) {
-        // Mark as globally submitted in sessions
-        const sessions = JSON.parse(localStorage.getItem('mots_sessions') || '[]');
-        const sessionIndex = sessions.findIndex(s => s.id === submission.id);
-        if (sessionIndex !== -1) {
-          sessions[sessionIndex].globalSubmitted = true;
-          sessions[sessionIndex].globalRank = result.rank;
-          localStorage.setItem('mots_sessions', JSON.stringify(sessions));
-        }
-
+        // submitToGlobal already updated session status
         // Remove from queue
         clearQueuedSubmission(submission.id);
         synced++;
       } else {
+        // submitToGlobal already marked as failed
         // Increment attempts
         incrementQueueAttempts(submission.id);
         failed++;
       }
     } catch (error) {
       console.error('Error syncing submission:', error);
+      updateSessionSyncStatus(submission.id, 'failed', { error: error.message });
       incrementQueueAttempts(submission.id);
       failed++;
     }

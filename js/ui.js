@@ -26,6 +26,7 @@ import {
   getTopicProgress,
   getTopScores,
   updateSessionName,
+  updateSessionSyncStatus,
   getPendingSubmissions,
   getPlayerName,
   clearQueuedSubmission
@@ -52,12 +53,7 @@ let leaderboardState = {
   error: null
 };
 
-// Global submission modal state
-let submissionModalState = {
-  visible: false,
-  session: null,
-  submitting: false
-};
+// Removed global submission modal - now using inline sync buttons in leaderboard
 
 // Load global leaderboard from API
 async function loadGlobalLeaderboard(topicId) {
@@ -591,19 +587,33 @@ function renderCompleteScreen() {
         <div class="leaderboard-section">
           <div class="leaderboard-header">
             <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
-            <div class="leaderboard-toggle">
-              <button
-                class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
-                data-action="toggle-leaderboard"
-                data-mode="local"
-              >Local</button>
-              <button
-                class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
-                data-action="toggle-leaderboard"
-                data-mode="global"
-              >Global</button>
+            <div class="leaderboard-actions">
+              <div class="leaderboard-toggle">
+                <button
+                  class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
+                  data-action="toggle-leaderboard"
+                  data-mode="local"
+                >Local</button>
+                <button
+                  class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
+                  data-action="toggle-leaderboard"
+                  data-mode="global"
+                >Global</button>
+              </div>
+              ${leaderboardState.viewMode === 'local' ? `
+                <button class="btn-sync-all" data-action="sync-all-scores" title="Sync all pending and failed scores to global leaderboard">
+                  🌍 Sync All
+                </button>
+              ` : ''}
             </div>
           </div>
+
+          ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
+            <!-- Last sync info -->
+            <div class="sync-info">
+              <small>📡 Loaded from server</small>
+            </div>
+          ` : ''}
 
           ${leaderboardState.loading ? `
             <div class="leaderboard-loading">
@@ -648,7 +658,32 @@ function renderCompleteScreen() {
                 `;
               }
 
-              // Normal row with rank, name, and score
+              // Determine sync status (only for local leaderboard)
+              const syncStatus = score.globalSyncStatus || 'none';
+              const globalRank = score.globalRank;
+              const syncError = score.globalSyncError;
+              const isLocal = leaderboardState.viewMode === 'local';
+
+              // Sync status indicator
+              let syncIndicator = '';
+              if (isLocal && playerName) {
+                if (syncStatus === 'synced') {
+                  // Distinguish top 10 from non-top-10
+                  const isTop10 = globalRank && globalRank <= 10;
+                  const syncClass = isTop10 ? 'synced top-ten' : 'synced';
+                  const icon = isTop10 ? '🏆' : '✓';
+                  syncIndicator = `<span class="sync-status ${syncClass}" title="Synced to global - Rank #${globalRank}">${icon} #${globalRank}</span>`;
+                } else if (syncStatus === 'pending') {
+                  syncIndicator = `<span class="sync-status pending" title="Queued for sync">⏳</span>`;
+                } else if (syncStatus === 'failed') {
+                  syncIndicator = `<span class="sync-status failed" title="${syncError || 'Sync failed - click Sync All to retry'}">❌</span>`;
+                } else if (syncStatus === 'none') {
+                  // Not synced yet - show indicator
+                  syncIndicator = `<span class="sync-status not-synced" title="Not synced - click Sync All to sync">○</span>`;
+                }
+              }
+
+              // Normal row with rank, name, score, and sync status
               return `
                 <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''}">
                   <div class="rank-number">
@@ -662,6 +697,7 @@ function renderCompleteScreen() {
                       <span>${formatTime(score.time)}</span>
                     </div>
                   </div>
+                  ${syncIndicator ? `<div class="sync-indicator">${syncIndicator}</div>` : ''}
                 </div>
               `;
             }).join('')}
@@ -750,9 +786,6 @@ function attachCompleteListeners() {
     render();
   });
 
-  // Show global submission modal if appropriate
-  checkAndShowSubmissionModal();
-
   // Toggle between global and local leaderboard
   document.querySelectorAll('[data-action="toggle-leaderboard"]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -784,6 +817,72 @@ function attachCompleteListeners() {
     content.classList.toggle('hidden');
     icon.textContent = isExpanded ? '▶' : '▼';
     e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+  });
+
+  // Handle sync all scores button
+  document.querySelector('[data-action="sync-all-scores"]')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const state = getState();
+
+    if (!state.selectedTopic) return;
+
+    // Get all sessions for this topic that need syncing
+    const allSessions = getSessions();
+    const topicSessions = allSessions.filter(s =>
+      s.topicId === state.selectedTopic.id &&
+      s.playerName &&
+      (!s.globalSyncStatus || s.globalSyncStatus === 'none' || s.globalSyncStatus === 'failed')
+    );
+
+    if (topicSessions.length === 0) {
+      btn.textContent = '✓ All synced';
+      setTimeout(() => {
+        btn.textContent = '🌍 Sync All';
+      }, 2000);
+      return;
+    }
+
+    // Disable button and show progress
+    btn.disabled = true;
+    btn.textContent = `⏳ Syncing ${topicSessions.length}...`;
+
+    let synced = 0;
+    let failed = 0;
+
+    for (const session of topicSessions) {
+      try {
+        const result = await submitToGlobal(session, session.playerName);
+        if (result.success) {
+          synced++;
+        } else {
+          failed++;
+        }
+      } catch (error) {
+        console.error('Error syncing score:', error);
+        failed++;
+      }
+    }
+
+    // Re-enable button and show result
+    btn.disabled = false;
+    if (synced > 0 && failed === 0) {
+      btn.textContent = `✓ Synced ${synced}`;
+    } else if (synced > 0 && failed > 0) {
+      btn.textContent = `⚠️ ${synced} synced, ${failed} failed`;
+    } else {
+      btn.textContent = `❌ All failed`;
+    }
+
+    // Refresh the leaderboard
+    render();
+
+    // Reset button text after delay
+    setTimeout(() => {
+      const newBtn = document.querySelector('[data-action="sync-all-scores"]');
+      if (newBtn) {
+        newBtn.textContent = '🌍 Sync All';
+      }
+    }, 3000);
   });
 
   // Scroll to current rank position
@@ -1052,321 +1151,7 @@ function attachStatisticsListeners() {
 }
 
 // Global Submission Modal Functions
-function showGlobalSubmissionModal(session) {
-  if (!session) return;
-
-  submissionModalState.visible = true;
-  submissionModalState.session = session;
-  submissionModalState.submitting = false;
-
-  renderModal();
-}
-
-function hideGlobalSubmissionModal() {
-  submissionModalState.visible = false;
-  submissionModalState.session = null;
-  submissionModalState.submitting = false;
-
-  const modal = document.getElementById('global-submission-modal');
-  if (modal) {
-    modal.remove();
-  }
-}
-
-function renderModal() {
-  const { session } = submissionModalState;
-  const online = isOnline();
-  const savedName = getPlayerName();
-
-  const modalHTML = `
-    <div id="global-submission-modal" class="modal-overlay" role="dialog" aria-labelledby="modal-title" aria-modal="true">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="modal-title" class="modal-title">
-            ${online ? '🌍 Submit to Global Leaderboard?' : '📴 You\'re Offline'}
-          </h3>
-        </div>
-
-        <div class="modal-body">
-          <div class="score-summary">
-            <div class="score-item">
-              <span class="score-label">Score:</span>
-              <span class="score-value">${session.score}</span>
-            </div>
-            <div class="score-item">
-              <span class="score-label">Success Rate:</span>
-              <span class="score-value">${session.successRate}%</span>
-            </div>
-          </div>
-
-          ${online ? `
-            <p class="modal-text">Share your score with players worldwide!</p>
-          ` : `
-            <p class="modal-text">You're currently offline. You can queue this score to submit when you're back online.</p>
-          `}
-
-          <div class="form-group">
-            <label for="player-name-input" class="form-label">
-              Player Name (max 8 characters)
-            </label>
-            <input
-              type="text"
-              id="player-name-input"
-              class="form-input"
-              maxlength="8"
-              value="${savedName}"
-              placeholder="PLAYER"
-              ${submissionModalState.submitting ? 'disabled' : ''}
-            />
-          </div>
-
-          ${submissionModalState.submitting ? `
-            <div class="modal-status">
-              <p class="status-message">Submitting...</p>
-            </div>
-          ` : ''}
-        </div>
-
-        <div class="modal-footer">
-          <button
-            class="btn btn-secondary"
-            data-action="cancel-submission"
-            ${submissionModalState.submitting ? 'disabled' : ''}
-          >
-            ${online ? 'Skip' : 'Cancel'}
-          </button>
-          <button
-            class="btn btn-primary"
-            data-action="confirm-submission"
-            ${submissionModalState.submitting ? 'disabled' : ''}
-          >
-            ${online ? '✓ Submit' : '📥 Queue for Later'}
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Remove existing modal if any
-  const existingModal = document.getElementById('global-submission-modal');
-  if (existingModal) {
-    existingModal.remove();
-  }
-
-  // Insert modal into DOM
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-  // Attach listeners
-  attachModalListeners();
-}
-
-function attachModalListeners() {
-  const modal = document.getElementById('global-submission-modal');
-  if (!modal) return;
-
-  const input = document.getElementById('player-name-input');
-  const cancelBtn = modal.querySelector('[data-action="cancel-submission"]');
-  const confirmBtn = modal.querySelector('[data-action="confirm-submission"]');
-
-  // Auto-uppercase input
-  if (input) {
-    input.addEventListener('input', (e) => {
-      e.target.value = e.target.value.toUpperCase();
-    });
-
-    // Submit on Enter
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleModalSubmission();
-      }
-    });
-
-    // Auto-focus
-    setTimeout(() => {
-      input.focus();
-      input.select();
-    }, 100);
-  }
-
-  // Cancel button
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
-      markSessionAsHandled();
-      hideGlobalSubmissionModal();
-    });
-  }
-
-  // Confirm button
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', handleModalSubmission);
-  }
-
-  // Close on overlay click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal && !submissionModalState.submitting) {
-      markSessionAsHandled();
-      hideGlobalSubmissionModal();
-    }
-  });
-
-  // Close on Escape key
-  document.addEventListener('keydown', handleEscapeKey);
-}
-
-function handleEscapeKey(e) {
-  if (e.key === 'Escape' && submissionModalState.visible && !submissionModalState.submitting) {
-    markSessionAsHandled();
-    hideGlobalSubmissionModal();
-    document.removeEventListener('keydown', handleEscapeKey);
-  }
-}
-
-function markSessionAsHandled() {
-  // Mark session as "handled" so modal doesn't show again
-  const { session } = submissionModalState;
-  if (session) {
-    const sessions = getSessions();
-    const sessionIndex = sessions.findIndex(s => s.id === session.id);
-    if (sessionIndex !== -1) {
-      sessions[sessionIndex].globalSubmitted = true; // Mark as "handled"
-      sessions[sessionIndex].globalSkipped = true; // Track that it was skipped
-      localStorage.setItem('mots_sessions', JSON.stringify(sessions));
-    }
-  }
-}
-
-async function handleModalSubmission() {
-  if (submissionModalState.submitting) return;
-
-  const input = document.getElementById('player-name-input');
-  const playerName = input?.value.trim().toUpperCase();
-
-  if (!playerName || playerName.length === 0) {
-    input?.focus();
-    return;
-  }
-
-  const { session } = submissionModalState;
-  const online = isOnline();
-
-  submissionModalState.submitting = true;
-  renderModal();
-
-  if (online) {
-    // Try to submit now
-    const result = await submitToGlobal(session, playerName);
-
-    if (result.success) {
-      // Mark session as globally submitted
-      const sessions = getSessions();
-      const sessionIndex = sessions.findIndex(s => s.id === session.id);
-      if (sessionIndex !== -1) {
-        sessions[sessionIndex].globalSubmitted = true;
-        sessions[sessionIndex].globalRank = result.rank;
-        localStorage.setItem('mots_sessions', JSON.stringify(sessions));
-      }
-
-      // Show success message (user will click continue)
-      showSubmissionResult(true, result.rank, result.madeTopTen);
-    } else {
-      // Failed, offer to queue
-      const queued = queueForLater(session, playerName);
-      if (queued) {
-        showSubmissionResult(false, null, false, 'Queued for later submission');
-      } else {
-        showSubmissionResult(false, null, false, 'Failed to submit or queue');
-      }
-    }
-  } else {
-    // Queue for later
-    const queued = queueForLater(session, playerName);
-
-    if (queued) {
-      showSubmissionResult(false, null, false, 'Queued! Will sync when online');
-    } else {
-      showSubmissionResult(false, null, false, 'Failed to queue');
-    }
-  }
-}
-
-function showSubmissionResult(success, rank, madeTopTen, message) {
-  const modal = document.getElementById('global-submission-modal');
-  if (!modal) return;
-
-  const body = modal.querySelector('.modal-body');
-  const footer = modal.querySelector('.modal-footer');
-  if (!body || !footer) return;
-
-  if (success) {
-    body.innerHTML = `
-      <div class="submission-success">
-        <div class="success-icon">🎊</div>
-        <h4 class="success-title">Score Submitted!</h4>
-        <div class="rank-display">
-          <p class="rank-text">Your Rank: <strong>#${rank}</strong></p>
-          ${madeTopTen ? '<p class="top-ten-badge">You made the Top 10! 🏆</p>' : ''}
-        </div>
-      </div>
-    `;
-  } else {
-    body.innerHTML = `
-      <div class="submission-queued">
-        <div class="queued-icon">${message.includes('Queued') ? '📥' : '⚠️'}</div>
-        <p class="queued-message">${message}</p>
-      </div>
-    `;
-  }
-
-  // Replace footer with a continue button
-  footer.innerHTML = `
-    <button class="btn btn-primary" data-action="close-result" style="width: 100%;">
-      Continue
-    </button>
-  `;
-
-  // Attach close handler
-  const closeBtn = footer.querySelector('[data-action="close-result"]');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', async () => {
-      hideGlobalSubmissionModal();
-      if (success) {
-        // Reload global leaderboard before closing
-        const { session } = submissionModalState;
-        if (session) {
-          await loadGlobalLeaderboard(session.topicId);
-        }
-      }
-      render();
-    });
-  }
-}
-
-// Check if we should show the modal after game completion
-export function checkAndShowSubmissionModal() {
-  const state = getState();
-
-  // Only show for PLAY mode when topic is complete
-  if (state.gameState === GAME_STATES.COMPLETE && state.lastSession && state.gameMode === GAME_MODES.PLAY) {
-    // Check if this session has already been submitted or queued
-    const pending = getPendingSubmissions();
-    const alreadyQueued = pending.some(p => p.id === state.lastSession.id);
-
-    // Check localStorage sessions to see if this specific session has been handled
-    const sessions = getSessions();
-    const sessionInStorage = sessions.find(s => s.id === state.lastSession.id);
-    const alreadySubmittedGlobal = sessionInStorage && (sessionInStorage.globalSubmitted || sessionInStorage.globalRank);
-
-    // Show modal if not already queued/submitted to global
-    // We show it even if they have a local name, because modal is for GLOBAL submission
-    if (!alreadyQueued && !alreadySubmittedGlobal) {
-      // Small delay to let the completion screen render first
-      setTimeout(() => {
-        showGlobalSubmissionModal(state.lastSession);
-      }, 300);
-    }
-  }
-}
+// Modal functions removed - now using inline sync UI in leaderboard
 
 // Initialize auto-sync on app load
 export function initializeSync() {
