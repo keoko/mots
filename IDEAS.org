@@ -5,7 +5,6 @@
 * Ideas
 ** I am in the top 10, show yes/no (number), ask to sync
 ** change local/global with other
-** press space or tap
 ** do not allow more than 10 scores per topic
 ** list of topics limited
 ** replace worldwide text by class members

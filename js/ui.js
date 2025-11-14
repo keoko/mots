@@ -283,22 +283,22 @@ function renderStandaloneLeaderboard() {
               class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
               data-action="toggle-leaderboard"
               data-mode="local"
-            >Local</button>
+            >Just Me</button>
             <button
               class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
               data-action="toggle-leaderboard"
               data-mode="global"
-            >Global</button>
+            >All Players</button>
           </div>
         </div>
 
         ${leaderboardState.loading ? `
           <div class="leaderboard-loading">
-            <p>Loading global leaderboard...</p>
+            <p>Loading all players...</p>
           </div>
         ` : leaderboardState.error && leaderboardState.viewMode === 'global' ? `
           <div class="leaderboard-error">
-            <p>⚠️ Unable to load global leaderboard</p>
+            <p>⚠️ Unable to load all players</p>
             <p class="error-detail">${leaderboardState.error}</p>
             <button class="btn btn-secondary" data-action="retry-global">Retry</button>
           </div>
@@ -605,16 +605,16 @@ function renderCompleteScreen() {
                   class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
                   data-action="toggle-leaderboard"
                   data-mode="local"
-                >Local</button>
+                >Just Me</button>
                 <button
                   class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
                   data-action="toggle-leaderboard"
                   data-mode="global"
-                >Global</button>
+                >All Players</button>
               </div>
               ${leaderboardState.viewMode === 'local' ? `
-                <button class="btn-sync-all" data-action="sync-all-scores" title="Share your best score to the global leaderboard">
-                  🌍 Share to Global
+                <button class="btn-sync-all" data-action="sync-all-scores" title="Share your best score with all players">
+                  🌍 Share with All
                 </button>
               ` : ''}
             </div>
@@ -633,7 +633,7 @@ function renderCompleteScreen() {
                 return `
                   <div class="sync-notice">
                     <span class="sync-notice-icon">🌍</span>
-                    <span class="sync-notice-text">Your score isn't on the global leaderboard yet</span>
+                    <span class="sync-notice-text">Share your score with all players</span>
                   </div>
                 `;
               }
@@ -650,11 +650,11 @@ function renderCompleteScreen() {
 
           ${leaderboardState.loading ? `
             <div class="leaderboard-loading">
-              <p>Loading global leaderboard...</p>
+              <p>Loading all players...</p>
             </div>
           ` : leaderboardState.error && leaderboardState.viewMode === 'global' ? `
             <div class="leaderboard-error">
-              <p>⚠️ Unable to load global leaderboard</p>
+              <p>⚠️ Unable to load all players</p>
               <p class="error-detail">${leaderboardState.error}</p>
               <button class="btn btn-secondary" data-action="retry-global">Retry</button>
             </div>
@@ -851,7 +851,7 @@ function attachCompleteListeners() {
     if (topicSessions.length === 0) {
       btn.textContent = '✓ Already shared';
       setTimeout(() => {
-        btn.textContent = '🌍 Share to Global';
+        btn.textContent = '🌍 Share with All';
       }, 2000);
       return;
     }
@@ -891,7 +891,7 @@ function attachCompleteListeners() {
     setTimeout(() => {
       const newBtn = document.querySelector('[data-action="sync-all-scores"]');
       if (newBtn) {
-        newBtn.textContent = '🌍 Share to Global';
+        newBtn.textContent = '🌍 Share with All';
       }
     }, 3000);
   });
