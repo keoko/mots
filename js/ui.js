@@ -29,6 +29,7 @@ import {
   updateSessionSyncStatus,
   getPendingSubmissions,
   getPlayerName,
+  getPlayerId,
   clearQueuedSubmission
 } from './storage.js';
 
@@ -640,6 +641,10 @@ function renderCompleteScreen() {
               const playerName = score.playerName || '';
               const needsNameEntry = isCurrentScore && !playerName;
 
+              // Check if this score belongs to the current player
+              const currentPlayerId = getPlayerId();
+              const isPlayerScore = score.playerId && score.playerId === currentPlayerId;
+
               // If needs name entry, show only the input (no rank/score)
               if (needsNameEntry) {
                 return `
@@ -684,8 +689,11 @@ function renderCompleteScreen() {
               }
 
               // Normal row with rank, name, score, and sync status
+              // Highlight if it's the current player's score OR the just-submitted score
+              const highlightClass = (isPlayerScore || isCurrentScore) ? 'current-rank' : '';
+
               return `
-                <div class="leaderboard-row ${isCurrentScore ? 'current-rank' : ''}">
+                <div class="leaderboard-row ${highlightClass}">
                   <div class="rank-number">
                     ${index + 1}
                   </div>
@@ -792,8 +800,8 @@ function attachCompleteListeners() {
       const mode = e.currentTarget.dataset.mode;
       leaderboardState.viewMode = mode;
 
-      // Fetch global leaderboard if switching to global and not loaded yet
-      if (mode === 'global' && !leaderboardState.globalScores && !leaderboardState.loading) {
+      // Always fetch fresh global leaderboard when switching to global
+      if (mode === 'global' && !leaderboardState.loading) {
         const state = getState();
         await loadGlobalLeaderboard(state.selectedTopic.id);
       }

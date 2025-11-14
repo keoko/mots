@@ -155,7 +155,8 @@ export function saveSession(sessionData) {
     const newSession = {
       ...sessionData,
       id: Date.now().toString(),
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      playerId: getPlayerId() // Store player ID with session
     };
     sessions.unshift(newSession);
 
