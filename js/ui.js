@@ -602,12 +602,33 @@ function renderCompleteScreen() {
                 >Global</button>
               </div>
               ${leaderboardState.viewMode === 'local' ? `
-                <button class="btn-sync-all" data-action="sync-all-scores" title="Sync all pending and failed scores to global leaderboard">
-                  🌍 Sync All
+                <button class="btn-sync-all" data-action="sync-all-scores" title="Share your score to the global leaderboard">
+                  🌍 Share to Global
                 </button>
               ` : ''}
             </div>
           </div>
+
+          ${leaderboardState.viewMode === 'local' ? `
+            <!-- Check if player has unsynced scores -->
+            ${(() => {
+              const currentPlayerId = getPlayerId();
+              const playerScores = topScores.filter(s =>
+                s.playerId === currentPlayerId &&
+                s.playerName &&
+                (!s.globalSyncStatus || s.globalSyncStatus === 'none' || s.globalSyncStatus === 'failed')
+              );
+              if (playerScores.length > 0) {
+                return `
+                  <div class="sync-notice">
+                    <span class="sync-notice-icon">🌍</span>
+                    <span class="sync-notice-text">Your score isn't on the global leaderboard yet</span>
+                  </div>
+                `;
+              }
+              return '';
+            })()}
+          ` : ''}
 
           ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
             <!-- Last sync info -->
@@ -663,32 +684,7 @@ function renderCompleteScreen() {
                 `;
               }
 
-              // Determine sync status (only for local leaderboard)
-              const syncStatus = score.globalSyncStatus || 'none';
-              const globalRank = score.globalRank;
-              const syncError = score.globalSyncError;
-              const isLocal = leaderboardState.viewMode === 'local';
-
-              // Sync status indicator
-              let syncIndicator = '';
-              if (isLocal && playerName) {
-                if (syncStatus === 'synced') {
-                  // Distinguish top 10 from non-top-10
-                  const isTop10 = globalRank && globalRank <= 10;
-                  const syncClass = isTop10 ? 'synced top-ten' : 'synced';
-                  const icon = isTop10 ? '🏆' : '✓';
-                  syncIndicator = `<span class="sync-status ${syncClass}" title="Synced to global - Rank #${globalRank}">${icon} #${globalRank}</span>`;
-                } else if (syncStatus === 'pending') {
-                  syncIndicator = `<span class="sync-status pending" title="Queued for sync">⏳</span>`;
-                } else if (syncStatus === 'failed') {
-                  syncIndicator = `<span class="sync-status failed" title="${syncError || 'Sync failed - click Sync All to retry'}">❌</span>`;
-                } else if (syncStatus === 'none') {
-                  // Not synced yet - show indicator
-                  syncIndicator = `<span class="sync-status not-synced" title="Not synced - click Sync All to sync">○</span>`;
-                }
-              }
-
-              // Normal row with rank, name, score, and sync status
+              // Normal row with rank, name, and score
               // Highlight if it's the current player's score OR the just-submitted score
               const highlightClass = (isPlayerScore || isCurrentScore) ? 'current-rank' : '';
 
@@ -705,7 +701,6 @@ function renderCompleteScreen() {
                       <span>${formatTime(score.time)}</span>
                     </div>
                   </div>
-                  ${syncIndicator ? `<div class="sync-indicator">${syncIndicator}</div>` : ''}
                 </div>
               `;
             }).join('')}
@@ -843,16 +838,16 @@ function attachCompleteListeners() {
     );
 
     if (topicSessions.length === 0) {
-      btn.textContent = '✓ All synced';
+      btn.textContent = '✓ All shared';
       setTimeout(() => {
-        btn.textContent = '🌍 Sync All';
+        btn.textContent = '🌍 Share to Global';
       }, 2000);
       return;
     }
 
     // Disable button and show progress
     btn.disabled = true;
-    btn.textContent = `⏳ Syncing ${topicSessions.length}...`;
+    btn.textContent = `⏳ Sharing ${topicSessions.length}...`;
 
     let synced = 0;
     let failed = 0;
@@ -874,9 +869,9 @@ function attachCompleteListeners() {
     // Re-enable button and show result
     btn.disabled = false;
     if (synced > 0 && failed === 0) {
-      btn.textContent = `✓ Synced ${synced}`;
+      btn.textContent = `✓ Shared ${synced}`;
     } else if (synced > 0 && failed > 0) {
-      btn.textContent = `⚠️ ${synced} synced, ${failed} failed`;
+      btn.textContent = `⚠️ ${synced} shared, ${failed} failed`;
     } else {
       btn.textContent = `❌ All failed`;
     }
@@ -888,7 +883,7 @@ function attachCompleteListeners() {
     setTimeout(() => {
       const newBtn = document.querySelector('[data-action="sync-all-scores"]');
       if (newBtn) {
-        newBtn.textContent = '🌍 Sync All';
+        newBtn.textContent = '🌍 Share to Global';
       }
     }, 3000);
   });
