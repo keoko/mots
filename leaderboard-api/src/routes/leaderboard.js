@@ -4,14 +4,16 @@ import db from '../db.js';
 
 const router = express.Router();
 
-// GET /api/leaderboard/:topicId - Get top 10 scores for a topic
+// GET /api/leaderboard/:topicId - Get top 10 best scores per player for a topic
 router.get('/:topicId', (req, res) => {
   try {
     const { topicId } = req.params;
 
+    // Get best score per player (player_id), showing only top 10 unique players
     const stmt = db.prepare(`
       SELECT
         id,
+        player_id as playerId,
         player_name as playerName,
         score,
         words_won as wordsWon,
@@ -21,11 +23,19 @@ router.get('/:topicId', (req, res) => {
         created_at as date
       FROM scores
       WHERE topic_id = ?
+        AND id IN (
+          SELECT id
+          FROM scores s2
+          WHERE s2.topic_id = ?
+            AND s2.player_id = scores.player_id
+          ORDER BY s2.score DESC, s2.time ASC
+          LIMIT 1
+        )
       ORDER BY score DESC, time ASC
       LIMIT 10
     `);
 
-    const topScores = stmt.all(topicId);
+    const topScores = stmt.all(topicId, topicId);
 
     res.json({
       topicId,
@@ -41,7 +51,7 @@ router.get('/:topicId', (req, res) => {
 router.post('/:topicId', (req, res) => {
   try {
     const { topicId } = req.params;
-    const { playerName, score, wordsWon, wordsLost, successRate, time } = req.body;
+    const { playerId, playerName, score, wordsWon, wordsLost, successRate, time } = req.body;
 
     // Validation
     if (!playerName || playerName.length > 8) {
@@ -58,12 +68,13 @@ router.post('/:topicId', (req, res) => {
 
     // Insert score
     const insertStmt = db.prepare(`
-      INSERT INTO scores (topic_id, player_name, score, words_won, words_lost, success_rate, time)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO scores (topic_id, player_id, player_name, score, words_won, words_lost, success_rate, time)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     const result = insertStmt.run(
       topicId,
+      playerId || null,
       playerName,
       score,
       wordsWon || 0,
@@ -72,21 +83,31 @@ router.post('/:topicId', (req, res) => {
       time
     );
 
-    // Calculate rank
+    // Calculate rank among unique players (based on their best scores)
+    // Count how many unique players have a better score than this submission
     const rankStmt = db.prepare(`
-      SELECT COUNT(*) + 1 as rank
-      FROM scores
-      WHERE topic_id = ? AND (
-        score > ? OR (score = ? AND time < ?)
+      WITH player_best_scores AS (
+        SELECT
+          player_id,
+          MAX(score) as best_score,
+          MIN(time) as best_time
+        FROM scores
+        WHERE topic_id = ?
+          AND player_id IS NOT NULL
+        GROUP BY player_id
       )
+      SELECT COUNT(*) + 1 as rank
+      FROM player_best_scores
+      WHERE best_score > ? OR (best_score = ? AND best_time < ?)
     `);
 
     const { rank } = rankStmt.get(topicId, score, score, time);
 
-    // Get top 10
+    // Get top 10 unique players
     const topStmt = db.prepare(`
       SELECT
         id,
+        player_id as playerId,
         player_name as playerName,
         score,
         success_rate as successRate,
@@ -94,11 +115,19 @@ router.post('/:topicId', (req, res) => {
         created_at as date
       FROM scores
       WHERE topic_id = ?
+        AND id IN (
+          SELECT id
+          FROM scores s2
+          WHERE s2.topic_id = ?
+            AND s2.player_id = scores.player_id
+          ORDER BY s2.score DESC, s2.time ASC
+          LIMIT 1
+        )
       ORDER BY score DESC, time ASC
       LIMIT 10
     `);
 
-    const topScores = topStmt.all(topicId);
+    const topScores = topStmt.all(topicId, topicId);
 
     res.json({
       id: result.lastInsertRowid,

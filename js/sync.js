@@ -13,7 +13,8 @@ import {
   getPlayerName,
   setPlayerName,
   updateSessionName,
-  updateSessionSyncStatus
+  updateSessionSyncStatus,
+  getPlayerId
 } from './storage.js';
 
 // Try to submit a score to the global leaderboard
@@ -24,6 +25,7 @@ export async function submitToGlobal(session, playerName) {
 
     // Format data for API
     const scoreData = {
+      playerId: getPlayerId(),
       playerName: playerName.toUpperCase().trim().slice(0, 8),
       score: session.score,
       wordsWon: session.wordsWon,

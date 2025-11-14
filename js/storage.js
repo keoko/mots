@@ -324,6 +324,33 @@ export function updateSessionSyncStatus(sessionId, status, options = {}) {
 // Queue management for global leaderboard submissions
 const SYNC_QUEUE_KEY = 'mots_sync_queue';
 const PLAYER_NAME_KEY = 'mots_player_name';
+const PLAYER_ID_KEY = 'mots_player_id';
+
+// Generate a UUID v4
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Get or create player ID (unique per browser/device)
+export function getPlayerId() {
+  try {
+    let playerId = localStorage.getItem(PLAYER_ID_KEY);
+    if (!playerId) {
+      playerId = generateUUID();
+      localStorage.setItem(PLAYER_ID_KEY, playerId);
+      console.log('Generated new player ID:', playerId);
+    }
+    return playerId;
+  } catch (error) {
+    console.error('Error getting player ID:', error);
+    // Fallback to session-based ID if localStorage fails
+    return 'temp-' + Date.now();
+  }
+}
 
 // Queue a score for global submission (when offline or user wants to submit later)
 export function queueGlobalSubmission(sessionData) {
