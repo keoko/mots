@@ -1,7 +1,7 @@
 // app.js - Main application entry point
 
 import { render, initializeSync } from './ui.js';
-import { backToTopics } from './game.js';
+import { backToTopics, getState, nextWord, GAME_STATES } from './game.js';
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -50,6 +50,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Register service worker for offline support with version query parameter
   registerServiceWorker(version);
+
+  // Global keyboard listener for advancing to next word
+  document.addEventListener('keydown', (e) => {
+    const state = getState();
+
+    // Only respond when showing feedback (RESULT state)
+    if (state.gameState === GAME_STATES.RESULT) {
+      // Check if it's the Space key
+      if (e.key === ' ') {
+        // Don't interfere if user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+
+        e.preventDefault();
+        nextWord();
+        render();
+      }
+    }
+  });
 });
 
 // Handle title click to go home

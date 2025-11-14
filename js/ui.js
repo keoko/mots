@@ -458,7 +458,7 @@ function renderPlayMode() {
                 Your answer: <strong>${state.userInput}</strong>
               </div>
             ` : ''}
-            <div class="feedback-hint">Tap to continue</div>
+            <div class="feedback-hint">Press Space or tap to continue</div>
           </div>
         ` : `
           <!-- Answer Input -->
