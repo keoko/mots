@@ -1,7 +1,7 @@
 // app.js - Main application entry point
 
 import { render, initializeSync } from './ui.js';
-import { backToTopics, getState, nextWord, GAME_STATES } from './game.js';
+import { backToTopics, getState, nextWord, toggleWordReveal, GAME_STATES } from './game.js';
 
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -55,9 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', (e) => {
     const state = getState();
 
-    // Only respond when showing feedback (RESULT state)
+    // Handle Space key in RESULT state (play mode feedback)
     if (state.gameState === GAME_STATES.RESULT) {
-      // Check if it's the Space key
       if (e.key === ' ') {
         // Don't interfere if user is typing in an input field
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -66,6 +65,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         e.preventDefault();
         nextWord();
+        render();
+      }
+    }
+
+    // Handle Space key in STUDYING state (study mode flashcards)
+    if (state.gameState === GAME_STATES.STUDYING) {
+      if (e.key === ' ') {
+        // Don't interfere if user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+
+        e.preventDefault();
+
+        if (!state.isWordRevealed) {
+          // First press: reveal the word
+          toggleWordReveal();
+        } else {
+          // Second press: go to next word
+          nextWord();
+        }
         render();
       }
     }

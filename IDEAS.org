@@ -3,8 +3,9 @@
 * Issues
 ** update new version message, 2 times
 * Ideas
-** local/global are very technical words
 ** I am in the top 10, show yes/no (number), ask to sync
+** change local/global with other
+** press space or tap
 ** do not allow more than 10 scores per topic
 ** list of topics limited
 ** replace worldwide text by class members

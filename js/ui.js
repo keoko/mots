@@ -54,6 +54,9 @@ let leaderboardState = {
   error: null
 };
 
+// Track last game state to detect transitions
+let lastGameState = null;
+
 // Removed global submission modal - now using inline sync buttons in leaderboard
 
 // Load global leaderboard from API
@@ -83,6 +86,14 @@ async function loadGlobalLeaderboard(topicId) {
 export function render() {
   const mainContent = document.getElementById('main-content');
   const state = getState();
+
+  // Reset to local view when first entering COMPLETE state
+  if (state.gameState === GAME_STATES.COMPLETE && lastGameState !== GAME_STATES.COMPLETE) {
+    leaderboardState.viewMode = 'local';
+  }
+
+  // Update last game state
+  lastGameState = state.gameState;
 
   switch (state.gameState) {
     case GAME_STATES.TOPIC_SELECTION:
@@ -397,7 +408,7 @@ function renderStudyMode() {
             }
           </div>
           <div class="flashcard-hint">
-            ${state.isWordRevealed ? 'Tap to continue' : 'Tap to reveal'}
+            ${state.isWordRevealed ? 'Press Space or tap to continue' : 'Press Space or tap to reveal'}
           </div>
         </div>
       </div>
@@ -602,7 +613,7 @@ function renderCompleteScreen() {
                 >Global</button>
               </div>
               ${leaderboardState.viewMode === 'local' ? `
-                <button class="btn-sync-all" data-action="sync-all-scores" title="Share your score to the global leaderboard">
+                <button class="btn-sync-all" data-action="sync-all-scores" title="Share your best score to the global leaderboard">
                   🌍 Share to Global
                 </button>
               ` : ''}
@@ -822,7 +833,7 @@ function attachCompleteListeners() {
     e.currentTarget.setAttribute('aria-expanded', !isExpanded);
   });
 
-  // Handle sync all scores button
+  // Handle sync all scores button (now only shares best score)
   document.querySelector('[data-action="sync-all-scores"]')?.addEventListener('click', async (e) => {
     const btn = e.currentTarget;
     const state = getState();
@@ -838,42 +849,39 @@ function attachCompleteListeners() {
     );
 
     if (topicSessions.length === 0) {
-      btn.textContent = '✓ All shared';
+      btn.textContent = '✓ Already shared';
       setTimeout(() => {
         btn.textContent = '🌍 Share to Global';
       }, 2000);
       return;
     }
 
+    // Find the best score (highest score, then lowest time as tiebreaker)
+    const bestSession = topicSessions.reduce((best, current) => {
+      if (!best) return current;
+      if (current.score > best.score) return current;
+      if (current.score === best.score && current.time < best.time) return current;
+      return best;
+    }, null);
+
     // Disable button and show progress
     btn.disabled = true;
-    btn.textContent = `⏳ Sharing ${topicSessions.length}...`;
+    btn.textContent = `⏳ Sharing...`;
 
-    let synced = 0;
-    let failed = 0;
+    try {
+      const result = await submitToGlobal(bestSession, bestSession.playerName);
 
-    for (const session of topicSessions) {
-      try {
-        const result = await submitToGlobal(session, session.playerName);
-        if (result.success) {
-          synced++;
-        } else {
-          failed++;
-        }
-      } catch (error) {
-        console.error('Error syncing score:', error);
-        failed++;
+      // Re-enable button and show result
+      btn.disabled = false;
+      if (result.success) {
+        btn.textContent = `✓ Shared`;
+      } else {
+        btn.textContent = `❌ Failed`;
       }
-    }
-
-    // Re-enable button and show result
-    btn.disabled = false;
-    if (synced > 0 && failed === 0) {
-      btn.textContent = `✓ Shared ${synced}`;
-    } else if (synced > 0 && failed > 0) {
-      btn.textContent = `⚠️ ${synced} shared, ${failed} failed`;
-    } else {
-      btn.textContent = `❌ All failed`;
+    } catch (error) {
+      console.error('Error syncing score:', error);
+      btn.disabled = false;
+      btn.textContent = `❌ Failed`;
     }
 
     // Refresh the leaderboard
