@@ -621,21 +621,26 @@ function renderCompleteScreen() {
           </div>
 
           ${leaderboardState.viewMode === 'local' ? `
-            <!-- Check if player has unsynced scores -->
+            <!-- Check if best score is not shared -->
             ${(() => {
               const currentPlayerId = getPlayerId();
               const playerScores = topScores.filter(s =>
                 s.playerId === currentPlayerId &&
-                s.playerName &&
-                (!s.globalSyncStatus || s.globalSyncStatus === 'none' || s.globalSyncStatus === 'failed')
+                s.playerName
               );
+              // Only show banner if best score (first one) is NOT synced
               if (playerScores.length > 0) {
-                return `
-                  <div class="sync-notice">
-                    <span class="sync-notice-icon">🌍</span>
-                    <span class="sync-notice-text">Share your score with all players</span>
-                  </div>
-                `;
+                const bestScore = playerScores[0];
+                const isBestScoreShared = bestScore.globalSyncStatus === 'synced';
+
+                if (!isBestScoreShared) {
+                  return `
+                    <div class="sync-notice">
+                      <span class="sync-notice-icon">🌍</span>
+                      <span class="sync-notice-text">Share your score with all players</span>
+                    </div>
+                  `;
+                }
               }
               return '';
             })()}
@@ -676,6 +681,7 @@ function renderCompleteScreen() {
               // Check if this score belongs to the current player
               const currentPlayerId = getPlayerId();
               const isPlayerScore = score.playerId && score.playerId === currentPlayerId;
+              const isShared = score.globalSyncStatus === 'synced';
 
               // If needs name entry, show only the input (no rank/score)
               if (needsNameEntry) {
@@ -704,7 +710,10 @@ function renderCompleteScreen() {
                   <div class="rank-number">
                     ${index + 1}
                   </div>
-                  <div class="player-name">${playerName || '---'}</div>
+                  <div class="player-name">
+                    ${playerName || '---'}
+                    ${isShared && leaderboardState.viewMode === 'local' ? '<span class="shared-badge" title="Shared with all players">🌍</span>' : ''}
+                  </div>
                   <div class="score-info">
                     <div class="score-value">${score.score.toLocaleString()}</div>
                     <div class="score-meta">
@@ -716,6 +725,29 @@ function renderCompleteScreen() {
               `;
             }).join('')}
           </div>
+
+          ${leaderboardState.viewMode === 'local' ? (() => {
+            // Check if best score is NOT shared but a lower score IS shared
+            const currentPlayerId = getPlayerId();
+            const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
+
+            if (playerScores.length > 0) {
+              const bestScore = playerScores[0]; // First score is the best
+              const hasSharedScore = playerScores.some(s => s.globalSyncStatus === 'synced');
+              const bestScoreShared = bestScore.globalSyncStatus === 'synced';
+
+              // If we have a shared score but it's NOT the best score
+              if (hasSharedScore && !bestScoreShared && bestScore.playerName) {
+                return `
+                  <div class="better-score-notice">
+                    <span class="notice-icon">⭐</span>
+                    <span class="notice-text">You have a better score! Click "Share with All" to update.</span>
+                  </div>
+                `;
+              }
+            }
+            return '';
+          })() : ''}
 
           ${currentScoreRank === 0 && actualRank > 0 && leaderboardState.viewMode === 'local' ? `
             <!-- User's rank outside top 10 -->

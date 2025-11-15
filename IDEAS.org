@@ -4,11 +4,8 @@
 ** update new version message, 2 times
 * Ideas
 ** I am in the top 10, show yes/no (number), ask to sync
-** change local/global with other
 ** do not allow more than 10 scores per topic
 ** list of topics limited
-** replace worldwide text by class members
-** enter does not work to move to the next work, only tapping.
 ** add rules to avoid exploiting sqlite DB
 ** investigate cheaper ways to have free storage persistance
 ** check we do not push tokens/resources that could exploit fly account
