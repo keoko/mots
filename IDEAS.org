@@ -3,7 +3,6 @@
 * Issues
 ** update new version message, 2 times
 * Ideas
-** keep name
 ** leadership in study mode should be the same
 ** update readme
 ** I am in the top 10, show yes/no (number), ask to sync

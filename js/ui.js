@@ -273,25 +273,82 @@ function showLeaderboardView() {
 function renderStandaloneLeaderboard() {
   const state = getState();
   const topScores = getTopScores(state.selectedTopic.id);
+  const displayScores = leaderboardState.viewMode === 'global' && leaderboardState.globalScores
+    ? leaderboardState.globalScores
+    : topScores;
 
   return `
     <div class="game game-complete">
       <div class="leaderboard-section">
         <div class="leaderboard-header">
           <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
-          <div class="leaderboard-toggle">
-            <button
-              class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
-              data-action="toggle-leaderboard"
-              data-mode="local"
-            >Just Me</button>
-            <button
-              class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
-              data-action="toggle-leaderboard"
-              data-mode="global"
-            >All Players</button>
+          <div class="leaderboard-actions">
+            <div class="leaderboard-toggle">
+              <button
+                class="toggle-btn ${leaderboardState.viewMode === 'local' ? 'active' : ''}"
+                data-action="toggle-leaderboard"
+                data-mode="local"
+              >Just Me</button>
+              <button
+                class="toggle-btn ${leaderboardState.viewMode === 'global' ? 'active' : ''}"
+                data-action="toggle-leaderboard"
+                data-mode="global"
+              >All Players</button>
+            </div>
+            ${leaderboardState.viewMode === 'local' ? `
+              <button class="btn-sync-all" data-action="sync-all-scores" title="Share your best score with all players">
+                🌍 Share with All
+              </button>
+            ` : ''}
           </div>
         </div>
+
+        ${leaderboardState.viewMode === 'local' ? `
+          <!-- Check if best score is not shared -->
+          ${(() => {
+            const currentPlayerId = getPlayerId();
+            const playerScores = topScores.filter(s =>
+              s.playerId === currentPlayerId &&
+              s.playerName
+            );
+            // Only show banner if best score (first one) is NOT synced
+            if (playerScores.length > 0) {
+              const bestScore = playerScores[0];
+              const isBestScoreShared = bestScore.globalSyncStatus === 'synced';
+
+              if (!isBestScoreShared) {
+                // Check if a lower score is already shared
+                const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
+
+                if (hasSharedLowerScore) {
+                  // Show "better score" message
+                  return `
+                    <div class="better-score-notice">
+                      <span class="notice-icon">⭐</span>
+                      <span class="notice-text">You have a better score! Click "Share with All" to update.</span>
+                    </div>
+                  `;
+                } else {
+                  // Show generic share message
+                  return `
+                    <div class="sync-notice">
+                      <span class="sync-notice-icon">🌍</span>
+                      <span class="sync-notice-text">Share your score with all players</span>
+                    </div>
+                  `;
+                }
+              }
+            }
+            return '';
+          })()}
+        ` : ''}
+
+        ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
+          <!-- Last sync info -->
+          <div class="sync-info">
+            <small>📡 Loaded from server</small>
+          </div>
+        ` : ''}
 
         ${leaderboardState.loading ? `
           <div class="leaderboard-loading">
@@ -303,9 +360,54 @@ function renderStandaloneLeaderboard() {
             <p class="error-detail">${leaderboardState.error}</p>
             <button class="btn btn-secondary" data-action="retry-global">Retry</button>
           </div>
-        ` : ''}
+        ` : displayScores.length > 0 ? `
+        <div class="leaderboard-grid">
+          ${(() => {
+            // Find the best synced score for the current player
+            const currentPlayerId = getPlayerId();
+            const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
+            const bestSyncedScore = playerScores.find(s => s.globalSyncStatus === 'synced');
+            const bestSyncedScoreId = bestSyncedScore ? bestSyncedScore.id : null;
 
-        ${renderLeaderboardScores(state.selectedTopic.id)}
+            return displayScores.map((score, index) => {
+              const formatTime = (ms) => {
+                const secs = Math.floor(ms / 1000);
+                const m = Math.floor(secs / 60);
+                const s = secs % 60;
+                return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+              };
+
+              const playerName = score.playerName || '';
+              const isPlayerScore = score.playerId && score.playerId === currentPlayerId;
+              const showSharedBadge = score.id === bestSyncedScoreId;
+              const highlightClass = isPlayerScore ? 'current-rank' : '';
+
+              return `
+                <div class="leaderboard-row ${highlightClass}">
+                  <div class="rank-number">
+                    ${index + 1}
+                  </div>
+                  <div class="player-name">
+                    ${playerName || '---'}
+                    ${showSharedBadge && leaderboardState.viewMode === 'local' ? '<span class="shared-badge" title="Shared with all players">🌍</span>' : ''}
+                  </div>
+                  <div class="score-info">
+                    <div class="score-value">${score.score.toLocaleString()}</div>
+                    <div class="score-meta">
+                      <span>${score.successRate}%</span>
+                      <span>${formatTime(score.time)}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          })()}
+        </div>
+        ` : `
+          <div class="leaderboard-empty">
+            <p>No scores yet. Be the first to play!</p>
+          </div>
+        `}
       </div>
 
       <div class="complete-buttons">
@@ -369,8 +471,8 @@ function attachStandaloneLeaderboardListeners() {
       const mode = e.currentTarget.dataset.mode;
       leaderboardState.viewMode = mode;
 
-      // Fetch global leaderboard if switching to global and not loaded yet
-      if (mode === 'global' && !leaderboardState.globalScores && !leaderboardState.loading) {
+      // Always fetch fresh global leaderboard when switching to global
+      if (mode === 'global' && !leaderboardState.loading) {
         const state = getState();
         await loadGlobalLeaderboard(state.selectedTopic.id);
       }
@@ -383,6 +485,75 @@ function attachStandaloneLeaderboardListeners() {
   document.querySelector('[data-action="retry-global"]')?.addEventListener('click', async () => {
     const state = getState();
     await loadGlobalLeaderboard(state.selectedTopic.id);
+  });
+
+  // Handle sync all scores button (now only shares best score)
+  document.querySelector('[data-action="sync-all-scores"]')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const state = getState();
+
+    if (!state.selectedTopic) return;
+
+    // Get ALL sessions for this topic with player name
+    const allSessions = getSessions();
+    const currentPlayerId = getPlayerId();
+    const topicSessions = allSessions.filter(s =>
+      s.topicId === state.selectedTopic.id &&
+      s.playerName &&
+      s.playerId === currentPlayerId
+    );
+
+    if (topicSessions.length === 0) {
+      return; // No sessions to share
+    }
+
+    // Find the best score (highest score, then lowest time as tiebreaker)
+    const bestSession = topicSessions.reduce((best, current) => {
+      if (!best) return current;
+      if (current.score > best.score) return current;
+      if (current.score === best.score && current.time < best.time) return current;
+      return best;
+    }, null);
+
+    // Check if best score is already shared
+    if (bestSession.globalSyncStatus === 'synced') {
+      btn.textContent = '✓ Best score already shared';
+      setTimeout(() => {
+        btn.textContent = '🌍 Share with All';
+      }, 2500);
+      return;
+    }
+
+    // Disable button and show progress
+    btn.disabled = true;
+    btn.textContent = `⏳ Sharing...`;
+
+    try {
+      const result = await submitToGlobal(bestSession, bestSession.playerName);
+
+      // Re-enable button and show result
+      btn.disabled = false;
+      if (result.success) {
+        btn.textContent = `✓ Shared`;
+      } else {
+        btn.textContent = `❌ Failed`;
+      }
+    } catch (error) {
+      console.error('Error syncing score:', error);
+      btn.disabled = false;
+      btn.textContent = `❌ Failed`;
+    }
+
+    // Refresh the leaderboard
+    showLeaderboardView();
+
+    // Reset button text after delay
+    setTimeout(() => {
+      const newBtn = document.querySelector('[data-action="sync-all-scores"]');
+      if (newBtn) {
+        newBtn.textContent = '🌍 Share with All';
+      }
+    }, 3000);
   });
 }
 
@@ -557,13 +728,13 @@ function renderCompleteScreen() {
     ? `${minutes}m ${seconds}s`
     : `${seconds}s`;
 
-  // Get top 10 scores (only for play mode)
-  let topScores = [];
+  // Get top 10 scores (for all modes)
+  let topScores = getTopScores(state.selectedTopic.id);
   let currentScoreRank = 0;
   let actualRank = 0;
 
+  // Only look for current score in play mode
   if (isPlayMode) {
-    topScores = getTopScores(state.selectedTopic.id);
     currentScoreRank = topScores.findIndex(s =>
       s.score === state.totalScore &&
       Math.abs(new Date(s.date) - new Date()) < 5000
@@ -595,9 +766,8 @@ function renderCompleteScreen() {
 
   return `
     <div class="game game-complete" role="alert" aria-live="assertive">
-      <!-- Top 10 Leaderboard (Play mode only) -->
-      ${isPlayMode ? `
-        <div class="leaderboard-section">
+      <!-- Top 10 Leaderboard -->
+      <div class="leaderboard-section">
           <div class="leaderboard-header">
             <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
             <div class="leaderboard-actions">
@@ -768,8 +938,7 @@ function renderCompleteScreen() {
               <p>No scores yet. Be the first!</p>
             </div>
           `}
-        </div>
-      ` : ''}
+      </div>
 
       <!-- Session Details -->
       ${isPlayMode ? `
