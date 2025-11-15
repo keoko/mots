@@ -29,6 +29,7 @@ import {
   updateSessionSyncStatus,
   getPendingSubmissions,
   getPlayerName,
+  setPlayerName,
   getPlayerId,
   clearQueuedSubmission
 } from './storage.js';
@@ -706,6 +707,7 @@ function renderCompleteScreen() {
 
                 // If needs name entry, show only the input (no rank/score)
                 if (needsNameEntry) {
+                  const savedName = getPlayerName();
                   return `
                     <div class="leaderboard-row name-entry-only">
                       <input
@@ -713,6 +715,7 @@ function renderCompleteScreen() {
                         class="name-input-fullwidth"
                         maxlength="8"
                         placeholder="ENTER YOUR NAME"
+                        value="${savedName}"
                         data-session-id="${score.id}"
                         autocomplete="off"
                         autocapitalize="characters"
@@ -952,6 +955,7 @@ function attachCompleteListeners() {
       const name = nameInputFullwidth.value.toUpperCase().trim();
       if (name.length > 0 && sessionId) {
         updateSessionName(sessionId, name);
+        setPlayerName(name); // Remember this name for future sessions
         render();
       }
     };
