@@ -1,152 +1,157 @@
-# Mots - Vanilla JavaScript Version
+# Mots - Word Learning Game
+
+A vanilla JavaScript word-learning game for learning English from Catalan, featuring local-first design with optional global leaderboard sharing.
+
+## ✨ Features
+
+- 🎮 **Two Game Modes**: Study (flashcards) and Play (interactive guessing)
+- 🏆 **Dual Leaderboards**: Personal scores ("Just Me") and global competition ("All Players")
+- 💾 **Local-First**: All data stored locally, share when ready
+- 🌍 **Optional Sharing**: Share your best scores with all players
+- 📱 **Mobile-Optimized**: Touch-friendly, responsive design
+- ⚡ **Offline-Ready**: Service worker for offline gameplay
+- ⌨️ **Keyboard Shortcuts**: Space bar navigation, Enter to submit
+- 🎯 **Score Tracking**: Detailed statistics and session history
+- 👤 **Player Profiles**: Name pre-filling, UUID-based identification
+- 🎨 **Clean UI**: Modern design with user-friendly language
 
 ## 📁 Project Structure
 
 ```
 mots/
-├── index.html           # Main HTML file
+├── index.html              # Main HTML file
+├── package.json            # Project metadata
+├── sw.js                   # Service Worker for offline support
 ├── css/
-│   └── styles.css      # All styles (use existing CSS from artifacts)
+│   └── styles.css         # All styles
 ├── js/
-│   ├── app.js          # Main application entry point
-│   ├── game.js         # Game state management
-│   ├── ui.js           # UI rendering functions
-│   └── data.js         # Topics data
-└── README.md           # This file
+│   ├── app.js             # Application entry point
+│   ├── game.js            # Game state management
+│   ├── ui.js              # UI rendering
+│   ├── data.js            # Topics and words data
+│   ├── storage.js         # localStorage utilities
+│   ├── sync.js            # Global leaderboard sync
+│   └── leaderboard-api.js # API client
+└── leaderboard-api/       # Backend API (optional)
+    ├── package.json
+    ├── src/
+    │   ├── index.js       # Express server
+    │   ├── db.js          # SQLite database
+    │   └── routes/
+    │       └── leaderboard.js
+    └── leaderboard.db     # SQLite database file
 ```
 
 ## 🚀 Quick Start
 
-### 1. Create the project structure
+### Frontend Only (Local Scores)
 
 ```bash
-mkdir mots
-cd mots
-mkdir css js
-```
-
-### 2. Copy the files
-
-Copy these files from the artifacts:
-- `index.html` → root directory
-- `styles.css` → `css/` directory (from the earlier CSS artifact)
-- `app.js` → `js/` directory
-- `game.js` → `js/` directory  
-- `ui.js` → `js/` directory
-- `data.js` → `js/` directory
-
-### 3. Run a local server
-
-You can't just open `index.html` directly because of ES6 modules. Use one of these:
-
-**Option A: Python**
-```bash
+# Serve the app
+npx http-server
+# or
 python3 -m http.server 8000
+
+# Open http://localhost:8000
 ```
 
-**Option B: Node.js**
+### With Global Leaderboard (Optional)
+
 ```bash
-npx serve
+# 1. Start the backend API
+cd leaderboard-api
+npm install
+npm run dev  # Runs on http://localhost:3000
+
+# 2. Serve the frontend (in another terminal)
+cd ..
+npx http-server  # http://localhost:8080
 ```
 
-**Option C: VS Code Live Server**
-- Install "Live Server" extension
-- Right-click `index.html` → "Open with Live Server"
+## 🎮 How to Play
 
-### 4. Open in browser
+### Study Mode
+1. Choose a topic
+2. Select "📖 Study"
+3. View flashcards with Catalan word
+4. Press **Space** or tap to reveal English translation
+5. Press **Space** or tap again to continue
 
-Navigate to `http://localhost:8000` (or whatever port your server uses)
+### Play Mode
+1. Choose a topic
+2. Select "🎮 Play"
+3. Type your answer for the Catalan word
+4. Press **Enter** to submit
+5. View inline feedback (✓ or ✗)
+6. Press **Space** or tap to continue
+7. Complete all words to see your score!
 
-## 🎮 How It Works
+## 🏆 Leaderboards
 
-### Architecture
+### Just Me (Local)
+- All your personal scores for this device
+- Stored in localStorage
+- Always available offline
+- Top 10 displayed
 
-```
-┌─────────────────────────────────────┐
-│         index.html                  │
-│  (Container + loads app.js)         │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│          app.js                     │
-│  • Initializes app                  │
-│  • Renders initial view             │
-│  • Sets up keyboard listeners       │
-└──────────────┬──────────────────────┘
-               │
-       ┌───────┴────────┐
-       ▼                ▼
-┌──────────┐    ┌────────────┐
-│ game.js  │◄───┤  ui.js     │
-│          │    │            │
-│ • State  │    │ • Render   │
-│ • Logic  │    │ • Events   │
-│ • Actions│    │ • HTML     │
-└─────┬────┘    └──────┬─────┘
-      │                │
-      ▼                │
-┌──────────┐          │
-│ data.js  │◄─────────┘
-│          │
-│ • Topics │
-│ • Words  │
-└──────────┘
-```
+### All Players (Global)
+- Best scores from all players worldwide
+- Requires backend API running
+- One score per player (your best)
+- Share when ready with "🌍 Share with All" button
 
-### Data Flow
+### Score Sharing
+- Scores remain local until you choose to share
+- Click "🌍 Share with All" to submit your best score
+- 🌍 badge shows which score is currently shared
+- Update anytime with a better score
 
-1. **User clicks** → Event in `ui.js`
-2. **Action called** → Function in `game.js` updates state
-3. **Re-render** → `render()` in `ui.js` updates DOM
-4. **New listeners** → Attached for new elements
+## 💾 Data Storage
+
+### LocalStorage Keys
+- `mots_progress` - Topic statistics
+- `mots_failed_words` - Words to practice
+- `mots_sessions` - Game session history
+- `mots_player_name` - Your saved name
+- `mots_player_id` - Unique browser ID (UUID)
+
+### Backend Database (Optional)
+- SQLite database (`leaderboard.db`)
+- Stores global scores with player_id
+- Shows best score per unique player
+- Automatic migrations
+
+## ⌨️ Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| **Space** | Reveal word (study) / Next word (after feedback) |
+| **Enter** | Submit answer (play mode) |
+| **Letters** | Type answer (play mode) |
+
+## 🎨 Architecture
 
 ### State Management
+- Centralized in `game.js`
+- Immutable reads via `getState()`
+- Actions update state (e.g., `selectTopic()`, `nextWord()`)
+- Unidirectional data flow
 
-All state lives in `game.js`:
-- **Immutable reads**: `getState()` returns a copy
-- **Actions only**: Use functions like `selectTopic()`, `guessLetter()`
-- **No direct state mutation** from UI code
+### Rendering Pattern
+1. User interaction → Event handler in `ui.js`
+2. Action function updates state in `game.js`
+3. `render()` re-renders entire view
+4. New event listeners attached
 
-## 🎯 Key Features
+### Game States
+- `TOPIC_SELECTION` - Choose topic
+- `MODE_SELECTION` - Choose study/play
+- `STUDYING` - Flashcard mode
+- `PLAYING` - Answer input
+- `RESULT` - Inline feedback
+- `COMPLETE` - Leaderboard & stats
 
-### Two Game Modes
-
-**📖 Study Mode**
-- Review all words
-- Navigate forward/backward
-- No pressure, no scoring
-- Switch to play mode anytime
-
-**🎮 Play Mode**
-- Interactive word guessing
-- Score tracking (won/lost)
-- 6 attempts per word
-- Visual feedback on keyboard
-
-### User Flow
-
-```
-1. Choose Topic (6 topics available)
-   ↓
-2. Choose Mode (Study or Play)
-   ↓
-3a. Study Mode              3b. Play Mode
-    • View translations         • Guess letters
-    • Navigate words            • Track score
-    • Start Playing button      • Complete topic
-```
-
-## 🎨 Styling
-
-All styles are in `css/styles.css`:
-- **Mobile-first** responsive design
-- **CSS custom properties** for theming
-- **Dark mode** support
-- **Touch-friendly** 44px minimum targets
-- **Accessible** focus states and ARIA
-
-## 🔧 Customization
+## 🔧 Configuration
 
 ### Add New Topics
 
@@ -154,132 +159,185 @@ Edit `js/data.js`:
 
 ```javascript
 export const topics = [
-  // ... existing topics ...
   {
-    id: 'colors',
-    name: 'Colors',
-    emoji: '🎨',
+    id: 'animals',
+    name: 'Animals',
+    emoji: '🐾',
     words: [
-      { catalan: 'vermell', english: 'red' },
-      { catalan: 'blau', english: 'blue' },
-      // ... more words
+      { ca: 'gos', en: 'dog' },
+      { ca: 'gat', en: 'cat' }
     ]
   }
 ];
 ```
 
-### Change Number of Attempts
+### Backend API Configuration
 
-Edit `js/game.js`:
+Edit `leaderboard-api/src/index.js`:
 
 ```javascript
-const state = {
-  // ...
-  maxAttempts: 8,  // Change from 6 to 8
-  // ...
-};
+const PORT = process.env.PORT || 3000;
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 ```
 
-### Modify Colors
+### Change API Endpoint
 
-Edit `css/styles.css`:
+Edit `js/leaderboard-api.js`:
 
-```css
-:root {
-  --color-primary: #6366f1;  /* Change main color */
-  --color-success: #10b981;  /* Change success color */
-  /* ... more variables */
+```javascript
+const API_BASE_URL = 'http://localhost:3000/api';
+```
+
+## 🌐 Backend API Endpoints
+
+### GET `/api/leaderboard/:topicId`
+Returns top 10 best scores per unique player
+
+**Response:**
+```json
+{
+  "topicId": "animals",
+  "scores": [
+    {
+      "id": 1,
+      "playerId": "uuid-here",
+      "playerName": "PLAYER1",
+      "score": 850,
+      "wordsWon": 10,
+      "wordsLost": 0,
+      "successRate": 100,
+      "time": 45000,
+      "date": "2025-01-15T10:30:00.000Z"
+    }
+  ]
 }
 ```
 
-## 📱 Mobile Features
+### POST `/api/leaderboard/:topicId`
+Submit a score
 
-- **Touch-optimized**: Large tap targets
-- **Responsive layout**: Adapts to all screens
-- **PWA-ready**: Add manifest.json for installable app
-- **Offline-capable**: No external dependencies
+**Request:**
+```json
+{
+  "playerId": "uuid-here",
+  "playerName": "PLAYER1",
+  "score": 850,
+  "wordsWon": 10,
+  "wordsLost": 0,
+  "successRate": 100,
+  "time": 45000
+}
+```
+
+**Response:**
+```json
+{
+  "id": 123,
+  "rank": 3,
+  "madeTopTen": true,
+  "topScores": [...]
+}
+```
+
+## 🎯 Scoring System
+
+- **Base score**: 100 points per correct word
+- **Time bonus**: Faster = more points
+- **Streak bonus**: Consecutive correct answers
+- **Success rate**: % of words guessed correctly
+- **Total score**: Cumulative points for the session
+
+## 📱 PWA Features
+
+- Service Worker for offline support
+- Versioned caching strategy
+- Update notifications
+- Works without internet after first load
 
 ## ♿ Accessibility
 
-- ✅ Semantic HTML
+- ✅ Semantic HTML5
 - ✅ ARIA labels and roles
 - ✅ Keyboard navigation
 - ✅ Screen reader support
-- ✅ Color contrast (WCAG AA)
 - ✅ Focus indicators
+- ✅ Color contrast (WCAG AA)
+- ✅ Touch targets ≥44px
 
 ## 🐛 Troubleshooting
 
 ### "Failed to load module" error
+**Solution**: Use a local server (ES6 modules don't work with `file://`)
 
-**Problem**: ES6 modules require a server
-**Solution**: Use a local server (see Quick Start #3)
+### Global leaderboard not loading
+**Solution**: Check backend is running on `http://localhost:3000`
 
-### Styles not loading
+### Scores not saving
+**Solution**: Check localStorage is enabled in browser settings
 
-**Problem**: CSS path incorrect
-**Solution**: Check `styles.css` is in `css/` folder
+### Name not pre-filling
+**Solution**: Enter your name at least once - it will be remembered
 
-### Topics not showing
+### Service Worker not updating
+**Solution**: Hard refresh (`Ctrl+Shift+R` or `Cmd+Shift+R`)
 
-**Problem**: JavaScript error
-**Solution**: Open browser console (F12) to see errors
+## 🔐 Privacy & Data
 
-### Keyboard not working
+- **Player ID**: Random UUID stored in localStorage (per device)
+- **No tracking**: No analytics or third-party scripts
+- **Local-first**: Data stays on your device unless you share
+- **Opt-in sharing**: Explicitly choose to share scores
+- **No accounts**: Anonymous gameplay
 
-**Problem**: Not in play mode
-**Solution**: Keyboard only works when guessing
+## 🚢 Deployment
 
-## 🚀 Next Steps
+### Frontend (Static Hosting)
 
-### Enhancements to Add
-
-1. **Persistence**: Save progress to localStorage
-2. **Sound effects**: Add audio feedback
-3. **Animations**: Smooth transitions
-4. **Achievements**: Badge system
-5. **Streaks**: Daily learning goals
-6. **PWA**: Make it installable
-7. **i18n**: Multi-language support
-
-### Production Checklist
-
-- [ ] Minify JavaScript
-- [ ] Minify CSS
-- [ ] Add service worker
-- [ ] Add manifest.json
-- [ ] Optimize images/emojis
-- [ ] Add analytics (optional)
-- [ ] Test on real devices
-- [ ] Accessibility audit
-
-## 📊 File Sizes
-
-Approximate sizes (unminified):
-- `index.html`: ~1 KB
-- `styles.css`: ~15 KB
-- `app.js`: ~1 KB
-- `game.js`: ~5 KB
-- `ui.js`: ~8 KB
-- `data.js`: ~2 KB
-
-**Total**: ~32 KB (incredibly lightweight!)
-
-## 🎉 That's It!
-
-You now have a fully functional, mobile-first word learning game in pure vanilla JavaScript!
-
-No frameworks, no build tools, no dependencies. Just clean, modern JavaScript. 🚀
-
-## Development
-
-```sh
-npx http-server   # Run the server
+```bash
+# Deploy to any static host
+# Netlify, Vercel, GitHub Pages, etc.
 ```
+
+### Backend (Node.js Hosting)
+
+```bash
+# Deploy to Railway, Render, Fly.io, etc.
+cd leaderboard-api
+npm install
+npm start
+
+# Environment variables:
+# PORT=3000
+# NODE_ENV=production
+# CORS_ORIGIN=https://your-frontend.com
+```
+
+### Database
+- SQLite file created automatically
+- Mount `/data` volume in production
+- Or use external database (modify `db.js`)
+
+## 📊 File Sizes (Approximate)
+
+- Frontend JS: ~40 KB (unminified)
+- CSS: ~20 KB
+- HTML: ~2 KB
+- **Total Frontend**: ~62 KB
+- Backend: ~5 KB + dependencies
+
+## 🎉 Credits
+
+Built with vanilla JavaScript - no frameworks, no build tools.
+
+**Technologies:**
+- Frontend: HTML5, CSS3, ES6 Modules
+- Backend: Node.js, Express, better-sqlite3
+- Storage: LocalStorage, SQLite
+- Offline: Service Worker
 
 ## 📝 License
 
-Feel free to use this for education, personal projects, or commercial use!
+Free to use for education and personal projects.
 
 ---
 
