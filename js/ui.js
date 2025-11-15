@@ -634,12 +634,26 @@ function renderCompleteScreen() {
                 const isBestScoreShared = bestScore.globalSyncStatus === 'synced';
 
                 if (!isBestScoreShared) {
-                  return `
-                    <div class="sync-notice">
-                      <span class="sync-notice-icon">🌍</span>
-                      <span class="sync-notice-text">Share your score with all players</span>
-                    </div>
-                  `;
+                  // Check if a lower score is already shared
+                  const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
+
+                  if (hasSharedLowerScore) {
+                    // Show "better score" message
+                    return `
+                      <div class="better-score-notice">
+                        <span class="notice-icon">⭐</span>
+                        <span class="notice-text">You have a better score! Click "Share with All" to update.</span>
+                      </div>
+                    `;
+                  } else {
+                    // Show generic share message
+                    return `
+                      <div class="sync-notice">
+                        <span class="sync-notice-icon">🌍</span>
+                        <span class="sync-notice-text">Share your score with all players</span>
+                      </div>
+                    `;
+                  }
                 }
               }
               return '';
@@ -665,89 +679,74 @@ function renderCompleteScreen() {
             </div>
           ` : displayScores.length > 0 ? `
           <div class="leaderboard-grid">
-            ${displayScores.map((score, index) => {
-              const isCurrentScore = score.score === state.totalScore &&
-                                     Math.abs(new Date(score.date) - new Date()) < 5000;
-              const formatTime = (ms) => {
-                const secs = Math.floor(ms / 1000);
-                const m = Math.floor(secs / 60);
-                const s = secs % 60;
-                return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
-              };
-
-              const playerName = score.playerName || '';
-              const needsNameEntry = isCurrentScore && !playerName;
-
-              // Check if this score belongs to the current player
+            ${(() => {
+              // Find the best synced score for the current player
               const currentPlayerId = getPlayerId();
-              const isPlayerScore = score.playerId && score.playerId === currentPlayerId;
-              const isShared = score.globalSyncStatus === 'synced';
+              const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
+              const bestSyncedScore = playerScores.find(s => s.globalSyncStatus === 'synced');
+              const bestSyncedScoreId = bestSyncedScore ? bestSyncedScore.id : null;
 
-              // If needs name entry, show only the input (no rank/score)
-              if (needsNameEntry) {
+              return displayScores.map((score, index) => {
+                const isCurrentScore = score.score === state.totalScore &&
+                                       Math.abs(new Date(score.date) - new Date()) < 5000;
+                const formatTime = (ms) => {
+                  const secs = Math.floor(ms / 1000);
+                  const m = Math.floor(secs / 60);
+                  const s = secs % 60;
+                  return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
+                };
+
+                const playerName = score.playerName || '';
+                const needsNameEntry = isCurrentScore && !playerName;
+
+                // Check if this score belongs to the current player
+                const isPlayerScore = score.playerId && score.playerId === currentPlayerId;
+                // Only show badge on the best synced score
+                const showSharedBadge = score.id === bestSyncedScoreId;
+
+                // If needs name entry, show only the input (no rank/score)
+                if (needsNameEntry) {
+                  return `
+                    <div class="leaderboard-row name-entry-only">
+                      <input
+                        type="text"
+                        class="name-input-fullwidth"
+                        maxlength="8"
+                        placeholder="ENTER YOUR NAME"
+                        data-session-id="${score.id}"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                      />
+                    </div>
+                  `;
+                }
+
+                // Normal row with rank, name, and score
+                // Highlight if it's the current player's score OR the just-submitted score
+                const highlightClass = (isPlayerScore || isCurrentScore) ? 'current-rank' : '';
+
                 return `
-                  <div class="leaderboard-row name-entry-only">
-                    <input
-                      type="text"
-                      class="name-input-fullwidth"
-                      maxlength="8"
-                      placeholder="ENTER YOUR NAME"
-                      data-session-id="${score.id}"
-                      autocomplete="off"
-                      autocapitalize="characters"
-                      spellcheck="false"
-                    />
-                  </div>
-                `;
-              }
-
-              // Normal row with rank, name, and score
-              // Highlight if it's the current player's score OR the just-submitted score
-              const highlightClass = (isPlayerScore || isCurrentScore) ? 'current-rank' : '';
-
-              return `
-                <div class="leaderboard-row ${highlightClass}">
-                  <div class="rank-number">
-                    ${index + 1}
-                  </div>
-                  <div class="player-name">
-                    ${playerName || '---'}
-                    ${isShared && leaderboardState.viewMode === 'local' ? '<span class="shared-badge" title="Shared with all players">🌍</span>' : ''}
-                  </div>
-                  <div class="score-info">
-                    <div class="score-value">${score.score.toLocaleString()}</div>
-                    <div class="score-meta">
-                      <span>${score.successRate}%</span>
-                      <span>${formatTime(score.time)}</span>
+                  <div class="leaderboard-row ${highlightClass}">
+                    <div class="rank-number">
+                      ${index + 1}
+                    </div>
+                    <div class="player-name">
+                      ${playerName || '---'}
+                      ${showSharedBadge && leaderboardState.viewMode === 'local' ? '<span class="shared-badge" title="Shared with all players">🌍</span>' : ''}
+                    </div>
+                    <div class="score-info">
+                      <div class="score-value">${score.score.toLocaleString()}</div>
+                      <div class="score-meta">
+                        <span>${score.successRate}%</span>
+                        <span>${formatTime(score.time)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-
-          ${leaderboardState.viewMode === 'local' ? (() => {
-            // Check if best score is NOT shared but a lower score IS shared
-            const currentPlayerId = getPlayerId();
-            const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
-
-            if (playerScores.length > 0) {
-              const bestScore = playerScores[0]; // First score is the best
-              const hasSharedScore = playerScores.some(s => s.globalSyncStatus === 'synced');
-              const bestScoreShared = bestScore.globalSyncStatus === 'synced';
-
-              // If we have a shared score but it's NOT the best score
-              if (hasSharedScore && !bestScoreShared && bestScore.playerName) {
-                return `
-                  <div class="better-score-notice">
-                    <span class="notice-icon">⭐</span>
-                    <span class="notice-text">You have a better score! Click "Share with All" to update.</span>
-                  </div>
                 `;
-              }
-            }
-            return '';
-          })() : ''}
+              }).join('');
+            })()}
+          </div>
 
           ${currentScoreRank === 0 && actualRank > 0 && leaderboardState.viewMode === 'local' ? `
             <!-- User's rank outside top 10 -->
@@ -872,20 +871,17 @@ function attachCompleteListeners() {
 
     if (!state.selectedTopic) return;
 
-    // Get all sessions for this topic that need syncing
+    // Get ALL sessions for this topic with player name
     const allSessions = getSessions();
+    const currentPlayerId = getPlayerId();
     const topicSessions = allSessions.filter(s =>
       s.topicId === state.selectedTopic.id &&
       s.playerName &&
-      (!s.globalSyncStatus || s.globalSyncStatus === 'none' || s.globalSyncStatus === 'failed')
+      s.playerId === currentPlayerId
     );
 
     if (topicSessions.length === 0) {
-      btn.textContent = '✓ Already shared';
-      setTimeout(() => {
-        btn.textContent = '🌍 Share with All';
-      }, 2000);
-      return;
+      return; // No sessions to share
     }
 
     // Find the best score (highest score, then lowest time as tiebreaker)
@@ -895,6 +891,15 @@ function attachCompleteListeners() {
       if (current.score === best.score && current.time < best.time) return current;
       return best;
     }, null);
+
+    // Check if best score is already shared
+    if (bestSession.globalSyncStatus === 'synced') {
+      btn.textContent = '✓ Best score already shared';
+      setTimeout(() => {
+        btn.textContent = '🌍 Share with All';
+      }, 2500);
+      return;
+    }
 
     // Disable button and show progress
     btn.disabled = true;
