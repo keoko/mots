@@ -535,6 +535,10 @@ function attachStandaloneLeaderboardListeners() {
       btn.disabled = false;
       if (result.success) {
         btn.textContent = `✓ Shared`;
+        // Switch to global view to show where the score ranks
+        leaderboardState.viewMode = 'global';
+        // Load the global leaderboard to show updated rankings
+        await loadGlobalLeaderboard(state.selectedTopic.id);
       } else {
         btn.textContent = `❌ Failed`;
       }
@@ -1084,6 +1088,10 @@ function attachCompleteListeners() {
       btn.disabled = false;
       if (result.success) {
         btn.textContent = `✓ Shared`;
+        // Switch to global view to show where the score ranks
+        leaderboardState.viewMode = 'global';
+        // Load the global leaderboard to show updated rankings
+        await loadGlobalLeaderboard(state.selectedTopic.id);
       } else {
         btn.textContent = `❌ Failed`;
       }
