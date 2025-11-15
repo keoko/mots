@@ -46,7 +46,7 @@ if (isTestMode) {
       { ca: 'llet netejadora', en: 'cleansing milk' },
       { ca: 'crema bronzejadora', en: 'suntan lotion' },
       { ca: 'protecció solar', en: 'sun protection' },
-      { ca: 'clivellat', en: 'cracked heel cream' }
+      { ca: 'crema per taló clivellat', en: 'cracked heel cream' }
     ]
   },
   {
