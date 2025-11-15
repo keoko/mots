@@ -1,6 +1,6 @@
 {
   "name": "mots",
-  "version": "0.0.82",
+  "version": "0.0.83",
   "description": "Learn English words from Catalan - an interactive word-guessing game",
   "scripts": {
     "start": "npx http-server",
