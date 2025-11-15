@@ -105,6 +105,8 @@ async function registerServiceWorker(version) {
     return;
   }
 
+  let updateNotificationShown = false;
+
   try {
     // Register service worker with version query parameter
     // This forces the browser to treat it as a new file when version changes
@@ -126,7 +128,10 @@ async function registerServiceWorker(version) {
           if (navigator.serviceWorker.controller) {
             // New service worker installed, old one still controlling
             console.log('[App] New version available');
-            showUpdateNotification();
+            if (!updateNotificationShown) {
+              updateNotificationShown = true;
+              showUpdateNotification();
+            }
           } else {
             // First time install
             console.log('[App] Service worker installed for the first time');
