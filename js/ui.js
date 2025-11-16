@@ -640,6 +640,7 @@ function renderPlayMode() {
               class="answer-input"
               placeholder="Type your answer..."
               value="${state.userInput}"
+              maxlength="${word.en.length}"
               autocomplete="off"
               autocapitalize="off"
               spellcheck="false"
