@@ -4,10 +4,24 @@ import db from '../db.js';
 
 const router = express.Router();
 
+// Allowed topic IDs - matches production topics + dev-short for testing
+const ALLOWED_TOPICS = new Set([
+  'cosmetics',
+  'infancy',
+  'pregnancy',
+  'toiletries',
+  'dev-short'
+]);
+
 // GET /api/leaderboard/:topicId - Get top 10 best scores per player for a topic
 router.get('/:topicId', (req, res) => {
   try {
     const { topicId } = req.params;
+
+    // Validate topic ID
+    if (!ALLOWED_TOPICS.has(topicId)) {
+      return res.status(400).json({ error: 'Invalid topic ID' });
+    }
 
     // Get best score per player (player_id), showing only top 10 unique players
     const stmt = db.prepare(`
@@ -53,6 +67,11 @@ router.post('/:topicId', (req, res) => {
     const { topicId } = req.params;
     const { playerId, playerName, score, wordsWon, wordsLost, successRate, time } = req.body;
 
+    // Validate topic ID
+    if (!ALLOWED_TOPICS.has(topicId)) {
+      return res.status(400).json({ error: 'Invalid topic ID' });
+    }
+
     // Validation
     if (!playerName || playerName.length > 8) {
       return res.status(400).json({ error: 'Player name required (max 8 chars)' });
@@ -60,6 +79,10 @@ router.post('/:topicId', (req, res) => {
 
     if (typeof score !== 'number' || score < 0) {
       return res.status(400).json({ error: 'Invalid score' });
+    }
+
+    if (score > 10000) {
+      return res.status(400).json({ error: 'Score too high (max 10000)' });
     }
 
     if (typeof time !== 'number' || time < 0) {

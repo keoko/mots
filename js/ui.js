@@ -52,7 +52,8 @@ let leaderboardState = {
   viewMode: 'local', // 'local' or 'global'
   globalScores: null,
   loading: false,
-  error: null
+  error: null,
+  syncError: null // Error message from failed score sync
 };
 
 // Track last game state to detect transitions
@@ -343,6 +344,15 @@ function renderStandaloneLeaderboard() {
           })()}
         ` : ''}
 
+        ${leaderboardState.syncError ? `
+          <!-- Sync error notice -->
+          <div class="sync-error-notice">
+            <span class="notice-icon">❌</span>
+            <span class="notice-text">${leaderboardState.syncError}</span>
+            <button class="dismiss-error-btn" data-action="dismiss-sync-error">Dismiss</button>
+          </div>
+        ` : ''}
+
         ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
           <!-- Last sync info -->
           <div class="sync-info">
@@ -535,17 +545,22 @@ function attachStandaloneLeaderboardListeners() {
       btn.disabled = false;
       if (result.success) {
         btn.textContent = `✓ Shared`;
+        // Clear any previous error
+        leaderboardState.syncError = null;
         // Switch to global view to show where the score ranks
         leaderboardState.viewMode = 'global';
         // Load the global leaderboard to show updated rankings
         await loadGlobalLeaderboard(state.selectedTopic.id);
       } else {
         btn.textContent = `❌ Failed`;
+        // Store error message to show in UI
+        leaderboardState.syncError = result.error || 'Failed to submit score';
       }
     } catch (error) {
       console.error('Error syncing score:', error);
       btn.disabled = false;
       btn.textContent = `❌ Failed`;
+      leaderboardState.syncError = error.message || 'Failed to submit score';
     }
 
     // Refresh the leaderboard
@@ -558,6 +573,12 @@ function attachStandaloneLeaderboardListeners() {
         newBtn.textContent = '🌍 Share with All';
       }
     }, 3000);
+  });
+
+  // Dismiss sync error button
+  document.querySelector('[data-action="dismiss-sync-error"]')?.addEventListener('click', () => {
+    leaderboardState.syncError = null;
+    showLeaderboardView();
   });
 }
 
@@ -835,6 +856,15 @@ function renderCompleteScreen() {
             })()}
           ` : ''}
 
+          ${leaderboardState.syncError ? `
+            <!-- Sync error notice -->
+            <div class="sync-error-notice">
+              <span class="notice-icon">❌</span>
+              <span class="notice-text">${leaderboardState.syncError}</span>
+              <button class="dismiss-error-btn" data-action="dismiss-sync-error">Dismiss</button>
+            </div>
+          ` : ''}
+
           ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
             <!-- Last sync info -->
             <div class="sync-info">
@@ -1088,17 +1118,22 @@ function attachCompleteListeners() {
       btn.disabled = false;
       if (result.success) {
         btn.textContent = `✓ Shared`;
+        // Clear any previous error
+        leaderboardState.syncError = null;
         // Switch to global view to show where the score ranks
         leaderboardState.viewMode = 'global';
         // Load the global leaderboard to show updated rankings
         await loadGlobalLeaderboard(state.selectedTopic.id);
       } else {
         btn.textContent = `❌ Failed`;
+        // Store error message to show in UI
+        leaderboardState.syncError = result.error || 'Failed to submit score';
       }
     } catch (error) {
       console.error('Error syncing score:', error);
       btn.disabled = false;
       btn.textContent = `❌ Failed`;
+      leaderboardState.syncError = error.message || 'Failed to submit score';
     }
 
     // Refresh the leaderboard
@@ -1156,6 +1191,12 @@ function attachCompleteListeners() {
       nameInputFullwidth.select();
     }, 300);
   }
+
+  // Dismiss sync error button
+  document.querySelector('[data-action="dismiss-sync-error"]')?.addEventListener('click', () => {
+    leaderboardState.syncError = null;
+    render();
+  });
 
 }
 

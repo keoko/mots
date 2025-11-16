@@ -37,7 +37,7 @@ export async function submitToGlobal(session, playerName) {
     // Try to submit
     const result = await submitGlobalScore(session.topicId, scoreData);
 
-    if (result) {
+    if (result && !result.error) {
       // Success! Update local session with player name
       updateSessionName(session.id, scoreData.playerName);
 
@@ -55,8 +55,9 @@ export async function submitToGlobal(session, playerName) {
       };
     } else {
       // API call failed
-      updateSessionSyncStatus(session.id, 'failed', { error: 'Failed to submit score' });
-      return { success: false, error: 'Failed to submit score' };
+      const errorMsg = result?.error || 'Failed to submit score';
+      updateSessionSyncStatus(session.id, 'failed', { error: errorMsg });
+      return { success: false, error: errorMsg };
     }
   } catch (error) {
     console.error('Error submitting to global leaderboard:', error);

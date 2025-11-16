@@ -48,13 +48,23 @@ export async function submitGlobalScore(topicId, scoreData) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      // Try to get error message from response body
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+      } catch (e) {
+        // Couldn't parse error response, use generic message
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
     console.error('Failed to submit global score:', error);
-    return null; // Return null to indicate failure
+    return { error: error.message }; // Return error details instead of null
   }
 }

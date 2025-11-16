@@ -1,7 +1,7 @@
 #+title: Ideas
 
 * Issues
-** update new version message, 2 times
+** none
 * Ideas
 ** do not allow more than 10 scores per topic
 ** list of topics limited
