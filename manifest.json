@@ -3,7 +3,8 @@
   "short_name": "Mots",
   "version": "0.0.85",
   "description": "Learn English vocabulary for FAR students with an interactive word game",
-  "start_url": "/",
+  "lang": "en",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#6366f1",
@@ -13,7 +14,7 @@
       "src": "favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-192.png",
