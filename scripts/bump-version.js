@@ -15,6 +15,7 @@ import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_ROOT = path.join(__dirname, '..');
 
 // Files that need version updates
 const FILES_TO_UPDATE = [
@@ -47,7 +48,7 @@ function bumpVersion(version, type = 'patch') {
 }
 
 function updatePackageJson(newVersion) {
-  const filepath = path.join(__dirname, 'package.json');
+  const filepath = path.join(PROJECT_ROOT, 'package.json');
   const pkg = readJsonFile(filepath);
   pkg.version = newVersion;
   writeJsonFile(filepath, pkg);
@@ -55,7 +56,7 @@ function updatePackageJson(newVersion) {
 }
 
 function updateManifestJson(newVersion) {
-  const filepath = path.join(__dirname, 'manifest.json');
+  const filepath = path.join(PROJECT_ROOT, 'manifest.json');
   const manifest = readJsonFile(filepath);
   manifest.version = newVersion;
   writeJsonFile(filepath, manifest);
@@ -63,7 +64,7 @@ function updateManifestJson(newVersion) {
 }
 
 function updateServiceWorker(newVersion) {
-  const filepath = path.join(__dirname, 'sw.js');
+  const filepath = path.join(PROJECT_ROOT, 'sw.js');
   let content = fs.readFileSync(filepath, 'utf8');
 
   // Replace the VERSION constant
@@ -107,7 +108,7 @@ function main() {
   }
 
   // Read current version from package.json
-  const pkg = readJsonFile(path.join(__dirname, 'package.json'));
+  const pkg = readJsonFile(path.join(PROJECT_ROOT, 'package.json'));
   const currentVersion = pkg.version;
   const newVersion = bumpVersion(currentVersion, bumpType);
 
