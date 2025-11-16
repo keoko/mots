@@ -1,24 +1,11 @@
 // data.js - Word collections organized by topic
 
-// Note: Import data files at the top - conditional imports don't work with ES6 modules
-import { topics as devTopics } from './data.dev.js';
-
 // Check URL parameters for different data modes
 const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-const isTestMode = urlParams?.get('test') === 'true';
 const isDevMode = urlParams?.get('dev') === 'true';
 
-// Select appropriate data based on mode
-let loadedTopics;
-if (isTestMode) {
-  // Test mode: minimal predictable data for E2E tests
-  loadedTopics = testTopics;
-} else if (isDevMode) {
-  // Dev mode: small dataset with various word lengths for development
-  loadedTopics = devTopics;
-} else {
-  // Production mode: full vocabulary dataset
-  loadedTopics = [
+// Production mode: full vocabulary dataset
+const productionTopics = [
   {
     id: 'cosmetics',
     name: 'Cosmetics',
@@ -115,6 +102,18 @@ if (isTestMode) {
     ]
   }
 ];
+
+// Dynamically load dev mode data only when needed
+let topicsPromise;
+
+if (isDevMode) {
+  // Dev mode: lazy load dev topics only when dev=true
+  topicsPromise = import('./data.dev.js').then(module => module.topics);
+} else {
+  // Production mode: use inline topics
+  topicsPromise = Promise.resolve(productionTopics);
 }
 
-export const topics = loadedTopics;
+// Export as a promise that resolves to topics
+// For backward compatibility, we also export synchronously for production
+export const topics = isDevMode ? await topicsPromise : productionTopics;
