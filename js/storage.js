@@ -129,12 +129,6 @@ export function getFailedWords() {
   }
 }
 
-// Get failed words for a specific topic
-export function getTopicFailedWords(topicId) {
-  const failedWords = getFailedWords();
-  return failedWords[topicId] || [];
-}
-
 // Remove a word from failed list (e.g., after successful review)
 export function removeFailedWord(topicId, word) {
   try {
@@ -236,43 +230,6 @@ export function getOverallStats() {
   }
 
   return stats;
-}
-
-// Clear all progress (for testing or reset)
-export function clearProgress() {
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(FAILED_WORDS_KEY);
-    localStorage.removeItem(SESSIONS_KEY);
-  } catch (error) {
-    console.error('Error clearing progress:', error);
-  }
-}
-
-// Export all data (for backup or sync)
-export function exportData() {
-  return {
-    progress: getProgress(),
-    failedWords: getFailedWords(),
-    sessions: getSessions()
-  };
-}
-
-// Import data (from backup or sync)
-export function importData(data) {
-  try {
-    if (data.progress) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.progress));
-    }
-    if (data.failedWords) {
-      localStorage.setItem(FAILED_WORDS_KEY, JSON.stringify(data.failedWords));
-    }
-    if (data.sessions) {
-      localStorage.setItem(SESSIONS_KEY, JSON.stringify(data.sessions));
-    }
-  } catch (error) {
-    console.error('Error importing data:', error);
-  }
 }
 
 // Update session with player name

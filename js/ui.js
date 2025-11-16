@@ -429,47 +429,6 @@ function renderStandaloneLeaderboard() {
   `;
 }
 
-function renderLeaderboardScores(topicId) {
-  const topScores = getTopScores(topicId);
-  const displayScores = leaderboardState.viewMode === 'global' && leaderboardState.globalScores
-    ? leaderboardState.globalScores
-    : topScores;
-
-  if (leaderboardState.loading || (leaderboardState.error && leaderboardState.viewMode === 'global')) {
-    return '';
-  }
-
-  if (displayScores.length === 0) {
-    return `
-      <div class="leaderboard-empty">
-        <p>No scores yet. Be the first to play!</p>
-      </div>
-    `;
-  }
-
-  const formatTime = (ms) => {
-    const secs = Math.floor(ms / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return m > 0 ? `${m}:${s.toString().padStart(2, '0')}` : `${s}s`;
-  };
-
-  return `
-    <div class="leaderboard-grid">
-      ${displayScores.map((score, index) => {
-        return `
-          <div class="leaderboard-row">
-            <span class="leaderboard-rank">#${index + 1}</span>
-            <span class="leaderboard-name">${score.playerName || '—'}</span>
-            <span class="leaderboard-score">${score.score}</span>
-            <span class="leaderboard-time">${formatTime(score.time)}</span>
-          </div>
-        `;
-      }).join('')}
-    </div>
-  `;
-}
-
 function attachStandaloneLeaderboardListeners() {
   document.querySelector('[data-action="back-to-modes"]')?.addEventListener('click', () => {
     render();
