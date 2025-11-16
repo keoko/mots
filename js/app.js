@@ -1,5 +1,4 @@
 // app.js - Main application entry point
-
 import { render, initializeSync } from './ui.js';
 import { backToTopics, getState, nextWord, toggleWordReveal, GAME_STATES } from './game.js';
 
@@ -49,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Register service worker for offline support with version query parameter
-  registerServiceWorker(version);
+  registerServiceWorker();
 
   // Global keyboard listener for advancing to next word
   document.addEventListener('keydown', (e) => {
@@ -98,37 +97,33 @@ function handleTitleClick() {
   render();
 }
 
+let newWorker;
+
 // Register service worker for offline-first functionality
-async function registerServiceWorker(version) {
+async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
     console.log('[App] Service workers not supported');
     return;
   }
 
   try {
-    // Register service worker with version query parameter
-    // This forces the browser to treat it as a new file when version changes
-    const registration = await navigator.serviceWorker.register(`./sw.js?v=${version}`, {
+    console.log('[App] Registering service worker...');
+    const registration = await navigator.serviceWorker.register(`./sw.js`, {
       updateViaCache: 'none' // Don't cache the SW file itself
     });
-    console.log(`[App] Service worker registered with version ${version}`);
-
-    // Check if there's already a waiting worker
-    if (registration.waiting) {
-      console.log('[App] Service worker already waiting');
-      showUpdateNotification();
-    }
 
     // Listen for new service worker installing
     registration.addEventListener('updatefound', () => {
-      const newWorker = registration.installing;
-      console.log('[App] New service worker found, installing...');
+      newWorker = registration.installing;
+
+      if (!newWorker) {
+        console.error('[App] ❌ No installing worker found!');
+        return;
+      }
 
       newWorker.addEventListener('statechange', () => {
-        console.log(`[App] Service worker state changed to: ${newWorker.state}`);
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
           // New service worker installed, old one still controlling
-          console.log('[App] New version available');
           showUpdateNotification();
         }
       });
@@ -137,9 +132,10 @@ async function registerServiceWorker(version) {
     // Listen for controller change (when new SW takes over)
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
+      if (refreshing) {
+        return;
+      }
       refreshing = true;
-      console.log('[App] New service worker activated, reloading...');
       window.location.reload();
     });
 
@@ -155,18 +151,17 @@ let updateNotificationDisplayed = false;
 function showUpdateNotification() {
   // Guard against duplicate calls
   if (updateNotificationDisplayed) {
-    console.log('[App] Update notification already displayed (flag check)');
     return;
   }
 
   // Double-check DOM in case of race condition
-  if (document.getElementById('update-notification')) {
-    console.log('[App] Update notification already exists in DOM');
+  const existingNotification = document.getElementById('update-notification');
+
+  if (existingNotification) {
     updateNotificationDisplayed = true;
     return;
   }
 
-  console.log('[App] Showing update notification');
   updateNotificationDisplayed = true;
 
   const notification = document.createElement('div');
@@ -212,11 +207,7 @@ function showUpdateNotification() {
   document.body.appendChild(notification);
 
   document.getElementById('update-btn').addEventListener('click', async () => {
-    // Tell the waiting service worker to skip waiting
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration && registration.waiting) {
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-    }
+    newWorker.postMessage({ type: 'SKIP_WAITING' });
   });
 
   document.getElementById('dismiss-btn').addEventListener('click', () => {
