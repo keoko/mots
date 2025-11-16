@@ -4,17 +4,8 @@
 // This ensures the service worker cache is properly invalidated
 // The app.js registration uses ?v=X.X.X query parameter to force browser to check for updates
 
-const VERSION = '0.0.98';
+const VERSION = '0.0.99';
 const CACHE_NAME = `mots-v${VERSION}`;
-
-// Error handler for unhandled errors
-self.addEventListener('error', (event) => {
-  console.error('[SW] Unhandled error:', event.error);
-});
-
-self.addEventListener('unhandledrejection', (event) => {
-  console.error('[SW] Unhandled promise rejection:', event.reason);
-});
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -57,8 +48,6 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log(`[SW] Activating service worker v${VERSION}...`);
-
   event.waitUntil(
     (async () => {
       try {
@@ -67,19 +56,13 @@ self.addEventListener('activate', (event) => {
         const deletionPromises = cacheNames
           .filter(cacheName => cacheName !== CACHE_NAME)
           .map(cacheName => {
-            console.log(`[SW] Deleting old cache: ${cacheName}`);
             return caches.delete(cacheName);
           });
 
         await Promise.all(deletionPromises);
 
-        if (deletionPromises.length > 0) {
-          console.log(`[SW] Cleaned up ${deletionPromises.length} old cache(s)`);
-        }
-
         // Take control of all clients immediately
         await self.clients.claim();
-        console.log(`[SW] Service worker v${VERSION} activated and claimed clients`);
       } catch (error) {
         console.error('[SW] Activation error:', error);
         throw error;
@@ -101,12 +84,10 @@ self.addEventListener('fetch', (event) => {
         // Try cache first
         const cachedResponse = await caches.match(event.request, { ignoreSearch: true });
         if (cachedResponse) {
-          console.log('[SW] Serving from cache:', event.request.url);
           return cachedResponse;
         }
 
         // Cache miss - try network
-        console.log('[SW] Fetching from network:', event.request.url);
         try {
           const networkResponse = await fetch(event.request);
 
@@ -142,9 +123,7 @@ self.addEventListener('fetch', (event) => {
 
 // Handle messages from the app
 self.addEventListener('message', (event) => {
-    console.log('event message', event);
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log(`[SW] Received SKIP_WAITING message, activating v${VERSION}...`);
     self.skipWaiting();
   }
 });
