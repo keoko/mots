@@ -1,5 +1,38 @@
 #+title: Journal
 * 2025
+** 2025/Nov/16
+*** claude code issues: service worker duplicate update notification
+Claude Code was unable to fix the issue with service worker. I had to read about it on https://github.com/deanhume/pwa-update-available
+
+*** fix: service worker update notification showing twice
+Fixed duplicate notification by adding boolean flag to prevent race conditions in statechange event handler.
+
+*** fix: manifest.json PWA compliance issues
+- Changed start_url from "/" to "./" for subdirectory hosting compatibility
+- Fixed SVG icon purpose (removed invalid "maskable" for SVG)
+- Added lang: "en" field
+
+*** feat: show topic name in leaderboard header
+TOP 10 SCORES now displays topic emoji and name for better context.
+
+*** feat: backend API validation
+- Added allowed topics whitelist (cosmetics, infancy, pregnancy, toiletries, dev-short)
+- Added max score validation (10000) to prevent impossible scores
+- Improved error handling - server error messages now displayed to user
+
+*** refactor: reorganize project structure
+Moved files to conventional directories:
+- assets/icons/ - favicon and app icons
+- scripts/ - bump-version.js, generate-manifest.js
+- docs/ - CLAUDE.md, IDEAS.org, JOURNAL.org
+Updated all references in manifest.json, sw.js, index.html, package.json
+
+*** refactor: optimize data loading
+Changed data.js to conditionally import dev topics only when ?dev=true, reducing production bundle size.
+
+*** refactor: remove dead code
+Removed unused functions: renderLeaderboardScores, clearProgress, exportData, importData, getTopicFailedWords (~88 lines)
+
 ** 2025/Nov/14
 *** feat: add global leaderboard API with offline sync and modal submission UI
 ** 2025/Oct/30

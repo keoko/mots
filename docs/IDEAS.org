@@ -2,7 +2,6 @@
 
 * Issues
 ** none
-** missing favicon
 * Ideas
 ** investigate cheaper ways to have free storage persistance
 ** header aligned to the left
