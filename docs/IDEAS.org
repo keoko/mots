@@ -2,10 +2,8 @@
 
 * Issues
 ** none
+** missing favicon
 * Ideas
-** do not allow more than 10 scores per topic
-** list of topics limited
-** add rules to avoid exploiting sqlite DB
 ** investigate cheaper ways to have free storage persistance
 ** header aligned to the left
 ** in bump version add tag

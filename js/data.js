@@ -1,8 +1,10 @@
 // data.js - Word collections organized by topic
 
+import { topics as devTopics } from './data.dev.js';
+
 // Check URL parameters for different data modes
-const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-const isDevMode = urlParams?.get('dev') === 'true';
+const urlParams = new URLSearchParams(window.location.search);
+const isDevMode = urlParams.get('dev') === 'true';
 
 // Production mode: full vocabulary dataset
 const productionTopics = [
@@ -103,17 +105,5 @@ const productionTopics = [
   }
 ];
 
-// Dynamically load dev mode data only when needed
-let topicsPromise;
-
-if (isDevMode) {
-  // Dev mode: lazy load dev topics only when dev=true
-  topicsPromise = import('./data.dev.js').then(module => module.topics);
-} else {
-  // Production mode: use inline topics
-  topicsPromise = Promise.resolve(productionTopics);
-}
-
-// Export as a promise that resolves to topics
-// For backward compatibility, we also export synchronously for production
-export const topics = isDevMode ? await topicsPromise : productionTopics;
+// Select topics based on mode
+export const topics = isDevMode ? devTopics : productionTopics;
