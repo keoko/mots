@@ -4,7 +4,7 @@
 // This ensures the service worker cache is properly invalidated
 // The app.js registration uses ?v=X.X.X query parameter to force browser to check for updates
 
-const VERSION = '0.0.96';
+const VERSION = '0.0.97';
 const CACHE_NAME = `mots-v${VERSION}`;
 
 // Error handler for unhandled errors
@@ -142,6 +142,7 @@ self.addEventListener('fetch', (event) => {
 
 // Handle messages from the app
 self.addEventListener('message', (event) => {
+    console.log('event message', event);
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log(`[SW] Received SKIP_WAITING message, activating v${VERSION}...`);
     self.skipWaiting();
