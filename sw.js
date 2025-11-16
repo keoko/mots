@@ -4,7 +4,7 @@
 // This ensures the service worker cache is properly invalidated
 // The app.js registration uses ?v=X.X.X query parameter to force browser to check for updates
 
-const VERSION = '0.0.86';
+const VERSION = '0.0.87';
 const CACHE_NAME = `mots-v${VERSION}`;
 
 // Error handler for unhandled errors
