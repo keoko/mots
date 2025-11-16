@@ -1,7 +1,6 @@
 // data.js - Word collections organized by topic
 
 // Note: Import data files at the top - conditional imports don't work with ES6 modules
-import { topics as testTopics } from './data.test.js';
 import { topics as devTopics } from './data.dev.js';
 
 // Check URL parameters for different data modes

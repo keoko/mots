@@ -16,10 +16,10 @@ const ASSETS_TO_CACHE = [
   './js/game.js',
   './js/data.js',
   './js/storage.js',
-  './favicon.svg',
+  './assets/icons/favicon.svg',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png'
 ];
 
 const addResourcesToCache = async (resources) => {
