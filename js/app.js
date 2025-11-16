@@ -105,8 +105,6 @@ async function registerServiceWorker(version) {
     return;
   }
 
-  let updateNotificationShown = false;
-
   try {
     // Register service worker with version query parameter
     // This forces the browser to treat it as a new file when version changes
@@ -115,29 +113,23 @@ async function registerServiceWorker(version) {
     });
     console.log(`[App] Service worker registered with version ${version}`);
 
-    // Check for updates on page load
-    registration.update();
+    // Check if there's already a waiting worker
+    if (registration.waiting) {
+      console.log('[App] Service worker already waiting');
+      showUpdateNotification();
+    }
 
-    // Listen for updates
+    // Listen for new service worker installing
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing;
       console.log('[App] New service worker found, installing...');
 
       newWorker.addEventListener('statechange', () => {
-        if (newWorker.state === 'installed') {
-          if (navigator.serviceWorker.controller) {
-            // New service worker installed, old one still controlling
-            console.log('[App] New version available');
-            if (!updateNotificationShown) {
-              updateNotificationShown = true;
-              showUpdateNotification();
-            }
-          } else {
-            // First time install
-            console.log('[App] Service worker installed for the first time');
-          }
-        } else if (newWorker.state === 'activated') {
-          console.log('[App] Service worker activated');
+        console.log(`[App] Service worker state changed to: ${newWorker.state}`);
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // New service worker installed, old one still controlling
+          console.log('[App] New version available');
+          showUpdateNotification();
         }
       });
     });
@@ -156,13 +148,26 @@ async function registerServiceWorker(version) {
   }
 }
 
+// Track if we've shown the update notification to prevent duplicates
+let updateNotificationDisplayed = false;
+
 // Show update notification to user
 function showUpdateNotification() {
-  // Don't show notification if it already exists
-  if (document.getElementById('update-notification')) {
-    console.log('[App] Update notification already shown');
+  // Guard against duplicate calls
+  if (updateNotificationDisplayed) {
+    console.log('[App] Update notification already displayed (flag check)');
     return;
   }
+
+  // Double-check DOM in case of race condition
+  if (document.getElementById('update-notification')) {
+    console.log('[App] Update notification already exists in DOM');
+    updateNotificationDisplayed = true;
+    return;
+  }
+
+  console.log('[App] Showing update notification');
+  updateNotificationDisplayed = true;
 
   const notification = document.createElement('div');
   notification.id = 'update-notification';
