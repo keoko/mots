@@ -7,10 +7,7 @@
 ** list of topics limited
 ** add rules to avoid exploiting sqlite DB
 ** investigate cheaper ways to have free storage persistance
-** check we do not push tokens/resources that could exploit fly account
 ** header aligned to the left
-** DONE keyboard with splitted words does not work
-** DONE topics page and score pages display an scrollbar on desktop UI
 ** in bump version add tag
 * Explore
 ** claude setup-install does not work on bash?

@@ -281,7 +281,7 @@ function renderStandaloneLeaderboard() {
     <div class="game game-complete">
       <div class="leaderboard-section">
         <div class="leaderboard-header">
-          <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
+          <h3 class="leaderboard-title">🏆 TOP 10 SCORES - ${state.selectedTopic.emoji} ${state.selectedTopic.name}</h3>
           <div class="leaderboard-actions">
             <div class="leaderboard-toggle">
               <button
@@ -773,7 +773,7 @@ function renderCompleteScreen() {
       <!-- Top 10 Leaderboard -->
       <div class="leaderboard-section">
           <div class="leaderboard-header">
-            <h3 class="leaderboard-title">🏆 TOP 10 SCORES</h3>
+            <h3 class="leaderboard-title">🏆 TOP 10 SCORES - ${state.selectedTopic.emoji} ${state.selectedTopic.name}</h3>
             <div class="leaderboard-actions">
               <div class="leaderboard-toggle">
                 <button
