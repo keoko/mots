@@ -134,19 +134,18 @@
       display: inline-flex;
       align-items: center;
       gap: var(--spacing-xs);
-      margin-top: var(--spacing-lg);
-      padding: var(--spacing-sm) var(--spacing-lg);
-      background: var(--color-primary);
-      color: white;
+      background: none;
+      border: none;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-base);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      min-height: var(--touch-target-min);
+      cursor: pointer;
       text-decoration: none;
-      font-weight: 600;
-      border-radius: var(--radius-lg);
-      transition: all var(--transition-base);
-      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
     }
     .back-link:active {
-      background: var(--color-primary-dark);
-      transform: scale(0.98);
+      color: var(--color-text);
     }
     @media (max-width: 640px) {
       body {
@@ -161,6 +160,8 @@
 <body>
   <h1>🎮 How to Play Mots</h1>
   <p class="subtitle">A simple, focused vocabulary trainer for learning English from Catalan</p>
+
+  <a href="index.html" class="back-link" style="display: inline-block; margin-bottom: var(--spacing-lg);">← Back to Game</a>
 
   <div class="help-section">
     <h2>🎯 Objective</h2>
@@ -302,8 +303,6 @@
       <li>Works great on phones, tablets, and desktop computers</li>
     </ul>
   </div>
-
-  <a href="index.html" class="back-link">← Back to Game</a>
 
   <footer style="text-align: center; margin-top: var(--spacing-xl); padding: var(--spacing-lg) 0; color: var(--color-text-secondary); font-size: var(--font-size-sm);">
     <span id="app-version"></span>

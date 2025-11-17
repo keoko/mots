@@ -280,6 +280,11 @@ function renderStandaloneLeaderboard() {
 
   return `
     <div class="game game-complete">
+      <!-- Back button at top -->
+      <div class="game-header">
+        <button class="back-button" data-action="back-to-modes">← Back</button>
+      </div>
+
       <div class="leaderboard-section">
         <div class="leaderboard-header">
           <h3 class="leaderboard-title">🏆 TOP 10 SCORES - ${state.selectedTopic.emoji} ${state.selectedTopic.name}</h3>
@@ -418,12 +423,6 @@ function renderStandaloneLeaderboard() {
             <p>No scores yet. Be the first to play!</p>
           </div>
         `}
-      </div>
-
-      <div class="complete-buttons">
-        <button class="btn btn-secondary" data-action="back-to-modes" aria-label="Back to mode selection">
-          ← Back
-        </button>
       </div>
     </div>
   `;
@@ -751,6 +750,11 @@ function renderCompleteScreen() {
 
   return `
     <div class="game game-complete" role="alert" aria-live="assertive">
+      <!-- Back button at top -->
+      <div class="game-header">
+        <button class="back-button" data-action="back-to-topics">← Topics</button>
+      </div>
+
       <!-- Top 10 Leaderboard -->
       <div class="leaderboard-section">
           <div class="leaderboard-header">
@@ -975,10 +979,7 @@ function renderCompleteScreen() {
       `}
 
       <div class="complete-buttons">
-        <button class="btn btn-secondary" data-action="back-to-topics" aria-label="Choose another topic">
-          ← Topics
-        </button>
-        <button class="btn btn-primary" data-action="back-to-modes" aria-label="Play this topic again">
+        <button class="btn btn-primary btn-play-again" data-action="back-to-modes" aria-label="Play this topic again">
           🔄 Play Again
         </button>
       </div>
@@ -1196,7 +1197,7 @@ function renderStatistics() {
   return `
     <div class="statistics-page">
       <div class="stats-header">
-        <button class="btn-back" aria-label="Back to topics">
+        <button class="back-button" aria-label="Back to topics">
           ← Back
         </button>
         <h2 class="section-title">📊 Statistics</h2>
@@ -1363,7 +1364,7 @@ function renderStatistics() {
 }
 
 function attachStatisticsListeners() {
-  const backButton = document.querySelector('.btn-back');
+  const backButton = document.querySelector('.back-button');
   if (backButton) {
     backButton.addEventListener('click', () => {
       backToTopics();
