@@ -1232,36 +1232,6 @@ body {
   color: var(--color-text-secondary);
 }
 
-.btn-sync-all {
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  padding: var(--spacing-xs) var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  white-space: nowrap;
-  min-height: var(--touch-target-min);
-}
-
-@media (hover: hover) {
-  .btn-sync-all:hover {
-    background: var(--color-primary-overlay-strong);
-    transform: translateY(-1px);
-  }
-}
-
-.btn-sync-all:active {
-  transform: translateY(0);
-}
-
-.btn-sync-all:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .sync-info {
   text-align: center;
   padding: var(--spacing-xs) var(--spacing-sm);
@@ -1358,6 +1328,37 @@ body {
   margin-left: var(--spacing-xs);
   font-size: var(--font-size-sm);
   opacity: 0.8;
+}
+
+/* Inline share button */
+.btn-share-inline {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .btn-share-inline:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-share-inline:active {
+  transform: translateY(0);
+}
+
+.btn-share-inline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Game Details */

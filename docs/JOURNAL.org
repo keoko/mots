@@ -1,5 +1,15 @@
 #+title: Journal
 * 2025
+** 2025/Nov/17
+*** refactor: comprehensive CSS cleanup
+- Removed ~240 lines of dead code (unused modal section)
+- Fixed accessibility: focus contrast (0.1→0.3), touch targets (32px→44px), keyboard navigation
+- Added missing dynamic class styles (.flashcard.revealed, .leaderboard-row variants)
+- Added @media (hover: hover) for touch device compatibility
+- Converted 12 hardcoded colors to CSS variables with 13 overlay variants
+- Converted 24+ hardcoded pixels to CSS variables (spacing, dimensions)
+- Final: 24 color variables, consistent design tokens throughout
+
 ** 2025/Nov/16
 *** claude code issues: service worker duplicate update notification
 Claude Code was unable to fix the issue with service worker. I had to read about it on https://github.com/deanhume/pwa-update-available
