@@ -26,12 +26,29 @@ html, body {
   --color-success: #10b981;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
+  --color-info: #3b82f6;
   --color-background: #f8fafc;
   --color-surface: #ffffff;
   --color-text: #1e293b;
   --color-text-secondary: #64748b;
   --color-border: #e2e8f0;
   --color-disabled: #cbd5e1;
+
+  /* Color overlays with opacity */
+  --color-primary-overlay-light: rgba(99, 102, 241, 0.1);
+  --color-primary-overlay: rgba(99, 102, 241, 0.3);
+  --color-primary-overlay-strong: rgba(99, 102, 241, 0.9);
+  --color-success-overlay: rgba(16, 185, 129, 0.05);
+  --color-success-strong: #22c55e;
+  --color-warning-overlay: rgba(245, 158, 11, 0.05);
+  --color-warning-strong: #facc15;
+  --color-error-overlay: rgba(239, 68, 68, 0.3);
+  --color-error-overlay-light: rgba(239, 68, 68, 0.1);
+  --color-error-overlay-medium: rgba(239, 68, 68, 0.2);
+  --color-error-overlay-strong: rgba(239, 68, 68, 0.4);
+  --color-info-overlay-light: rgba(59, 130, 246, 0.1);
+  --color-info-overlay: rgba(59, 130, 246, 0.3);
+  --color-secondary-overlay: rgba(148, 163, 184, 0.1);
 
   /* Spacing - Mobile First */
   --spacing-xs: 0.5rem;    /* 8px */
@@ -738,7 +755,7 @@ body {
 .answer-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 0 3px var(--color-primary-overlay);
 }
 
 @media (min-width: 640px) {
@@ -1005,9 +1022,11 @@ body {
   color: white;
 }
 
-.toggle-btn:hover:not(.active) {
-  background: rgba(99, 102, 241, 0.1);
-  color: var(--color-primary);
+@media (hover: hover) {
+  .toggle-btn:hover:not(.active) {
+    background: var(--color-primary-overlay-light);
+    color: var(--color-primary);
+  }
 }
 
 .leaderboard-loading,
@@ -1044,7 +1063,7 @@ body {
 }
 
 .leaderboard-row.current-rank {
-  background: rgba(99, 102, 241, 0.1);
+  background: var(--color-primary-overlay-light);
   border: 2px solid var(--color-primary);
 }
 
@@ -1058,7 +1077,7 @@ body {
 /* User rank outside top 10 */
 .leaderboard-row.user-rank-outside {
   border: 2px solid var(--color-warning);
-  background: rgba(245, 158, 11, 0.05);
+  background: var(--color-warning-overlay);
 }
 
 /* Rank separator (ellipsis between top 10 and user rank) */
@@ -1118,7 +1137,7 @@ body {
 
 .name-input-fullwidth:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 0 3px var(--color-primary-overlay);
 }
 
 .name-label {
@@ -1150,7 +1169,7 @@ body {
 .name-input:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 0 3px var(--color-primary-overlay);
 }
 
 .btn-save-name {
@@ -1176,28 +1195,28 @@ body {
 }
 
 .sync-status.synced {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background: var(--color-success-overlay);
+  color: var(--color-success-strong);
 }
 
 .sync-status.synced.top-ten {
-  background: rgba(250, 204, 21, 0.1);
-  color: #facc15;
+  background: var(--color-warning-overlay);
+  color: var(--color-warning-strong);
 }
 
 .sync-status.pending {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background: var(--color-info-overlay-light);
+  color: var(--color-info);
 }
 
 .sync-status.failed {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--color-error-overlay-light);
+  color: var(--color-error);
 }
 
 .sync-status.not-synced {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
+  background: var(--color-secondary-overlay);
+  color: var(--color-text-secondary);
 }
 
 .btn-sync-all {
@@ -1214,9 +1233,11 @@ body {
   min-height: var(--touch-target-min);
 }
 
-.btn-sync-all:hover {
-  background: rgba(99, 102, 241, 0.9);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .btn-sync-all:hover {
+    background: var(--color-primary-overlay-strong);
+    transform: translateY(-1px);
+  }
 }
 
 .btn-sync-all:active {
@@ -1238,8 +1259,8 @@ body {
 }
 
 .sync-notice {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--color-info-overlay-light);
+  border: 1px solid var(--color-info-overlay);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
   margin-bottom: var(--spacing-sm);
@@ -1282,8 +1303,8 @@ body {
 }
 
 .sync-error-notice {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: var(--color-error-overlay-light);
+  border: 1px solid var(--color-error-overlay-strong);
   border-radius: var(--radius-md);
   padding: var(--spacing-sm) var(--spacing-md);
   margin: var(--spacing-sm) 0;
@@ -1304,18 +1325,20 @@ body {
 }
 
 .sync-error-notice .dismiss-error-btn {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: var(--color-error-overlay-medium);
+  border: 1px solid var(--color-error-overlay-strong);
   border-radius: var(--radius-sm);
   padding: var(--spacing-xs) var(--spacing-sm);
   color: var(--color-text);
   font-size: var(--font-size-xs);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-base);
 }
 
-.sync-error-notice .dismiss-error-btn:hover {
-  background: rgba(239, 68, 68, 0.3);
+@media (hover: hover) {
+  .sync-error-notice .dismiss-error-btn:hover {
+    background: var(--color-error-overlay);
+  }
 }
 
 .shared-badge {
