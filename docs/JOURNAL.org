@@ -1,6 +1,12 @@
 #+title: Journal
 * 2025
 ** 2025/Nov/17
+*** refactor: improve leaderboard share UX with inline badges
+- Replaced "Share with All" button with inline 📤 badge on best score row
+- Badge only shows if score qualifies for global top 10
+- Fixed current-rank highlighting (only in "All Players" tab)
+- Updated help.html with global leaderboard section
+
 *** refactor: comprehensive CSS cleanup
 - Removed ~240 lines of dead code (unused modal section)
 - Fixed accessibility: focus contrast (0.1→0.3), touch targets (32px→44px), keyboard navigation
