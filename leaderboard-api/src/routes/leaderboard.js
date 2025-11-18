@@ -14,7 +14,7 @@ const ALLOWED_TOPICS = new Set([
 ]);
 
 // GET /api/leaderboard/:topicId - Get top 10 best scores per player for a topic
-router.get('/:topicId', (req, res) => {
+router.get('/:topicId', async (req, res) => {
   try {
     const { topicId } = req.params;
 
@@ -24,36 +24,37 @@ router.get('/:topicId', (req, res) => {
     }
 
     // Get best score per player (player_id), showing only top 10 unique players
-    const stmt = db.prepare(`
-      SELECT
-        id,
-        player_id as playerId,
-        player_name as playerName,
-        score,
-        words_won as wordsWon,
-        words_lost as wordsLost,
-        success_rate as successRate,
-        time,
-        created_at as date
-      FROM scores
-      WHERE topic_id = ?
-        AND id IN (
-          SELECT id
-          FROM scores s2
-          WHERE s2.topic_id = ?
-            AND s2.player_id = scores.player_id
-          ORDER BY s2.score DESC, s2.time ASC
-          LIMIT 1
-        )
-      ORDER BY score DESC, time ASC
-      LIMIT 10
-    `);
-
-    const topScores = stmt.all(topicId, topicId);
+    const result = await db.execute({
+      sql: `
+        SELECT
+          id,
+          player_id as playerId,
+          player_name as playerName,
+          score,
+          words_won as wordsWon,
+          words_lost as wordsLost,
+          success_rate as successRate,
+          time,
+          created_at as date
+        FROM scores
+        WHERE topic_id = ?
+          AND id IN (
+            SELECT id
+            FROM scores s2
+            WHERE s2.topic_id = ?
+              AND s2.player_id = scores.player_id
+            ORDER BY s2.score DESC, s2.time ASC
+            LIMIT 1
+          )
+        ORDER BY score DESC, time ASC
+        LIMIT 10
+      `,
+      args: [topicId, topicId]
+    });
 
     res.json({
       topicId,
-      scores: topScores
+      scores: result.rows
     });
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
@@ -62,7 +63,7 @@ router.get('/:topicId', (req, res) => {
 });
 
 // POST /api/leaderboard/:topicId - Submit a score
-router.post('/:topicId', (req, res) => {
+router.post('/:topicId', async (req, res) => {
   try {
     const { topicId } = req.params;
     const { playerId, playerName, score, wordsWon, wordsLost, successRate, time } = req.body;
@@ -90,73 +91,77 @@ router.post('/:topicId', (req, res) => {
     }
 
     // Insert score
-    const insertStmt = db.prepare(`
-      INSERT INTO scores (topic_id, player_id, player_name, score, words_won, words_lost, success_rate, time)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const result = insertStmt.run(
-      topicId,
-      playerId || null,
-      playerName,
-      score,
-      wordsWon || 0,
-      wordsLost || 0,
-      successRate || 0,
-      time
-    );
+    const insertResult = await db.execute({
+      sql: `
+        INSERT INTO scores (topic_id, player_id, player_name, score, words_won, words_lost, success_rate, time)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        topicId,
+        playerId || null,
+        playerName,
+        score,
+        wordsWon || 0,
+        wordsLost || 0,
+        successRate || 0,
+        time
+      ]
+    });
 
     // Calculate rank among unique players (based on their best scores)
-    // Count how many unique players have a better score than this submission
-    const rankStmt = db.prepare(`
-      WITH player_best_scores AS (
-        SELECT
-          player_id,
-          MAX(score) as best_score,
-          MIN(time) as best_time
-        FROM scores
-        WHERE topic_id = ?
-          AND player_id IS NOT NULL
-        GROUP BY player_id
-      )
-      SELECT COUNT(*) + 1 as rank
-      FROM player_best_scores
-      WHERE best_score > ? OR (best_score = ? AND best_time < ?)
-    `);
+    const rankResult = await db.execute({
+      sql: `
+        WITH player_best_scores AS (
+          SELECT
+            player_id,
+            MAX(score) as best_score,
+            MIN(time) as best_time
+          FROM scores
+          WHERE topic_id = ?
+            AND player_id IS NOT NULL
+          GROUP BY player_id
+        )
+        SELECT COUNT(*) + 1 as rank
+        FROM player_best_scores
+        WHERE best_score > ? OR (best_score = ? AND best_time < ?)
+      `,
+      args: [topicId, score, score, time]
+    });
 
-    const { rank } = rankStmt.get(topicId, score, score, time);
+    const rank = rankResult.rows[0]?.rank || 1;
 
     // Get top 10 unique players
-    const topStmt = db.prepare(`
-      SELECT
-        id,
-        player_id as playerId,
-        player_name as playerName,
-        score,
-        success_rate as successRate,
-        time,
-        created_at as date
-      FROM scores
-      WHERE topic_id = ?
-        AND id IN (
-          SELECT id
-          FROM scores s2
-          WHERE s2.topic_id = ?
-            AND s2.player_id = scores.player_id
-          ORDER BY s2.score DESC, s2.time ASC
-          LIMIT 1
-        )
-      ORDER BY score DESC, time ASC
-      LIMIT 10
-    `);
-
-    const topScores = topStmt.all(topicId, topicId);
+    const topResult = await db.execute({
+      sql: `
+        SELECT
+          id,
+          player_id as playerId,
+          player_name as playerName,
+          score,
+          success_rate as successRate,
+          time,
+          created_at as date
+        FROM scores
+        WHERE topic_id = ?
+          AND id IN (
+            SELECT id
+            FROM scores s2
+            WHERE s2.topic_id = ?
+              AND s2.player_id = scores.player_id
+            ORDER BY s2.score DESC, s2.time ASC
+            LIMIT 1
+          )
+        ORDER BY score DESC, time ASC
+        LIMIT 10
+      `,
+      args: [topicId, topicId]
+    });
 
     res.json({
-      id: result.lastInsertRowid,
+      id: Number(insertResult.lastInsertRowid),
       rank,
       madeTopTen: rank <= 10,
-      topScores
+      topScores: topResult.rows
     });
   } catch (error) {
     console.error('Error submitting score:', error);
