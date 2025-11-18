@@ -304,13 +304,42 @@ function renderStandaloneLeaderboard() {
           </div>
         </div>
 
-        ${leaderboardState.viewMode === 'local' ? `
-          <!-- Hint for sharing scores -->
-          <div class="sync-notice">
-            <span class="sync-notice-icon">💡</span>
-            <span class="sync-notice-text">Tip: Tap 📤 next to your best score to share it with all players</span>
-          </div>
-        ` : ''}
+        ${(() => {
+          // Only show hint if best score is eligible for global top 10 and not shared
+          if (leaderboardState.viewMode !== 'local' || displayScores.length === 0) return '';
+
+          const currentPlayerId = getPlayerId();
+          const bestScore = displayScores[0];
+          const isPlayerScore = bestScore.playerId === currentPlayerId;
+
+          if (!isPlayerScore) return '';
+
+          // Check if score is good enough for global top 10
+          let isEligibleForTop10 = true;
+          if (leaderboardState.globalScores && leaderboardState.globalScores.length >= 10) {
+            const tenthPlaceScore = leaderboardState.globalScores[9].score;
+            isEligibleForTop10 = bestScore.score > tenthPlaceScore;
+          }
+
+          if (!isEligibleForTop10) return '';
+
+          const isSynced = bestScore.globalSyncStatus === 'synced';
+          if (isSynced) return '';
+
+          // Determine if this is an update or initial share
+          const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
+          const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
+          const actionText = hasSharedLowerScore ? 'Update' : 'Share';
+
+          return `
+            <!-- Hint for sharing scores -->
+            <div class="sync-notice">
+              <span class="sync-notice-icon">🏆</span>
+              <span class="sync-notice-text">Amazing! You're in the global top 10!</span>
+              <button class="btn-share-inline" data-action="share-best-score" data-score-id="${bestScore.id}" title="Share this score with all players">📤 ${actionText}</button>
+            </div>
+          `;
+        })()}
 
         ${leaderboardState.syncError ? `
           <!-- Sync error notice -->
@@ -360,30 +389,6 @@ function renderStandaloneLeaderboard() {
               // Only highlight in "All Players" tab (to find your scores among others)
               const highlightClass = (isPlayerScore && leaderboardState.viewMode === 'global') ? 'current-rank' : '';
 
-              // Inline share badge logic (only for row #1 in "Just Me" tab)
-              let shareBadge = '';
-              if (index === 0 && leaderboardState.viewMode === 'local' && isPlayerScore) {
-                // Check if score is good enough for global top 10
-                let isEligibleForTop10 = true;
-                if (leaderboardState.globalScores && leaderboardState.globalScores.length >= 10) {
-                  const tenthPlaceScore = leaderboardState.globalScores[9].score;
-                  isEligibleForTop10 = score.score > tenthPlaceScore;
-                }
-
-                if (isEligibleForTop10) {
-                  const isSynced = score.globalSyncStatus === 'synced';
-                  if (isSynced) {
-                    // Already shared
-                    shareBadge = '<span class="shared-badge" title="Shared with all players">🌍</span>';
-                  } else {
-                    // Not shared - check if updating or sharing new
-                    const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
-                    const actionText = hasSharedLowerScore ? 'Update' : 'Share';
-                    shareBadge = `<button class="btn-share-inline" data-action="share-best-score" data-score-id="${score.id}" title="Share this score with all players">📤 ${actionText}</button>`;
-                  }
-                }
-              }
-
               return `
                 <div class="leaderboard-row ${highlightClass}">
                   <div class="rank-number">
@@ -399,7 +404,6 @@ function renderStandaloneLeaderboard() {
                       <span>${formatTime(score.time)}</span>
                     </div>
                   </div>
-                  ${shareBadge}
                 </div>
               `;
             }).join('');
@@ -742,13 +746,42 @@ function renderCompleteScreen() {
             </div>
           </div>
 
-          ${leaderboardState.viewMode === 'local' ? `
-            <!-- Hint for sharing scores -->
-            <div class="sync-notice">
-              <span class="sync-notice-icon">💡</span>
-              <span class="sync-notice-text">Tip: Tap 📤 next to your best score to share it globally</span>
-            </div>
-          ` : ''}
+          ${(() => {
+            // Only show hint if best score is eligible for global top 10 and not shared
+            if (leaderboardState.viewMode !== 'local' || displayScores.length === 0) return '';
+
+            const currentPlayerId = getPlayerId();
+            const bestScore = displayScores[0];
+            const isPlayerScore = bestScore.playerId === currentPlayerId;
+
+            if (!isPlayerScore) return '';
+
+            // Check if score is good enough for global top 10
+            let isEligibleForTop10 = true;
+            if (leaderboardState.globalScores && leaderboardState.globalScores.length >= 10) {
+              const tenthPlaceScore = leaderboardState.globalScores[9].score;
+              isEligibleForTop10 = bestScore.score > tenthPlaceScore;
+            }
+
+            if (!isEligibleForTop10) return '';
+
+            const isSynced = bestScore.globalSyncStatus === 'synced';
+            if (isSynced) return '';
+
+            // Determine if this is an update or initial share
+            const playerScores = displayScores.filter(s => s.playerId === currentPlayerId);
+            const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
+            const actionText = hasSharedLowerScore ? 'Update' : 'Share';
+
+            return `
+              <!-- Hint for sharing scores -->
+              <div class="sync-notice">
+                <span class="sync-notice-icon">🏆</span>
+                <span class="sync-notice-text">Amazing! You're in the global top 10!</span>
+                <button class="btn-share-inline" data-action="share-best-score" data-score-id="${bestScore.id}" title="Share this score with all players">📤 ${actionText}</button>
+              </div>
+            `;
+          })()}
 
           ${leaderboardState.syncError ? `
             <!-- Sync error notice -->
@@ -827,30 +860,6 @@ function renderCompleteScreen() {
                 // Only highlight in "All Players" tab (to find your scores among others)
                 const highlightClass = ((isPlayerScore || isCurrentScore) && leaderboardState.viewMode === 'global') ? 'current-rank' : '';
 
-                // Inline share badge logic (only for row #1 in "Just Me" tab)
-                let shareBadge = '';
-                if (index === 0 && leaderboardState.viewMode === 'local' && isPlayerScore) {
-                  // Check if score is good enough for global top 10
-                  let isEligibleForTop10 = true;
-                  if (leaderboardState.globalScores && leaderboardState.globalScores.length >= 10) {
-                    const tenthPlaceScore = leaderboardState.globalScores[9].score;
-                    isEligibleForTop10 = score.score > tenthPlaceScore;
-                  }
-
-                  if (isEligibleForTop10) {
-                    const isSynced = score.globalSyncStatus === 'synced';
-                    if (isSynced) {
-                      // Already shared
-                      shareBadge = '<span class="shared-badge" title="Shared with all players">🌍</span>';
-                    } else {
-                      // Not shared - check if updating or sharing new
-                      const hasSharedLowerScore = playerScores.some((s, idx) => idx > 0 && s.globalSyncStatus === 'synced');
-                      const actionText = hasSharedLowerScore ? 'Update' : 'Share';
-                      shareBadge = `<button class="btn-share-inline" data-action="share-best-score" data-score-id="${score.id}" title="Share this score with all players">📤 ${actionText}</button>`;
-                    }
-                  }
-                }
-
                 return `
                   <div class="leaderboard-row ${highlightClass}">
                     <div class="rank-number">
@@ -866,7 +875,6 @@ function renderCompleteScreen() {
                         <span>${formatTime(score.time)}</span>
                       </div>
                     </div>
-                    ${shareBadge}
                   </div>
                 `;
               }).join('');
