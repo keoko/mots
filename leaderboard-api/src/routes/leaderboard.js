@@ -16,6 +16,9 @@ const ALLOWED_TOPICS = new Set([
 // Maximum number of scores to keep per topic (prevents database bloat)
 const MAX_SCORES_PER_TOPIC = 100;
 
+// UUID validation regex (v4 format)
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 // In-memory cache of player counts per topic (reduces DB queries)
 // Single instance on Fly.io free tier makes this safe
 const topicPlayerCounts = new Map();
@@ -95,6 +98,10 @@ router.post('/:topicId', async (req, res) => {
     // Validation
     if (!playerId) {
       return res.status(400).json({ error: 'Player ID required' });
+    }
+
+    if (!UUID_REGEX.test(playerId)) {
+      return res.status(400).json({ error: 'Player ID must be a valid UUID' });
     }
 
     if (!playerName || playerName.length > 8) {
