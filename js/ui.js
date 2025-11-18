@@ -350,13 +350,6 @@ function renderStandaloneLeaderboard() {
           </div>
         ` : ''}
 
-        ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
-          <!-- Last sync info -->
-          <div class="sync-info">
-            <small>📡 Loaded from server</small>
-          </div>
-        ` : ''}
-
         ${leaderboardState.loading ? `
           <div class="leaderboard-loading">
             <p>Loading all players...</p>
@@ -789,13 +782,6 @@ function renderCompleteScreen() {
               <span class="notice-icon">❌</span>
               <span class="notice-text">${leaderboardState.syncError}</span>
               <button class="dismiss-error-btn" data-action="dismiss-sync-error">Dismiss</button>
-            </div>
-          ` : ''}
-
-          ${leaderboardState.viewMode === 'global' && leaderboardState.globalScores ? `
-            <!-- Last sync info -->
-            <div class="sync-info">
-              <small>📡 Loaded from server</small>
             </div>
           ` : ''}
 
