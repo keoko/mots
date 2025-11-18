@@ -19,31 +19,28 @@ const db = createClient({
 // Initialize database schema
 async function initializeDatabase() {
   try {
-    // Create scores table
+    // Create scores table - one best score per player per topic
     await db.execute(`
       CREATE TABLE IF NOT EXISTS scores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         topic_id TEXT NOT NULL,
-        player_id TEXT,
+        player_id TEXT NOT NULL,
         player_name TEXT NOT NULL,
         score INTEGER NOT NULL,
         words_won INTEGER NOT NULL,
         words_lost INTEGER NOT NULL,
         success_rate INTEGER NOT NULL,
         time INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(player_id, topic_id)
       )
     `);
 
-    // Create indexes
+    // Simple index for leaderboard queries
     await db.execute(`
       CREATE INDEX IF NOT EXISTS idx_topic_score
       ON scores(topic_id, score DESC, time ASC)
-    `);
-
-    await db.execute(`
-      CREATE INDEX IF NOT EXISTS idx_player_topic
-      ON scores(player_id, topic_id, score DESC)
     `);
 
     console.log('✓ Turso database initialized');
