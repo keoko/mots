@@ -65,7 +65,6 @@ let lastGameState = null;
 async function loadGlobalLeaderboard(topicId) {
   leaderboardState.loading = true;
   leaderboardState.error = null;
-  render();
 
   try {
     const scores = await fetchGlobalLeaderboard(topicId);
@@ -80,7 +79,6 @@ async function loadGlobalLeaderboard(topicId) {
     console.error('Error loading global leaderboard:', error);
   } finally {
     leaderboardState.loading = false;
-    render();
   }
 }
 
@@ -421,7 +419,6 @@ function attachStandaloneLeaderboardListeners() {
   document.querySelectorAll('[data-action="toggle-leaderboard"]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const mode = e.currentTarget.dataset.mode;
-      leaderboardState.viewMode = mode;
 
       // Always fetch fresh global leaderboard when switching to global
       if (mode === 'global' && !leaderboardState.loading) {
@@ -429,6 +426,8 @@ function attachStandaloneLeaderboardListeners() {
         await loadGlobalLeaderboard(state.selectedTopic.id);
       }
 
+      // Set viewMode AFTER loading data to prevent flash
+      leaderboardState.viewMode = mode;
       showLeaderboardView();
     });
   });
@@ -950,7 +949,6 @@ function attachCompleteListeners() {
   document.querySelectorAll('[data-action="toggle-leaderboard"]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const mode = e.currentTarget.dataset.mode;
-      leaderboardState.viewMode = mode;
 
       // Always fetch fresh global leaderboard when switching to global
       if (mode === 'global' && !leaderboardState.loading) {
@@ -958,6 +956,8 @@ function attachCompleteListeners() {
         await loadGlobalLeaderboard(state.selectedTopic.id);
       }
 
+      // Set viewMode AFTER loading data to prevent flash
+      leaderboardState.viewMode = mode;
       render();
     });
   });
