@@ -23,8 +23,3 @@ primary_region = "cdg" # Paris region (Madrid is deprecated)
     method = "GET"
     timeout = "5s"
     path = "/health"
-
-# Persistent volume for SQLite database
-[mounts]
-  source = "mots_leaderboard_data"
-  destination = "/data"
