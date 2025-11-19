@@ -388,3 +388,71 @@ export function setPlayerName(name) {
     return name;
   }
 }
+
+// Global leaderboard caching
+const GLOBAL_LEADERBOARD_PREFIX = 'mots_global_leaderboard_';
+const CACHE_STALE_TIME = 5 * 60 * 1000; // 5 minutes
+
+// Get cached global leaderboard for a topic
+export function getCachedGlobalLeaderboard(topicId) {
+  try {
+    const key = GLOBAL_LEADERBOARD_PREFIX + topicId;
+    const cached = localStorage.getItem(key);
+
+    if (!cached) return null;
+
+    const data = JSON.parse(cached);
+    const fetchedAt = new Date(data.fetchedAt);
+    const age = Date.now() - fetchedAt.getTime();
+
+    return {
+      scores: data.scores,
+      fetchedAt: fetchedAt,
+      isStale: age > CACHE_STALE_TIME
+    };
+  } catch (error) {
+    console.error('Error loading cached leaderboard:', error);
+    return null;
+  }
+}
+
+// Cache global leaderboard for a topic
+export function setCachedGlobalLeaderboard(topicId, scores) {
+  try {
+    const key = GLOBAL_LEADERBOARD_PREFIX + topicId;
+    const data = {
+      scores,
+      fetchedAt: new Date().toISOString()
+    };
+    localStorage.setItem(key, JSON.stringify(data));
+    return true;
+  } catch (error) {
+    console.error('Error caching leaderboard:', error);
+    return false;
+  }
+}
+
+// Clean up old leaderboard caches (older than 7 days)
+export function cleanupOldLeaderboardCaches() {
+  try {
+    const MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+    Object.keys(localStorage)
+      .filter(key => key.startsWith(GLOBAL_LEADERBOARD_PREFIX))
+      .forEach(key => {
+        try {
+          const cached = JSON.parse(localStorage.getItem(key));
+          const age = Date.now() - new Date(cached.fetchedAt).getTime();
+
+          if (age > MAX_AGE) {
+            localStorage.removeItem(key);
+          }
+        } catch (error) {
+          // Remove corrupted cache entries
+          localStorage.removeItem(key);
+        }
+      });
+  } catch (error) {
+    console.error('Error cleaning up leaderboard caches:', error);
+  }
+}

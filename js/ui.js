@@ -31,7 +31,9 @@ import {
   getPlayerName,
   setPlayerName,
   getPlayerId,
-  clearQueuedSubmission
+  clearQueuedSubmission,
+  getCachedGlobalLeaderboard,
+  cleanupOldLeaderboardCaches
 } from './storage.js';
 
 import {
@@ -53,7 +55,10 @@ let leaderboardState = {
   globalScores: null,
   loading: false,
   error: null,
-  syncError: null // Error message from failed score sync
+  syncError: null, // Error message from failed score sync
+  fetchedAt: null, // When the global scores were fetched
+  fromCache: false, // Whether the current global scores are from cache
+  isStale: false // Whether the cached data is stale
 };
 
 // Track last game state to detect transitions
@@ -61,24 +66,170 @@ let lastGameState = null;
 
 // Removed global submission modal - now using inline sync buttons in leaderboard
 
-// Load global leaderboard from API
-async function loadGlobalLeaderboard(topicId) {
+// Helper: Format relative time
+function formatRelativeTime(date) {
+  const now = Date.now();
+  const diffMs = now - new Date(date).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+// Helper: Format absolute time
+function formatAbsoluteTime(date) {
+  const d = new Date(date);
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+
+  const timeStr = d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
+  if (isToday) {
+    return `Today at ${timeStr}`;
+  }
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const isYesterday = d.toDateString() === yesterday.toDateString();
+
+  if (isYesterday) {
+    return `Yesterday at ${timeStr}`;
+  }
+
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
+// Helper: Render freshness indicator for cached leaderboard
+function renderFreshnessIndicator() {
+  // Only show for global view
+  if (leaderboardState.viewMode !== 'global') {
+    return '';
+  }
+
+  // Show loading state
+  if (leaderboardState.loading && !leaderboardState.fetchedAt) {
+    return `
+      <div class="leaderboard-freshness loading">
+        <span class="freshness-icon">⏳</span>
+        <span class="freshness-text">Loading leaderboard...</span>
+      </div>
+    `;
+  }
+
+  // Show sync info if we have data
+  if (leaderboardState.fetchedAt) {
+    const relativeTime = formatRelativeTime(leaderboardState.fetchedAt);
+    const absoluteTime = formatAbsoluteTime(leaderboardState.fetchedAt);
+    const isStale = leaderboardState.isStale;
+    const isUpdating = leaderboardState.loading;
+
+    return `
+      <div class="leaderboard-freshness ${isStale ? 'stale' : 'fresh'}">
+        <span class="freshness-icon">${isStale ? '⚠️' : '✓'}</span>
+        <span class="freshness-text">
+          <span class="sync-relative">${isStale ? 'Last synced' : 'Synced'} ${relativeTime}</span>
+          <span class="sync-absolute" title="${new Date(leaderboardState.fetchedAt).toLocaleString()}">${absoluteTime}</span>
+        </span>
+        <button
+          class="btn-refresh ${isUpdating ? 'updating' : ''}"
+          data-action="retry-global"
+          title="Refresh leaderboard"
+          ${isUpdating ? 'disabled' : ''}
+        >
+          ${isUpdating ? '⏳ Updating...' : '🔄 Refresh'}
+        </button>
+      </div>
+    `;
+  }
+
+  return '';
+}
+
+// Load global leaderboard from API with smart caching
+async function loadGlobalLeaderboard(topicId, options = {}) {
+  const { forceRefresh = false } = options;
+
+  // Try to show cached data immediately (instant feedback)
+  if (!forceRefresh) {
+    const cached = getCachedGlobalLeaderboard(topicId);
+    if (cached) {
+      leaderboardState.globalScores = cached.scores;
+      leaderboardState.fetchedAt = cached.fetchedAt;
+      leaderboardState.fromCache = true;
+      leaderboardState.isStale = cached.isStale;
+      leaderboardState.error = null;
+
+      // Render immediately with cached data
+      const state = getState();
+      if (state.currentState === GAME_STATES.COMPLETE) {
+        render();
+      } else {
+        showLeaderboardView();
+      }
+    }
+  }
+
+  // Fetch fresh data in background
   leaderboardState.loading = true;
   leaderboardState.error = null;
 
   try {
-    const scores = await fetchGlobalLeaderboard(topicId);
-    if (scores) {
-      leaderboardState.globalScores = scores;
+    const result = await fetchGlobalLeaderboard(topicId, {
+      forceRefresh: forceRefresh,
+      background: !!getCachedGlobalLeaderboard(topicId) // Silent fail if we have cache
+    });
+
+    if (result && result.scores) {
+      leaderboardState.globalScores = result.scores;
+      leaderboardState.fetchedAt = result.fetchedAt;
+      leaderboardState.fromCache = result.fromCache;
+      leaderboardState.isStale = false;
       leaderboardState.error = null;
+
+      // Only re-render if data changed (not from cache)
+      if (!result.fromCache) {
+        const state = getState();
+        if (state.currentState === GAME_STATES.COMPLETE) {
+          render();
+        } else {
+          showLeaderboardView();
+        }
+      }
     } else {
-      leaderboardState.error = 'Could not connect to server. Showing local scores.';
+      // Only show error if we don't have cached data
+      if (!leaderboardState.globalScores) {
+        leaderboardState.error = 'Could not connect to server. Showing local scores.';
+      }
     }
   } catch (error) {
-    leaderboardState.error = error.message || 'Failed to load global leaderboard';
     console.error('Error loading global leaderboard:', error);
+    // Only show error if we don't have cached data
+    if (!leaderboardState.globalScores) {
+      leaderboardState.error = error.message || 'Failed to load global leaderboard';
+    }
   } finally {
     leaderboardState.loading = false;
+
+    // Always re-render to update loading state (button, freshness indicator)
+    const state = getState();
+    if (state.currentState === GAME_STATES.COMPLETE) {
+      render();
+    } else {
+      showLeaderboardView();
+    }
   }
 }
 
@@ -302,6 +453,8 @@ function renderStandaloneLeaderboard() {
           </div>
         </div>
 
+        ${renderFreshnessIndicator()}
+
         ${(() => {
           // Only show hint if best score is eligible for global top 10 and not shared
           if (leaderboardState.viewMode !== 'local' || displayScores.length === 0) return '';
@@ -348,11 +501,11 @@ function renderStandaloneLeaderboard() {
           </div>
         ` : ''}
 
-        ${leaderboardState.loading ? `
+        ${leaderboardState.loading && !leaderboardState.globalScores ? `
           <div class="leaderboard-loading">
             <p>Loading all players...</p>
           </div>
-        ` : leaderboardState.error && leaderboardState.viewMode === 'global' ? `
+        ` : leaderboardState.error && leaderboardState.viewMode === 'global' && !leaderboardState.globalScores ? `
           <div class="leaderboard-error">
             <p>⚠️ Unable to load all players</p>
             <p class="error-detail">${leaderboardState.error}</p>
@@ -435,7 +588,7 @@ function attachStandaloneLeaderboardListeners() {
   // Retry loading global leaderboard
   document.querySelector('[data-action="retry-global"]')?.addEventListener('click', async () => {
     const state = getState();
-    await loadGlobalLeaderboard(state.selectedTopic.id);
+    await loadGlobalLeaderboard(state.selectedTopic.id, { forceRefresh: true });
   });
 
   // Handle inline share button (share best score)
@@ -738,6 +891,8 @@ function renderCompleteScreen() {
             </div>
           </div>
 
+          ${renderFreshnessIndicator()}
+
           ${(() => {
             // Only show hint if best score is eligible for global top 10 and not shared
             if (leaderboardState.viewMode !== 'local' || displayScores.length === 0) return '';
@@ -784,11 +939,11 @@ function renderCompleteScreen() {
             </div>
           ` : ''}
 
-          ${leaderboardState.loading ? `
+          ${leaderboardState.loading && !leaderboardState.globalScores ? `
             <div class="leaderboard-loading">
               <p>Loading all players...</p>
             </div>
-          ` : leaderboardState.error && leaderboardState.viewMode === 'global' ? `
+          ` : leaderboardState.error && leaderboardState.viewMode === 'global' && !leaderboardState.globalScores ? `
             <div class="leaderboard-error">
               <p>⚠️ Unable to load all players</p>
               <p class="error-detail">${leaderboardState.error}</p>
@@ -965,7 +1120,7 @@ function attachCompleteListeners() {
   // Retry loading global leaderboard
   document.querySelector('[data-action="retry-global"]')?.addEventListener('click', async () => {
     const state = getState();
-    await loadGlobalLeaderboard(state.selectedTopic.id);
+    await loadGlobalLeaderboard(state.selectedTopic.id, { forceRefresh: true });
   });
 
   // Toggle game details section
@@ -1313,16 +1468,39 @@ function attachStatisticsListeners() {
 // Modal functions removed - now using inline sync UI in leaderboard
 
 // Initialize auto-sync on app load
+// Background refresh cached leaderboards
+async function refreshCachedLeaderboards() {
+  // Get all topics that have cached leaderboards
+  const cachedTopics = Object.keys(localStorage)
+    .filter(key => key.startsWith('mots_global_leaderboard_'))
+    .map(key => key.replace('mots_global_leaderboard_', ''));
+
+  // Refresh in background (don't await, silent fail)
+  cachedTopics.forEach(topicId => {
+    fetchGlobalLeaderboard(topicId, { background: true })
+      .catch(() => {}); // Silent fail
+  });
+}
+
 export function initializeSync() {
+  // Clean up old leaderboard caches (older than 7 days)
+  cleanupOldLeaderboardCaches();
+
   setupAutoSync((result) => {
     if (result.synced > 0) {
       console.log(`✓ Synced ${result.synced} pending score(s)`);
       // Optionally show a notification to the user
     }
+
+    // Also refresh cached leaderboards when coming back online
+    refreshCachedLeaderboards();
   });
 
   // Try to sync on page load if online
   if (isOnline()) {
     syncPendingScores();
+
+    // Refresh cached leaderboards in background
+    refreshCachedLeaderboards();
   }
 }

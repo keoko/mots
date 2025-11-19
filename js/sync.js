@@ -14,8 +14,32 @@ import {
   setPlayerName,
   updateSessionName,
   updateSessionSyncStatus,
-  getPlayerId
+  getPlayerId,
+  getCachedGlobalLeaderboard,
+  setCachedGlobalLeaderboard
 } from './storage.js';
+
+// Helper: Insert score optimistically into cache
+function insertScoreOptimistically(scores, newScore) {
+  const updated = [...scores, {
+    playerId: newScore.playerId,
+    playerName: newScore.playerName,
+    score: newScore.score,
+    wordsWon: newScore.wordsWon,
+    wordsLost: newScore.wordsLost,
+    successRate: newScore.successRate,
+    time: newScore.time,
+    pending: true  // Mark as unconfirmed
+  }];
+
+  // Sort by score DESC, then time ASC
+  updated.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.time - b.time;
+  });
+
+  return updated.slice(0, 10); // Keep top 10
+}
 
 // Try to submit a score to the global leaderboard
 export async function submitToGlobal(session, playerName) {
@@ -47,6 +71,11 @@ export async function submitToGlobal(session, playerName) {
       // Mark as synced with rank
       updateSessionSyncStatus(session.id, 'synced', { rank: result.rank });
 
+      // Update cache with server response
+      if (result.topScores) {
+        setCachedGlobalLeaderboard(session.topicId, result.topScores);
+      }
+
       return {
         success: true,
         rank: result.rank,
@@ -62,6 +91,24 @@ export async function submitToGlobal(session, playerName) {
   } catch (error) {
     console.error('Error submitting to global leaderboard:', error);
     updateSessionSyncStatus(session.id, 'failed', { error: error.message });
+
+    // If offline, optimistically add to cache
+    if (!navigator.onLine) {
+      const cached = getCachedGlobalLeaderboard(session.topicId);
+      if (cached) {
+        const updatedScores = insertScoreOptimistically(cached.scores, {
+          playerId: getPlayerId(),
+          playerName: playerName.toUpperCase().trim().slice(0, 8),
+          score: session.score,
+          wordsWon: session.wordsWon,
+          wordsLost: session.wordsLost,
+          successRate: session.successRate,
+          time: session.time
+        });
+        setCachedGlobalLeaderboard(session.topicId, updatedScores);
+      }
+    }
+
     return { success: false, error: error.message };
   }
 }

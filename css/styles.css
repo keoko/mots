@@ -1324,6 +1324,104 @@ body {
   }
 }
 
+/* Leaderboard freshness indicator */
+.leaderboard-freshness {
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+}
+
+.leaderboard-freshness.fresh {
+  background: var(--color-success-overlay);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--color-text);
+}
+
+.leaderboard-freshness.stale {
+  background: var(--color-warning-overlay);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--color-text);
+}
+
+.leaderboard-freshness.loading {
+  background: var(--color-info-overlay-light);
+  border: 1px solid var(--color-info-overlay);
+  color: var(--color-text-secondary);
+}
+
+.freshness-icon {
+  font-size: var(--font-size-lg);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.freshness-text {
+  flex: 1;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.sync-relative {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.sync-absolute {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.btn-refresh {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-refresh:disabled,
+.btn-refresh.updating {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .btn-refresh:hover:not(:disabled):not(.updating) {
+    background: var(--color-primary-dark);
+    transform: scale(1.02);
+  }
+}
+
+/* Responsive: Stack on very small screens */
+@media (max-width: 400px) {
+  .leaderboard-freshness {
+    flex-wrap: wrap;
+  }
+
+  .freshness-text {
+    flex-basis: 100%;
+    order: 2;
+  }
+
+  .btn-refresh {
+    margin-left: auto;
+  }
+}
+
 .shared-badge {
   margin-left: var(--spacing-xs);
   font-size: var(--font-size-sm);
