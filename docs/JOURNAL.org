@@ -1,5 +1,18 @@
 #+title: Journal
 * 2025
+** 2025/Nov/19
+*** feat: implement cached global leaderboard with local-first sync
+Added localStorage caching for global leaderboards with 5-minute freshness window:
+- Cache-first strategy: instant display from cache, background refresh if stale
+- Optimistic updates: cache updated immediately on score submission
+- Freshness indicator shows sync time (relative + absolute) with manual refresh button
+- Visual states: ✓ fresh (green), ⚠️ stale (yellow), ⏳ loading (blue)
+- Background refresh on app launch and when coming back online
+- Old caches (>7 days) automatically cleaned up
+- Leaderboard stays visible during refresh (no blocking "Loading..." state)
+
+Files: storage.js, leaderboard-api.js, sync.js, ui.js, styles.css
+
 ** 2025/Nov/17
 *** refactor: improve leaderboard share UX with inline badges
 - Replaced "Share with All" button with inline 📤 badge on best score row
