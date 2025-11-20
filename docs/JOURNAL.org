@@ -1,5 +1,11 @@
 #+title: Journal
 * 2025
+** 2025/Nov/20
+*** feat: add landing page for first-time visitors
+Educational landing page with FAR explanation, feature cards, and learning path visualization. Shows once on first visit (localStorage detection), then goes directly to topic selection.
+
+Files: landing.js (new), game.js, ui.js, styles.css
+
 ** 2025/Nov/19
 *** feat: implement cached global leaderboard with local-first sync
 Added localStorage caching for global leaderboards with 5-minute freshness window:
