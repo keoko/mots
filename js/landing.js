@@ -32,13 +32,12 @@ export function renderLanding() {
         <p class="landing-subtitle">Master FAR Vocabulary Through Interactive Learning</p>
       </div>
 
-      <!-- What is FAR Section -->
+      <!-- What is MOTS Section -->
       <div class="landing-section">
-        <h2 class="landing-section-title">What is FAR?</h2>
+        <h2 class="landing-section-title">What is MOTS?</h2>
         <p class="landing-text">
-          FAR (Fonètica, Alfabet i Ritme) is a comprehensive approach to language learning
-          that emphasizes proper pronunciation, alphabet familiarity, and natural rhythm.
-          Mots helps you build a strong vocabulary foundation through interactive exercises.
+          Mots is an interactive vocabulary trainer for pharmacy students learning English.
+          It helps you master pharmaceutical terminology through flashcard study and timed practice modes.
         </p>
       </div>
 
