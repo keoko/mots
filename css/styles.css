@@ -176,20 +176,26 @@ body {
    HEADER
    ============================================ */
 .header {
-  text-align: center;
-  padding: var(--spacing-md) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
   position: relative;
 }
 
 .header h1 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: 700;
-  margin-bottom: var(--spacing-xs);
+  margin: 0;
 }
 
 @media (min-width: 640px) {
+  .header {
+    padding: var(--spacing-sm) 0;
+  }
+
   .header h1 {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
   }
 }
 
@@ -206,11 +212,12 @@ body {
 .subtitle {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 
 .help-button {
   position: absolute;
-  top: var(--spacing-md);
+  top: var(--spacing-xs);
   right: 0;
   color: var(--color-text-secondary);
   width: var(--touch-target-min);
