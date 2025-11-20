@@ -452,7 +452,6 @@ body {
 }
 
 .topic-progress {
-  display: flex;
   gap: var(--spacing-sm);
   margin-top: var(--spacing-xs);
   font-size: var(--font-size-sm);
