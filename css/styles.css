@@ -1408,10 +1408,6 @@ body {
 
 /* Responsive: Stack on very small screens */
 @media (max-width: 400px) {
-  .leaderboard-freshness {
-    flex-wrap: wrap;
-  }
-
   .freshness-text {
     flex-basis: 100%;
     order: 2;

@@ -136,6 +136,10 @@ function renderFreshnessIndicator() {
     const isStale = leaderboardState.isStale;
     const isUpdating = leaderboardState.loading;
 
+    // Don't show refresh button if synced within the last minute
+    const age = Date.now() - new Date(leaderboardState.fetchedAt).getTime();
+    const showRefreshButton = age >= 60000; // 1 minute
+
     return `
       <div class="leaderboard-freshness ${isStale ? 'stale' : 'fresh'}">
         <span class="freshness-icon">${isStale ? '⚠️' : '✓'}</span>
@@ -143,14 +147,16 @@ function renderFreshnessIndicator() {
           <span class="sync-relative">${isStale ? 'Last synced' : 'Synced'} ${relativeTime}</span>
           <span class="sync-absolute" title="${new Date(leaderboardState.fetchedAt).toLocaleString()}">${absoluteTime}</span>
         </span>
-        <button
-          class="btn-refresh ${isUpdating ? 'updating' : ''}"
-          data-action="retry-global"
-          title="Refresh leaderboard"
-          ${isUpdating ? 'disabled' : ''}
-        >
-          ${isUpdating ? '⏳ Updating...' : '🔄 Refresh'}
-        </button>
+        ${showRefreshButton ? `
+          <button
+            class="btn-refresh ${isUpdating ? 'updating' : ''}"
+            data-action="retry-global"
+            title="Refresh leaderboard"
+            ${isUpdating ? 'disabled' : ''}
+          >
+            ${isUpdating ? '⏳ Updating...' : '🔄 Refresh'}
+          </button>
+        ` : ''}
       </div>
     `;
   }

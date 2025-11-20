@@ -3,12 +3,13 @@
 * Issues
 ** none
 * Ideas
-** investigate cheaper ways to have free storage persistance
+** E2E tests, playwright issues on arch linux
+** turso Dev mode (use local DB)
+** Xstate
 ** header aligned to the left
 ** in bump version add tag
 * Explore
 ** claude setup-install does not work on bash?
-** E2E tests, playwright issues on arch linux
 ** touch events API
 ** use IndexedDB, any benefits?
 ** what is AppCache
