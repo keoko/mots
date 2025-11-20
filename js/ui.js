@@ -646,6 +646,16 @@ function attachStandaloneLeaderboardListeners() {
     // Refresh the leaderboard
     showLeaderboardView();
 
+    // Scroll to player's score in global leaderboard
+    if (result.success) {
+      setTimeout(() => {
+        const playerRankRow = document.querySelector('.leaderboard-row.current-rank');
+        if (playerRankRow) {
+          playerRankRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+
     // Reset button text after delay
     setTimeout(() => {
       const newBtn = document.querySelector('[data-action="sync-all-scores"]');
@@ -1188,6 +1198,16 @@ function attachCompleteListeners() {
 
     // Refresh the leaderboard
     render();
+
+    // Scroll to player's score in global leaderboard
+    if (result.success) {
+      setTimeout(() => {
+        const playerRankRow = document.querySelector('.leaderboard-row.current-rank');
+        if (playerRankRow) {
+          playerRankRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
 
     // Reset button text after delay
     setTimeout(() => {
