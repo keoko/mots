@@ -11,6 +11,7 @@ import {
 } from './storage.js';
 
 export const GAME_STATES = {
+  LANDING: 'landing',
   TOPIC_SELECTION: 'topic_selection',
   MODE_SELECTION: 'mode_selection',
   STUDYING: 'studying',
@@ -48,7 +49,7 @@ const state = {
   // Practice failed words mode
   practiceWords: null,
   isPracticingFailed: false,
-  gameState: GAME_STATES.TOPIC_SELECTION
+  gameState: GAME_STATES.LANDING // Start with landing page
 };
 
 // Get current state
@@ -234,6 +235,11 @@ export function nextWord() {
       state.gameState = GAME_STATES.PLAYING;
     }
   }
+}
+
+// Proceed from landing page to topic selection
+export function proceedFromLanding() {
+  state.gameState = GAME_STATES.TOPIC_SELECTION;
 }
 
 // Back to topic selection

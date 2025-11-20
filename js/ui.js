@@ -16,8 +16,15 @@ import {
   backToTopics,
   backToModeSelection,
   goToStatistics,
-  startPracticingFailed
+  startPracticingFailed,
+  proceedFromLanding
 } from './game.js';
+
+import {
+  hasSeenLanding,
+  renderLanding,
+  setupLandingListeners
+} from './landing.js';
 
 import {
   getOverallStats,
@@ -435,6 +442,10 @@ export function render() {
   lastGameState = state.gameState;
 
   switch (state.gameState) {
+    case GAME_STATES.LANDING:
+      mainContent.innerHTML = renderLanding();
+      attachLandingListeners();
+      break;
     case GAME_STATES.TOPIC_SELECTION:
       mainContent.innerHTML = renderTopicSelection();
       attachTopicSelectionListeners();
@@ -528,6 +539,13 @@ function renderTopicSelection() {
       </div>
     </div>
   `;
+}
+
+function attachLandingListeners() {
+  setupLandingListeners(() => {
+    proceedFromLanding();
+    render();
+  });
 }
 
 function attachTopicSelectionListeners() {
@@ -1395,6 +1413,11 @@ async function refreshCachedLeaderboards() {
 }
 
 export function initializeSync() {
+  // Check if user has seen landing page and set initial state
+  if (hasSeenLanding()) {
+    proceedFromLanding();
+  }
+
   // Clean up old leaderboard caches (older than 7 days)
   cleanupOldLeaderboardCaches();
 
