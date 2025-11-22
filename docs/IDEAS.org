@@ -6,10 +6,8 @@
 ** E2E tests, playwright issues on arch linux
 ** turso Dev mode (use local DB)
 ** Xstate
-** header aligned to the left
 ** in bump version add tag
 * Explore
 ** claude setup-install does not work on bash?
 ** touch events API
 ** use IndexedDB, any benefits?
-** what is AppCache

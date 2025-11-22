@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('app loads successfully', async ({ page }) => {
-  await page.goto('http://localhost:8000');
+  await page.goto('/', { waitUntil: 'load' });
 
   // Check page title
   await expect(page).toHaveTitle(/Mots/);
@@ -13,9 +13,9 @@ test('app loads successfully', async ({ page }) => {
 
 test('landing page shows on first visit', async ({ page }) => {
   // Clear localStorage to simulate first visit
-  await page.goto('http://localhost:8000');
+  await page.goto('/', { waitUntil: 'load' });
   await page.evaluate(() => localStorage.clear());
-  await page.reload();
+  await page.reload({ waitUntil: 'load' });
 
   // Should see landing page
   await expect(page.locator('.landing-page')).toBeVisible();

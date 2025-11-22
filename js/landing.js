@@ -28,7 +28,7 @@ export function renderLanding() {
       <!-- Hero Section -->
       <div class="landing-hero">
         <div class="landing-logo">🎓</div>
-        <h1 class="landing-title">Welcome to Mots</h1>
+        <h2 class="landing-title">Welcome to Mots</h2>
         <p class="landing-subtitle">Master FAR Vocabulary Through Interactive Learning</p>
       </div>
 
