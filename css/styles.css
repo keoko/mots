@@ -2108,3 +2108,14 @@ body {
   outline: 3px solid var(--color-primary);
   outline-offset: 4px;
 }
+
+/* Hide desktop-only sections on mobile */
+.landing-desktop-only {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .landing-desktop-only {
+    display: block;
+  }
+}

@@ -41,8 +41,8 @@ export function renderLanding() {
         </p>
       </div>
 
-      <!-- Features Section -->
-      <div class="landing-section">
+      <!-- Features Section - Desktop only -->
+      <div class="landing-section landing-desktop-only">
         <h2 class="landing-section-title">How It Works</h2>
         <div class="landing-features">
           <div class="landing-feature">
@@ -74,8 +74,8 @@ export function renderLanding() {
         </div>
       </div>
 
-      <!-- Learning Path Section -->
-      <div class="landing-section">
+      <!-- Learning Path Section - Desktop only -->
+      <div class="landing-section landing-desktop-only">
         <h2 class="landing-section-title">Your Learning Path</h2>
         <div class="landing-steps">
           <div class="landing-step">
