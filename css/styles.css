@@ -212,7 +212,6 @@ body {
 .subtitle {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  white-space: nowrap;
 }
 
 .help-button {
