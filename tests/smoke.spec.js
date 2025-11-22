@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { setupCleanApp } from './helpers/app-helpers.js';
 
 test('app loads successfully', async ({ page }) => {
-  await page.goto('/', { waitUntil: 'load' });
+  await page.goto('/', { waitUntil: 'networkidle' });
 
   // Check page title
   await expect(page).toHaveTitle(/Mots/);
@@ -11,11 +12,9 @@ test('app loads successfully', async ({ page }) => {
   await expect(heading).toBeVisible();
 });
 
-test('landing page shows on first visit', async ({ page }) => {
+test('landing page shows on first visit', async ({ page, context }) => {
   // Clear localStorage to simulate first visit
-  await page.goto('/', { waitUntil: 'load' });
-  await page.evaluate(() => localStorage.clear());
-  await page.reload({ waitUntil: 'load' });
+  await setupCleanApp(page, context);
 
   // Should see landing page
   await expect(page.locator('.landing-page')).toBeVisible();

@@ -1,32 +1,26 @@
 import { test, expect } from '@playwright/test';
+import {
+  setupCleanApp,
+  goToTopicSelection,
+  completeGame,
+  startStudyMode,
+  startPlayMode
+} from './helpers/app-helpers.js';
 
 test.describe('Complete Learning Flow', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
     // Clear storage to start fresh
-    await page.goto('/', { waitUntil: 'load' });
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
-    await page.reload({ waitUntil: 'load' });
+    await setupCleanApp(page, context);
   });
 
-  test('study mode: complete topic flow', async ({ page }) => {
-    // Skip landing page
+  test('study mode: complete topic flow', async ({ page, context }) => {
+    // Skip landing page and go to topics
     await expect(page.locator('.landing-page')).toBeVisible();
     await page.click('#landing-get-started');
-
-    // Select topic
     await expect(page.locator('.topic-selection')).toBeVisible();
-    await page.click('[data-topic-id="cosmetics"]');
 
-    // Select study mode
-    await expect(page.locator('.mode-selection')).toBeVisible();
-    const studyButton = page.locator('[data-mode="study"]');
-    await expect(studyButton).toBeVisible();
-    await studyButton.click();
-
-    // Study mode: flashcard should be visible
-    await expect(page.locator('.flashcard')).toBeVisible();
+    // Start study mode
+    await startStudyMode(page, 'cosmetics');
 
     // Check word in Catalan is shown
     await expect(page.locator('.flashcard-word')).toBeVisible();
@@ -48,19 +42,16 @@ test.describe('Complete Learning Flow', () => {
     await expect(page.locator('.topic-selection, .mode-selection')).toBeVisible();
   });
 
-  test('play mode: submit answer and continue', async ({ page }) => {
-    // Skip landing
+  test('play mode: submit answer and continue', async ({ page, context }) => {
+    // Skip landing and go to topics
     await page.click('#landing-get-started');
+    await expect(page.locator('.topic-selection')).toBeVisible();
 
-    // Select topic
-    await page.click('[data-topic-id="cosmetics"]');
-
-    // Select play mode
-    await page.click('[data-mode="play"]');
+    // Start play mode
+    await startPlayMode(page, 'cosmetics');
 
     // Play mode: should see Catalan word prompt
     await expect(page.locator('.prompt-word')).toBeVisible();
-    await expect(page.locator('.answer-input')).toBeVisible();
 
     // Type any answer
     await page.locator('.answer-input').fill('test');
@@ -76,62 +67,14 @@ test.describe('Complete Learning Flow', () => {
     expect(resultCount).toBeGreaterThan(0);
   });
 
-  test('complete full topic and see statistics', async ({ page }) => {
-    // Use dev mode for faster test (fewer words)
-    await page.goto('/?dev=true');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload({ waitUntil: 'load' });
+  test('complete full topic and see statistics', async ({ page, context }) => {
+    // Use dev mode and skip to topic selection
+    await goToTopicSelection(page, context, { dev: true });
 
-    // Skip landing
-    await page.click('#landing-get-started');
+    // Complete the dev-short game
+    await completeGame(page, 'dev-short');
 
-    // Select dev-short topic (only 2 words)
-    const devTopic = page.locator('[data-topic-id="dev-short"]');
-    if (await devTopic.count() > 0) {
-      await devTopic.click();
-    } else {
-      // Fallback to cosmetics
-      await page.click('[data-topic-id="cosmetics"]');
-    }
-
-    // Play mode
-    await page.click('[data-mode="play"]');
-
-    // Answer all words (submit random answers to complete quickly)
-    let wordsCompleted = 0;
-    const maxWords = 5; // Safety limit
-
-    while (wordsCompleted < maxWords) {
-      // Check if we're still in playing state
-      const isPlaying = await page.locator('.answer-input').count() > 0;
-      const isComplete = await page.locator('.game-complete').count() > 0;
-
-      if (isComplete) {
-        break;
-      }
-
-      if (isPlaying) {
-        // Submit answer
-        await page.locator('.answer-input').fill('test');
-        await page.click('.btn-submit');
-
-        // Wait for feedback
-        await page.waitForTimeout(200);
-
-        // Press space to continue
-        await page.keyboard.press('Space');
-        await page.waitForTimeout(200);
-
-        wordsCompleted++;
-      } else {
-        break;
-      }
-    }
-
-    // Should reach completion screen
-    await expect(page.locator('.game-complete')).toBeVisible({ timeout: 5000 });
-
-    // Completion screen should be visible (score display varies by mode)
+    // Completion screen should be visible
     await expect(page.locator('[data-action="back-to-topics"]')).toBeVisible();
 
     // Back to topics should work
